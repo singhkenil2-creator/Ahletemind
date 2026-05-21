@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-sport="football">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Road to Pro — Sports AI Hub</title>
+
+  <!-- PWA / SEO meta -->
+  <meta name="description" content="Your AI-powered personal sports training hub. Training plans, nutrition, streak tracking, drills and more." />
+  <meta name="theme-color" content="#00e676" id="metaThemeColor" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Road to Pro" />
+  <link rel="apple-touch-icon" href="https://via.placeholder.com/180x180/00e676/000000?text=RTP" />
+
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Font Awesome icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <!-- Google Fonts — preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- Page transition bar -->
+  <div id="pageLoader" class="page-loader hidden"></div>
+
+  <!-- ===== SLEEP REMINDER BANNER ===== -->
+  <div id="sleepBanner" class="sleep-banner hidden">
+    <div class="sleep-banner-copy">
+      <i class="fas fa-moon"></i>
+      <div>
+        <strong id="sleepBannerTitle">Sleep tracker</strong>
+        <p id="sleepBannerText">Start a sleep session and we will remind you in the morning.</p>
+      </div>
+    </div>
+    <div class="sleep-banner-actions">
+      <button class="btn-secondary small" onclick="endSleepSession()"><i class="fas fa-check"></i> End Sleep</button>
+      <button class="btn-ghost small" onclick="dismissSleepBanner()"><i class="fas fa-times"></i> Dismiss</button>
+    </div>
+  </div>
+
+  <!-- ========== ONBOARDING WIZARD ========== -->
+  <div id="ageGate" class="modal-overlay active">
+    <div class="modal-box age-gate-box">
+
+      <!-- Progress bar -->
+      <div class="onboard-progress">
+        <div class="onboard-bar" id="onboardBar" style="width:20%"></div>
+      </div>
+      <div class="onboard-steps-label">Step <span id="onboardStepNum">1</span> of 5</div>
+
+      <!-- STEP 1: Basic Info -->
+      <div id="onboard-step-1" class="onboard-step active">
+        <div class="age-gate-logo">
+          <i class="fas fa-futbol sport-icon"></i>
+          <h1>Road to Pro</h1>
+          <p>Your Personal Sports Journey</p>
+        </div>
+        <h2>Let's get started 👋</h2>
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" id="userName" placeholder="Enter your name" />
+        </div>
+        <div class="form-group">
+          <label>Date of Birth <span class="hint">(must be 4+ years old)</span></label>
+          <input type="date" id="userDob" max="" />
+        </div>
+        <div id="ageError" class="error-msg hidden">You must be at least 4 years old to use this app.</div>
+        <button class="btn-primary btn-full" onclick="onboardNext(1)">
+          Next <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <!-- STEP 2: Sport Selection -->
+      <div id="onboard-step-2" class="onboard-step hidden">
+        <h2>🏅 Choose Your Sport</h2>
+        <p class="onboard-hint">Pick <strong>one sport</strong> — you'll master this before anything else.</p>
+        <div class="sport-selector onboard-sport-grid">
+          <button class="sport-btn active" data-sport="football"><i class="fas fa-futbol"></i><span>Football</span></button>
+          <button class="sport-btn" data-sport="basketball"><i class="fas fa-basketball"></i><span>Basketball</span></button>
+          <button class="sport-btn" data-sport="running"><i class="fas fa-person-running"></i><span>Running</span></button>
+          <button class="sport-btn" data-sport="tennis"><i class="fas fa-baseball"></i><span>Tennis</span></button>
+          <button class="sport-btn" data-sport="swimming"><i class="fas fa-person-swimming"></i><span>Swimming</span></button>
+          <button class="sport-btn" data-sport="cycling"><i class="fas fa-bicycle"></i><span>Cycling</span></button>
+        </div>
+        <div class="onboard-nav">
+          <button class="btn-ghost" onclick="onboardBack(2)"><i class="fas fa-arrow-left"></i> Back</button>
+          <button class="btn-primary" onclick="onboardNext(2)">Next <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Physical Profile -->
+      <div id="onboard-step-3" class="onboard-step hidden">
+        <h2>📏 Physical Profile</h2>
+        <p class="onboard-hint">Used to personalise your training plans and nutrition goals.</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Weight</label>
+            <div class="measure-row">
+              <input type="number" id="setupWeight" placeholder="70" step="0.1" />
+              <select id="setupWeightUnit"><option value="kg">kg</option><option value="lbs">lbs</option></select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Height</label>
+            <div class="measure-row">
+              <input type="number" id="setupHeight" placeholder="175" />
+              <select id="setupHeightUnit"><option value="cm">cm</option><option value="ft">ft</option></select>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Fitness Level</label>
+            <select id="setupFitness">
+              <option value="beginner">Beginner — Just starting out</option>
+              <option value="intermediate" selected>Intermediate — Training regularly</option>
+              <option value="advanced">Advanced — Competing</option>
+              <option value="elite">Elite — Semi/Professional</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Training Days / Week</label>
+            <select id="setupDays">
+              <option value="1">1 day</option>
+              <option value="2">2 days</option>
+              <option value="3" selected>3 days</option>
+              <option value="4">4 days</option>
+              <option value="5">5 days</option>
+              <option value="6">6 days</option>
+              <option value="7">7 days</option>
+            </select>
+          </div>
+        </div>
+        <div class="onboard-nav">
+          <button class="btn-ghost" onclick="onboardBack(3)"><i class="fas fa-arrow-left"></i> Back</button>
+          <button class="btn-primary" onclick="onboardNext(3)">Next <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Player Profile -->
+      <div id="onboard-step-4" class="onboard-step hidden">
+        <h2>⚽ Player Profile</h2>
+        <p class="onboard-hint">Tell us about how and where you play.</p>
+        <div class="form-row">
+          <div class="form-group" id="setupPositionGroup">
+            <label>Position / Role</label>
+            <select id="setupPosition">
+              <option value="">Select position</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Division / Level</label>
+            <select id="setupDivision">
+              <option value="recreational">Recreational / Social</option>
+              <option value="amateur">Amateur / Sunday League</option>
+              <option value="semi_amateur">Semi-Amateur (County/District)</option>
+              <option value="semi_pro">Semi-Professional</option>
+              <option value="professional">Professional</option>
+              <option value="academy">Academy / Youth</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Where Do You Play?</label>
+            <select id="setupVenue">
+              <option value="outdoor_grass">Outdoor — Natural Grass</option>
+              <option value="outdoor_astro">Outdoor — Artificial Turf (Astro)</option>
+              <option value="indoor">Indoor</option>
+              <option value="mixed">Mixed (Both)</option>
+              <option value="pool">Pool (Swimming)</option>
+              <option value="track">Track (Athletics / Cycling)</option>
+              <option value="court">Court (Tennis / Basketball)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Current Club / Team</label>
+            <input type="text" id="setupCurrentClub" placeholder="e.g. FC United, Solo, School" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>City / Town You Play In</label>
+          <input type="text" id="setupCity" placeholder="e.g. London, Manchester" />
+        </div>
+        <div class="onboard-nav">
+          <button class="btn-ghost" onclick="onboardBack(4)"><i class="fas fa-arrow-left"></i> Back</button>
+          <button class="btn-primary" onclick="onboardNext(4)">Next <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- STEP 5: History & Goals -->
+      <div id="onboard-step-5" class="onboard-step hidden">
+        <h2>📋 History &amp; Goals</h2>
+        <p class="onboard-hint">Help us understand your journey so far.</p>
+        <div class="form-group">
+          <label>Past Clubs / Teams <span class="hint">(optional)</span></label>
+          <input type="text" id="setupPastClubs" placeholder="e.g. City Youth, School Team, FC Rovers" />
+        </div>
+        <div class="form-group">
+          <label>Years Playing</label>
+          <select id="setupYearsPlaying">
+            <option value="0">Just started</option>
+            <option value="1">Less than 1 year</option>
+            <option value="2">1–3 years</option>
+            <option value="3">3–5 years</option>
+            <option value="5">5–10 years</option>
+            <option value="10">10+ years</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Equipment You Own <span class="hint">(tick all that apply)</span></label>
+          <div class="equipment-checklist" id="equipmentChecklist"></div>
+        </div>
+        <div class="form-group">
+          <label>Looking to Move Clubs?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="moveClubs" value="yes" /> Yes, actively looking</label>
+            <label class="radio-label"><input type="radio" name="moveClubs" value="maybe" checked /> Maybe / Open to it</label>
+            <label class="radio-label"><input type="radio" name="moveClubs" value="no" /> No, happy where I am</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Main Goal</label>
+          <select id="setupGoal">
+            <option value="pro">Turn Professional</option>
+            <option value="improve">Improve My Game</option>
+            <option value="fitness">Get Fit &amp; Healthy</option>
+            <option value="compete">Win Competitions</option>
+            <option value="enjoy">Enjoy the Sport</option>
+          </select>
+        </div>
+        <div class="onboard-nav">
+          <button class="btn-ghost" onclick="onboardBack(5)"><i class="fas fa-arrow-left"></i> Back</button>
+          <button class="btn-primary btn-full" onclick="submitAgeGate()">
+            <i class="fas fa-rocket"></i> Start My Pro Journey
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========== HEADER ========== -->
+  <header class="app-header">
+    <div class="header-left">
+      <i class="fas fa-futbol sport-logo-icon"></i>
+      <span class="app-title">Road to Pro</span>
+      <span class="user-greeting" id="greetingText"></span>
+    </div>
+    <nav class="nav-tabs">
+      <button class="nav-btn active" data-page="dashboard"><i class="fas fa-home"></i><span>Home</span></button>
+      <button class="nav-btn" data-page="plans"><i class="fas fa-dumbbell"></i><span>Plans</span></button>
+      <button class="nav-btn" data-page="fields"><i class="fas fa-map-marker-alt"></i><span>Fields</span></button>
+      <button class="nav-btn" data-page="calendar"><i class="fas fa-calendar-alt"></i><span>Calendar</span></button>
+      <button class="nav-btn" data-page="nutrition"><i class="fas fa-apple-alt"></i><span>Nutrition</span></button>
+      <button class="nav-btn" data-page="stats"><i class="fas fa-chart-line"></i><span>Stats</span></button>
+      <button class="nav-btn" data-page="gamify"><i class="fas fa-fire"></i><span>Streak Hub</span></button>
+      <button class="nav-btn" data-page="wellness"><i class="fas fa-heart-pulse"></i><span>Wellness</span></button>
+      <button class="nav-btn" data-page="drills"><i class="fas fa-play-circle"></i><span>Drills</span></button>
+      <button class="nav-btn" data-page="video"><i class="fas fa-clapperboard"></i><span>Video</span></button>
+      <button class="nav-btn" data-page="gear"><i class="fas fa-bag-shopping"></i><span>Gear</span></button>
+      <button class="nav-btn" data-page="profile"><i class="fas fa-user-circle"></i><span>Profile</span></button>
+      <button class="nav-btn" data-page="ai"><i class="fas fa-comment-dots"></i><span>Coach</span></button>
+    </nav>
+    <div class="header-right">
+      <button class="sport-toggle-btn" onclick="openSportSwitch()"><i class="fas fa-exchange-alt"></i> <span id="currentSportLabel">Football</span></button>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+        <i class="fas fa-moon" id="themeIcon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="app-main">
+
+    <!-- ===== DASHBOARD PAGE ===== -->
+    <section id="page-dashboard" class="page active">
+      <div class="page-hero">
+        <div class="hero-content">
+          <div class="hero-badge"><i class="fas fa-bolt"></i> AI-Powered Training</div>
+          <h1 class="hero-title">Your <span class="accent">Pro Journey</span><br>Starts Here</h1>
+          <p class="hero-sub">Personalised training, nutrition &amp; field discovery &mdash; all in one place.</p>
+          <div class="hero-actions">
+            <button class="btn-primary" onclick="navTo('plans')"><i class="fas fa-dumbbell"></i> Get My Plan</button>
+            <button class="btn-secondary" onclick="navTo('fields')"><i class="fas fa-map"></i> Find Fields Near Me</button>
+          </div>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-card"><i class="fas fa-fire"></i><span id="stat-streak">0</span><label>Day Streak</label></div>
+          <div class="stat-card"><i class="fas fa-calendar-check"></i><span id="stat-sessions">0</span><label>Sessions</label></div>
+          <div class="stat-card"><i class="fas fa-utensils"></i><span id="stat-calories">0</span><label>Calories Today</label></div>
+          <div class="stat-card"><i class="fas fa-trophy"></i><span id="stat-level">Rookie</span><label>Level</label></div>
+        </div>
+      </div>
+
+      <!-- Mascot + Game Day -->
+      <div class="dash-row">
+        <div id="dashMascot" class="dash-mascot mascot-idle">
+          <span class="mascot-emoji">😴</span>
+          <span class="mascot-msg">Ready to start your streak? Log a session!</span>
+        </div>
+        <button class="btn-gameday" onclick="openGameDay()"><i class="fas fa-gamepad"></i> 🎮 Game Day Mode</button>
+      </div>
+
+      <!-- AI Daily Tip -->
+      <div class="card ai-daily-tip">
+        <div class="card-header"><i class="fas fa-lightbulb"></i> Daily Tip</div>
+        <p id="dailyTip" class="tip-text">Loading your personalised tip...</p>
+        <button class="btn-ghost" onclick="refreshDailyTip()"><i class="fas fa-sync-alt"></i> New Tip</button>
+      </div>
+
+      <!-- Quick Overview -->
+      <div class="dashboard-grid">
+        <div class="card quick-card" onclick="navTo('plans')">
+          <i class="fas fa-dumbbell big-icon"></i>
+          <h3>Training Plans</h3>
+          <p>Personalised Road to Pro programmes</p>
+          <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
+        </div>
+        <div class="card quick-card" onclick="navTo('fields')">
+          <i class="fas fa-map-marker-alt big-icon"></i>
+          <h3>Find Fields</h3>
+          <p>Nearby pitches + live weather</p>
+          <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
+        </div>
+        <div class="card quick-card" onclick="navTo('calendar')">
+          <i class="fas fa-calendar-alt big-icon"></i>
+          <h3>My Calendar</h3>
+          <p>Schedule & track sessions</p>
+          <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
+        </div>
+        <div class="card quick-card" onclick="navTo('nutrition')">
+          <i class="fas fa-apple-alt big-icon"></i>
+          <h3>Nutrition</h3>
+          <p>Calorie & macro tracking</p>
+          <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
+        </div>
+      </div>
+
+      <!-- Activity Feed -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-history"></i> Recent Activity</div>
+        <div id="activityFeed" class="activity-feed"></div>
+      </div>
+    </section>
+
+    <!-- ===== PLANS PAGE ===== -->
+    <section id="page-plans" class="page">
+      <div class="page-header">
+        <h2><i class="fas fa-dumbbell"></i> Road to Pro — Training Plans</h2>
+        <p>AI-generated programmes tailored to your sport, age & goals</p>
+      </div>
+
+      <div class="plans-controls card">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Sport</label>
+            <select id="planSport">
+              <option value="football">⚽ Football</option>
+              <option value="basketball">🏀 Basketball</option>
+              <option value="running">🏃 Running</option>
+              <option value="tennis">🎾 Tennis</option>
+              <option value="swimming">🏊 Swimming</option>
+              <option value="cycling">🚴 Cycling</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Goal</label>
+            <select id="planGoal">
+              <option value="fitness">General Fitness</option>
+              <option value="pro">Road to Pro</option>
+              <option value="speed">Speed & Agility</option>
+              <option value="strength">Strength & Power</option>
+              <option value="endurance">Endurance</option>
+              <option value="skills">Technical Skills</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Duration</label>
+            <select id="planDuration">
+              <option value="4">4 Weeks</option>
+              <option value="8">8 Weeks</option>
+              <option value="12" selected>12 Weeks</option>
+              <option value="24">6 Months</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Level</label>
+            <select id="planLevel">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+              <option value="elite">Elite</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-primary btn-full" onclick="generatePlan()">
+          <i class="fas fa-robot"></i> Generate My AI Plan
+        </button>
+      </div>
+
+      <div id="planOutput" class="plan-output hidden"></div>
+
+      <!-- Road to Pro Roadmap -->
+      <div class="card roadmap-card">
+        <div class="card-header"><i class="fas fa-road"></i> Road to Pro Roadmap</div>
+        <div class="roadmap">
+          <div class="roadmap-step completed"><div class="step-dot"><i class="fas fa-check"></i></div><div class="step-info"><h4>Phase 1 — Foundations</h4><p>Basic fitness, coordination, sport fundamentals</p></div></div>
+          <div class="roadmap-step" id="road-phase2"><div class="step-dot">2</div><div class="step-info"><h4>Phase 2 — Development</h4><p>Technical skills, tactical understanding</p></div></div>
+          <div class="roadmap-step" id="road-phase3"><div class="step-dot">3</div><div class="step-info"><h4>Phase 3 — Performance</h4><p>Peak conditioning, competition preparation</p></div></div>
+          <div class="roadmap-step" id="road-phase4"><div class="step-dot">4</div><div class="step-info"><h4>Phase 4 — Pro Ready</h4><p>Elite-level training, scouting readiness</p></div></div>
+        </div>
+      </div>
+
+      <!-- Sport Cards -->
+      <div class="sports-grid">
+        <div class="sport-card" onclick="quickPlan('football')">
+          <div class="sport-card-icon">⚽</div>
+          <h3>Football</h3>
+          <p>Dribbling, shooting, tactical</p>
+          <button class="btn-accent">Explore</button>
+        </div>
+        <div class="sport-card" onclick="quickPlan('basketball')">
+          <div class="sport-card-icon">🏀</div>
+          <h3>Basketball</h3>
+          <p>Ball handling, defence, plays</p>
+          <button class="btn-accent">Explore</button>
+        </div>
+        <div class="sport-card" onclick="quickPlan('running')">
+          <div class="sport-card-icon">🏃</div>
+          <h3>Running</h3>
+          <p>Sprint, distance, intervals</p>
+          <button class="btn-accent">Explore</button>
+        </div>
+        <div class="sport-card" onclick="quickPlan('tennis')">
+          <div class="sport-card-icon">🎾</div>
+          <h3>Tennis</h3>
+          <p>Serve, rallying, footwork</p>
+          <button class="btn-accent">Explore</button>
+        </div>
+        <div class="sport-card" onclick="quickPlan('swimming')">
+          <div class="sport-card-icon">🏊</div>
+          <h3>Swimming</h3>
+          <p>Stroke technique, endurance</p>
+          <button class="btn-accent">Explore</button>
+        </div>
+        <div class="sport-card" onclick="quickPlan('cycling')">
+          <div class="sport-card-icon">🚴</div>
+          <h3>Cycling</h3>
+          <p>Power, cadence, hill climbs</p>
+          <button class="btn-accent">Explore</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FIELDS PAGE ===== -->
+    <section id="page-fields" class="page">
+      <div class="page-header">
+        <h2><i class="fas fa-map-marker-alt"></i> Find Nearby Fields</h2>
+        <p>Instant sport-venue search powered by Google Maps — always accurate, always fast</p>
+      </div>
+
+      <!-- Quick Sport Search Buttons -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-bolt"></i> Quick Search — Tap & Go</div>
+        <p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:14px">Opens Google Maps instantly — the fastest & most accurate way to find venues near you.</p>
+        <div class="fields-quick-grid" id="fieldsQuickGrid">
+          <a class="fields-quick-btn" href="https://maps.google.com/?q=football+pitches+near+me" target="_blank" rel="noopener"><span class="fq-icon">⚽</span><span>Football Pitches</span></a>
+          <a class="fields-quick-btn" href="https://maps.google.com/?q=basketball+courts+near+me" target="_blank" rel="noopener"><span class="fq-icon">🏀</span><span>Basketball Courts</span></a>
+          <a class="fields-quick-btn" href="https://maps.google.com/?q=running+tracks+near+me" target="_blank" rel="noopener"><span class="fq-icon">🏃</span><span>Running Tracks</span></a>
+          <a class="fields-quick-btn" href="https://maps.google.com/?q=tennis+courts+near+me" target="_blank" rel="noopener"><span class="fq-icon">🎾</span><span>Tennis Courts</span></a>
+          <a class="fields-quick-btn" href="https://maps.google.com/?q=swimming+pools+near+me" target="_blank" rel="noopener"><span class="fq-icon">🏊</span><span>Swimming Pools</span></a>
+          <a class="fields-quick-btn" href="https://maps.google.com/?q=cycling+routes+near+me" target="_blank" rel="noopener"><span class="fq-icon">🚴</span><span>Cycling Routes</span></a>
+        </div>
+      </div>
+
+      <!-- Smart Search + Embed Map -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-search-location"></i> Search Any Location</div>
+        <div class="fields-search-row">
+          <input type="text" id="locationSearch" class="fields-search-input" placeholder="Enter city, town or postcode…" />
+          <button class="btn-primary" onclick="searchFieldsLocation()"><i class="fas fa-search"></i> Search</button>
+          <button class="btn-secondary" onclick="searchCurrentLocation()"><i class="fas fa-crosshairs"></i> Near Me</button>
+        </div>
+        <div id="fieldsMapWrap" class="fields-map-wrap">
+          <div class="fields-map-placeholder" id="fieldsMapPlaceholder">
+            <i class="fas fa-map-marked-alt"></i>
+            <p>Search a location or tap "Near Me" to load the map</p>
+          </div>
+          <iframe id="fieldsMapFrame" class="fields-map-iframe hidden" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+        <div id="fieldsDirectLink" class="fields-direct-link hidden">
+          <i class="fas fa-external-link-alt"></i>
+          <a id="fieldsDirectAnchor" href="#" target="_blank" rel="noopener">Open full results in Google Maps →</a>
+        </div>
+      </div>
+
+      <!-- Weather Banner (kept for live conditions) -->
+      <div class="card weather-banner" id="weatherBanner" style="display:none">
+        <div class="weather-loading">
+          <i class="fas fa-spinner fa-spin"></i>
+          <span>Loading weather…</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CALENDAR PAGE ===== -->
+    <section id="page-calendar" class="page">
+      <div class="page-header">
+        <h2><i class="fas fa-calendar-alt"></i> My Calendar</h2>
+        <p>Training, school, personal life & rest — plan everything in one place</p>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="cal-filter-bar">
+        <button class="cal-filter-btn active" data-filter="all" onclick="filterCalendar('all', this)"><i class="fas fa-border-all"></i> All</button>
+        <button class="cal-filter-btn" data-filter="training" onclick="filterCalendar('training', this)"><i class="fas fa-dumbbell"></i> Training</button>
+        <button class="cal-filter-btn" data-filter="team" onclick="filterCalendar('team', this)"><i class="fas fa-users"></i> Team</button>
+        <button class="cal-filter-btn" data-filter="school" onclick="filterCalendar('school', this)"><i class="fas fa-graduation-cap"></i> School</button>
+        <button class="cal-filter-btn" data-filter="personal" onclick="filterCalendar('personal', this)"><i class="fas fa-star"></i> Personal</button>
+        <button class="cal-filter-btn" data-filter="rest" onclick="filterCalendar('rest', this)"><i class="fas fa-bed"></i> Rest</button>
+        <button class="cal-filter-btn" data-filter="free" onclick="filterCalendar('free', this)"><i class="fas fa-smile"></i> Free Time</button>
+      </div>
+
+      <div class="calendar-layout">
+        <div class="calendar-main card">
+          <div class="cal-nav">
+            <button onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+            <h3 id="calMonthYear"></h3>
+            <button onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
+          </div>
+          <div class="cal-legend">
+            <span class="leg-item training"><i class="fas fa-circle"></i> Training</span>
+            <span class="leg-item team"><i class="fas fa-circle"></i> Team</span>
+            <span class="leg-item school"><i class="fas fa-circle"></i> School</span>
+            <span class="leg-item personal"><i class="fas fa-circle"></i> Personal</span>
+            <span class="leg-item rest"><i class="fas fa-circle"></i> Rest</span>
+            <span class="leg-item free"><i class="fas fa-circle"></i> Free Time</span>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+        </div>
+
+        <div class="calendar-side">
+          <!-- Add Event Card -->
+          <div class="card add-event-card">
+            <div class="card-header"><i class="fas fa-plus-circle"></i> Add Event</div>
+
+            <!-- Event Type Quick Selector -->
+            <div class="form-group">
+              <label>Event Type</label>
+              <div class="event-type-grid" id="eventTypeGrid">
+                <button class="event-type-btn active" data-type="training" onclick="selectEventType('training', this)">
+                  <i class="fas fa-dumbbell"></i><span>Training</span>
+                </button>
+                <button class="event-type-btn" data-type="team" onclick="selectEventType('team', this)">
+                  <i class="fas fa-users"></i><span>Team</span>
+                </button>
+                <button class="event-type-btn" data-type="school" onclick="selectEventType('school', this)">
+                  <i class="fas fa-graduation-cap"></i><span>School</span>
+                </button>
+                <button class="event-type-btn" data-type="personal" onclick="selectEventType('personal', this)">
+                  <i class="fas fa-star"></i><span>Personal</span>
+                </button>
+                <button class="event-type-btn" data-type="rest" onclick="selectEventType('rest', this)">
+                  <i class="fas fa-bed"></i><span>Rest Day</span>
+                </button>
+                <button class="event-type-btn" data-type="free" onclick="selectEventType('free', this)">
+                  <i class="fas fa-smile"></i><span>Free Time</span>
+                </button>
+                <button class="event-type-btn" data-type="custom" onclick="selectEventType('custom', this)">
+                  <i class="fas fa-pen"></i><span>Custom</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Event Name</label>
+              <input type="text" id="eventTitle" placeholder="e.g. Sprint Training, Maths Exam..." />
+            </div>
+
+            <!-- Sport field — only shown for training/team -->
+            <div class="form-group" id="eventSportGroup">
+              <label>Sport</label>
+              <select id="eventSport">
+                <option value="football">⚽ Football</option>
+                <option value="basketball">🏀 Basketball</option>
+                <option value="running">🏃 Running</option>
+                <option value="tennis">🎾 Tennis</option>
+                <option value="swimming">🏊 Swimming</option>
+                <option value="cycling">🚴 Cycling</option>
+              </select>
+            </div>
+
+            <!-- Custom colour — only shown for custom type -->
+            <div class="form-group hidden" id="eventCustomColourGroup">
+              <label>Event Colour</label>
+              <div class="colour-picker-row">
+                <button class="colour-swatch active" data-colour="#7c4dff" style="background:#7c4dff" onclick="selectEventColour('#7c4dff',this)"></button>
+                <button class="colour-swatch" data-colour="#e91e63" style="background:#e91e63" onclick="selectEventColour('#e91e63',this)"></button>
+                <button class="colour-swatch" data-colour="#ff6f00" style="background:#ff6f00" onclick="selectEventColour('#ff6f00',this)"></button>
+                <button class="colour-swatch" data-colour="#00bcd4" style="background:#00bcd4" onclick="selectEventColour('#00bcd4',this)"></button>
+                <button class="colour-swatch" data-colour="#8bc34a" style="background:#8bc34a" onclick="selectEventColour('#8bc34a',this)"></button>
+                <button class="colour-swatch" data-colour="#f44336" style="background:#f44336" onclick="selectEventColour('#f44336',this)"></button>
+                <input type="color" id="eventCustomColour" value="#7c4dff" style="width:32px;height:32px;border:none;cursor:pointer;border-radius:6px;background:none" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Date</label>
+                <input type="date" id="eventDate" />
+              </div>
+              <div class="form-group">
+                <label>Time</label>
+                <input type="time" id="eventTime" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Duration (mins)</label>
+                <input type="number" id="eventDuration" placeholder="60" min="5" max="600" />
+              </div>
+              <div class="form-group">
+                <label>End Time <span class="hint">(or blank)</span></label>
+                <input type="time" id="eventEndTime" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Notes / Details</label>
+              <textarea id="eventNotes" placeholder="Location, what to bring, reminders..."></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="repeat-toggle">
+                  <input type="checkbox" id="eventRepeatWeekly" />
+                  <span>Repeat weekly</span>
+                </label>
+              </div>
+              <div class="form-group">
+                <label>Repeat Count</label>
+                <input type="number" id="eventRepeatCount" min="2" max="52" value="4" />
+              </div>
+            </div>
+
+            <button class="btn-ghost btn-full" onclick="cancelAllRepeatEvents()">
+              <i class="fas fa-ban"></i> Cancel All Repeat Events
+            </button>
+
+            <button class="btn-primary btn-full" onclick="addCalendarEvent()">
+              <i class="fas fa-calendar-plus"></i> Add to Calendar
+            </button>
+          </div>
+
+          <!-- Selected Day Events -->
+          <div class="card" id="selectedDayCard" style="display:none">
+            <div class="card-header"><i class="fas fa-calendar-day"></i> <span id="selectedDayTitle">Events</span></div>
+            <div id="selectedDayEvents"></div>
+          </div>
+
+          <!-- Upcoming Events -->
+          <div class="card upcoming-card">
+            <div class="card-header"><i class="fas fa-clock"></i> Upcoming</div>
+            <div id="upcomingEvents"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== NUTRITION PAGE ===== -->
+    <section id="page-nutrition" class="page">
+      <div class="page-header">
+        <h2><i class="fas fa-apple-alt"></i> Nutrition & Calorie Tracker</h2>
+        <p>Fuel your pro journey with smart eating</p>
+      </div>
+
+      <!-- Calorie Summary -->
+      <div class="calorie-summary card">
+        <div class="calorie-ring-area">
+          <svg class="calorie-ring" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="50" class="ring-bg"/>
+            <circle cx="60" cy="60" r="50" class="ring-progress" id="calorieRing"/>
+          </svg>
+          <div class="ring-text">
+            <span id="totalCaloriesDisplay">0</span>
+            <small>/ <span id="calorieGoalDisplay">2500</span></small>
+            <label>kcal</label>
+          </div>
+        </div>
+        <div class="macro-bars">
+          <div class="macro-item">
+            <div class="macro-label"><span>Protein</span><span id="proteinVal">0g</span></div>
+            <div class="macro-bar-bg"><div class="macro-bar protein-bar" id="proteinBar"></div></div>
+          </div>
+          <div class="macro-item">
+            <div class="macro-label"><span>Carbs</span><span id="carbsVal">0g</span></div>
+            <div class="macro-bar-bg"><div class="macro-bar carbs-bar" id="carbsBar"></div></div>
+          </div>
+          <div class="macro-item">
+            <div class="macro-label"><span>Fat</span><span id="fatVal">0g</span></div>
+            <div class="macro-bar-bg"><div class="macro-bar fat-bar" id="fatBar"></div></div>
+          </div>
+          <div class="macro-item">
+            <div class="macro-label"><span>Fibre</span><span id="fibreVal">0g</span></div>
+            <div class="macro-bar-bg"><div class="macro-bar fibre-bar" id="fibreBar"></div></div>
+          </div>
+        </div>
+        <div class="calorie-goals-edit">
+          <button class="btn-ghost" onclick="openGoalModal()"><i class="fas fa-sliders-h"></i> Edit Goals</button>
+          <button class="btn-ghost sport-auto-btn" onclick="autoSetSportNutrition()"><i class="fas fa-magic"></i> Auto-set for my sport</button>
+        </div>
+      </div>
+
+      <!-- Add Food -->
+      <div class="card add-food-card">
+        <div class="card-header"><i class="fas fa-plus-circle"></i> Log Food</div>
+        <div class="food-search-row">
+          <input type="text" id="foodSearch" placeholder="Search food (e.g. banana, chicken breast...)" oninput="searchFood(this.value)" />
+          <label class="btn-camera" title="Scan food with camera" for="foodCameraInput"><i class="fas fa-camera"></i></label>
+          <input type="file" id="foodCameraInput" accept="image/*" capture="environment" style="display:none" onchange="scanFoodPhoto(this)" />
+          <button class="btn-primary" onclick="openCustomFood()"><i class="fas fa-edit"></i> Custom</button>
+        </div>
+        <div id="foodSuggestions" class="food-suggestions hidden"></div>
+        <div id="selectedFoodPreview" class="selected-food-preview hidden">
+          <div class="food-preview-content">
+            <div id="foodPreviewName" class="food-preview-name"></div>
+            <div id="foodPreviewMacros" class="food-preview-macros"></div>
+            <div class="food-amount-row">
+              <label>Amount (g / ml)</label>
+              <input type="number" id="foodAmount" value="100" min="1" />
+              <select id="mealType">
+                <option value="breakfast">Breakfast</option>
+                <option value="lunch">Lunch</option>
+                <option value="dinner">Dinner</option>
+                <option value="snack">Snack</option>
+                <option value="pre-workout">Pre-Workout</option>
+                <option value="post-workout">Post-Workout</option>
+              </select>
+              <button class="btn-primary" onclick="logSelectedFood()"><i class="fas fa-plus"></i> Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Food Log -->
+      <div class="card food-log-card">
+        <div class="card-header">
+          <span><i class="fas fa-list"></i> Today's Food Log</span>
+          <button class="btn-ghost small" onclick="clearFoodLog()"><i class="fas fa-trash"></i> Clear</button>
+        </div>
+        <div id="foodLog" class="food-log-list">
+          <p class="empty-state"><i class="fas fa-utensils"></i> No food logged today. Start tracking!</p>
+        </div>
+      </div>
+
+      <!-- Nutrition Advice -->
+      <div class="card ai-nutrition-card">
+        <div class="card-header"><i class="fas fa-lightbulb"></i> Nutrition Advice</div>
+        <p id="nutritionAdvice">Log your meals to get personalised nutrition feedback.</p>
+        <button class="btn-ghost" onclick="getAINutritionAdvice()"><i class="fas fa-magic"></i> Get Advice</button>
+      </div>
+
+      <!-- Custom Food Modal -->
+      <div id="customFoodModal" class="modal-overlay hidden">
+        <div class="modal-box">
+          <div class="modal-header">
+            <h3><i class="fas fa-edit"></i> Add Custom Food</h3>
+            <button class="close-btn" onclick="closeModal('customFoodModal')"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="form-group"><label>Food Name</label><input type="text" id="customFoodName" placeholder="e.g. My Protein Shake" /></div>
+          <div class="form-row">
+            <div class="form-group"><label>Calories (per 100g)</label><input type="number" id="customCals" placeholder="250" /></div>
+            <div class="form-group"><label>Protein (g)</label><input type="number" id="customProtein" placeholder="25" /></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Carbs (g)</label><input type="number" id="customCarbs" placeholder="30" /></div>
+            <div class="form-group"><label>Fat (g)</label><input type="number" id="customFat" placeholder="5" /></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Fibre (g)</label><input type="number" id="customFibre" placeholder="2" /></div>
+            <div class="form-group"><label>Amount (g)</label><input type="number" id="customAmount" value="100" /></div>
+          </div>
+          <div class="form-group">
+            <label>Meal Type</label>
+            <select id="customMealType">
+              <option value="breakfast">Breakfast</option><option value="lunch">Lunch</option>
+              <option value="dinner">Dinner</option><option value="snack">Snack</option>
+              <option value="pre-workout">Pre-Workout</option><option value="post-workout">Post-Workout</option>
+            </select>
+          </div>
+          <button class="btn-primary btn-full" onclick="logCustomFood()"><i class="fas fa-plus"></i> Add Food</button>
+        </div>
+      </div>
+
+      <!-- Goal Modal -->
+      <div id="goalModal" class="modal-overlay hidden">
+        <div class="modal-box">
+          <div class="modal-header">
+            <h3><i class="fas fa-sliders-h"></i> Nutrition Goals</h3>
+            <button class="close-btn" onclick="closeModal('goalModal')"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="form-group"><label>Daily Calories (kcal)</label><input type="number" id="goalCalories" value="2500" /></div>
+          <div class="form-row">
+            <div class="form-group"><label>Protein (g)</label><input type="number" id="goalProtein" value="150" /></div>
+            <div class="form-group"><label>Carbs (g)</label><input type="number" id="goalCarbs" value="300" /></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Fat (g)</label><input type="number" id="goalFat" value="80" /></div>
+            <div class="form-group"><label>Fibre (g)</label><input type="number" id="goalFibre" value="30" /></div>
+          </div>
+          <button class="btn-primary btn-full" onclick="saveGoals()"><i class="fas fa-save"></i> Save Goals</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== AI COACH PAGE ===== -->
+    <section id="page-ai" class="page">
+      <div class="page-header">
+        <h2><i class="fas fa-robot"></i> AI Sports Coach</h2>
+        <p>Your personal AI coach — ask anything about training, nutrition & performance</p>
+      </div>
+
+      <div class="ai-coach-layout">
+        <div class="card ai-chat-card">
+          <div class="chat-messages" id="chatMessages">
+            <div class="chat-msg ai-msg">
+              <div class="msg-avatar"><i class="fas fa-robot"></i></div>
+              <div class="msg-bubble">
+                <p>Hey there, champ! 👋 I'm your AI Sports Coach. Ask me anything about training, nutrition, technique, recovery, or your road to pro! What's on your mind?</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-input-area">
+            <div class="quick-prompts" id="quickPrompts">
+              <button class="quick-prompt-btn" onclick="sendQuickPrompt(this)">🏃 Training tips</button>
+              <button class="quick-prompt-btn" onclick="sendQuickPrompt(this)">🍎 Nutrition advice</button>
+              <button class="quick-prompt-btn" onclick="sendQuickPrompt(this)">💪 Build strength</button>
+              <button class="quick-prompt-btn" onclick="sendQuickPrompt(this)">😴 Recovery tips</button>
+              <button class="quick-prompt-btn" onclick="sendQuickPrompt(this)">⚡ Improve speed</button>
+              <button class="quick-prompt-btn" onclick="sendQuickPrompt(this)">🧠 Mental game</button>
+            </div>
+            <div class="chat-input-row">
+              <input type="text" id="chatInput" placeholder="Ask your AI coach..." onkeydown="if(event.key==='Enter') sendChat()" />
+              <button class="btn-primary" onclick="sendChat()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="ai-sidebar">
+          <div class="card">
+            <div class="card-header"><i class="fas fa-chart-line"></i> My Stats</div>
+            <div class="stats-list">
+              <div class="stat-row"><span>Sport</span><strong id="sidebar-sport">Football</strong></div>
+              <div class="stat-row"><span>Age</span><strong id="sidebar-age">—</strong></div>
+              <div class="stat-row"><span>Sessions this week</span><strong id="sidebar-sessions">0</strong></div>
+              <div class="stat-row"><span>Calories today</span><strong id="sidebar-cals">0 kcal</strong></div>
+              <div class="stat-row"><span>Level</span><strong id="sidebar-level">Rookie</strong></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><i class="fas fa-star"></i> Pro Tips of the Day</div>
+            <ul id="proTips" class="tips-list"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== STATS PAGE ===== -->
+    <section id="page-stats" class="page">
+      <div class="page-header">
+        <h2><i class="fas fa-chart-line"></i> Performance Stats</h2>
+        <p>Track your records, body measurements, progress charts & training analytics</p>
+      </div>
+
+      <!-- Personal Records -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-medal"></i> Personal Records (PBs)</div>
+        <div class="pb-grid" id="pbGrid"></div>
+        <button class="btn-primary" style="margin-top:14px" onclick="openAddPB()"><i class="fas fa-plus"></i> Log New PB</button>
+      </div>
+
+      <!-- Body Measurements -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-ruler-combined"></i> Body Measurements</div>
+        <div class="measurements-grid">
+          <div class="measure-input-group">
+            <label>Weight</label>
+            <div class="measure-row">
+              <input type="number" id="bodyWeight" placeholder="70" step="0.1" />
+              <select id="weightUnit"><option value="kg">kg</option><option value="lbs">lbs</option></select>
+            </div>
+          </div>
+          <div class="measure-input-group">
+            <label>Height</label>
+            <div class="measure-row">
+              <input type="number" id="bodyHeight" placeholder="175" />
+              <select id="heightUnit"><option value="cm">cm</option><option value="ft">ft/in</option></select>
+            </div>
+          </div>
+          <div class="measure-input-group"><label>Body Fat %</label><input type="number" id="bodyFat" placeholder="15" step="0.1" /></div>
+          <div class="measure-input-group"><label>Chest (cm)</label><input type="number" id="measureChest" placeholder="95" /></div>
+          <div class="measure-input-group"><label>Waist (cm)</label><input type="number" id="measureWaist" placeholder="80" /></div>
+          <div class="measure-input-group"><label>Hips (cm)</label><input type="number" id="measureHips" placeholder="95" /></div>
+          <div class="measure-input-group"><label>Thigh (cm)</label><input type="number" id="measureThigh" placeholder="55" /></div>
+          <div class="measure-input-group"><label>Bicep (cm)</label><input type="number" id="measureBicep" placeholder="35" /></div>
+        </div>
+        <div class="bmi-result" id="bmiResult"></div>
+        <button class="btn-primary btn-full" style="margin-top:14px" onclick="saveMeasurements()"><i class="fas fa-save"></i> Save Measurements</button>
+      </div>
+
+      <!-- Progress Charts -->
+      <div class="charts-grid">
+        <div class="card chart-card">
+          <div class="card-header"><i class="fas fa-weight"></i> Weight Progress</div>
+          <canvas id="weightChart"></canvas>
+        </div>
+        <div class="card chart-card">
+          <div class="card-header"><i class="fas fa-fire"></i> Weekly Calories</div>
+          <canvas id="calorieChart"></canvas>
+        </div>
+        <div class="card chart-card">
+          <div class="card-header"><i class="fas fa-calendar-check"></i> Training Sessions</div>
+          <canvas id="sessionsChart"></canvas>
+        </div>
+        <div class="card chart-card">
+          <div class="card-header"><i class="fas fa-bolt"></i> Session Intensity (RPE)</div>
+          <canvas id="rpeChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Training Heatmap -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-th"></i> Training Consistency Heatmap</div>
+        <div id="trainingHeatmap" class="heatmap-container"></div>
+        <p class="hint" style="margin-top:8px">Each square = 1 day. Green = session logged.</p>
+      </div>
+
+      <!-- RPE Logger -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-tachometer-alt"></i> Log Session RPE</div>
+        <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:12px">Rate of Perceived Exertion — how hard was today's training? (1 = very easy, 10 = maximum effort)</p>
+        <div class="rpe-form">
+          <div class="form-group"><label>Session Name</label><input type="text" id="rpeSession" placeholder="e.g. Sprint Training" /></div>
+          <div class="form-group"><label>RPE (1–10)</label>
+            <div class="rpe-slider-row">
+              <input type="range" id="rpeSlider" min="1" max="10" value="5" oninput="updateRPEDisplay(this.value)" class="rpe-slider" />
+              <span class="rpe-value" id="rpeDisplay">5</span>
+              <span class="rpe-label" id="rpeLabel">Moderate</span>
+            </div>
+          </div>
+          <div class="form-group"><label>Notes</label><input type="text" id="rpeNotes" placeholder="How did it feel?" /></div>
+          <button class="btn-primary" onclick="logRPE()"><i class="fas fa-save"></i> Log RPE</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== GAMIFY PAGE ===== -->
+    <section id="page-gamify" class="page">
+      <div class="page-header">
+        <h2><i class="fas fa-fire"></i> Streak Hub & Gamification</h2>
+        <p>Build unstoppable streaks, earn XP, unlock badges & beat challenges</p>
+      </div>
+
+      <!-- Streak Hero Card -->
+      <div class="card streak-hub-card">
+        <div class="card-header" style="margin-bottom:14px"><i class="fas fa-fire"></i> Your Streak — Never Lose Motivation</div>
+        <div id="streakHeroInner"><!-- rendered by JS --></div>
+      </div>
+
+      <!-- XP & Level -->
+      <div class="card xp-card">
+        <div class="xp-header">
+          <div class="xp-avatar" id="xpAvatar">R</div>
+          <div class="xp-info">
+            <div class="xp-name" id="xpName">Athlete</div>
+            <div class="xp-level-badge" id="xpLevelBadge">🥉 Rookie</div>
+            <div class="xp-bar-wrap">
+              <div class="xp-bar-bg"><div class="xp-bar-fill" id="xpBarFill"></div></div>
+              <span class="xp-text" id="xpText">0 / 100 XP</span>
+            </div>
+          </div>
+          <div class="xp-total"><span id="xpTotal">0</span><label>Total XP</label></div>
+        </div>
+        <div class="xp-actions">
+          <div class="xp-earn-item"><i class="fas fa-calendar-check"></i><span>Log session</span><strong>+10 XP</strong></div>
+          <div class="xp-earn-item"><i class="fas fa-utensils"></i><span>Log food</span><strong>+2 XP</strong></div>
+          <div class="xp-earn-item"><i class="fas fa-fire"></i><span>7-day streak</span><strong>+50 XP</strong></div>
+          <div class="xp-earn-item"><i class="fas fa-medal"></i><span>New PB</span><strong>+25 XP</strong></div>
+          <div class="xp-earn-item"><i class="fas fa-trophy"></i><span>Challenge done</span><strong>+30 XP</strong></div>
+          <div class="xp-earn-item"><i class="fas fa-droplet"></i><span>Hydration goal</span><strong>+5 XP</strong></div>
+        </div>
+      </div>
+
+      <!-- Badges -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-award"></i> Achievements & Badges</div>
+        <div class="badges-grid" id="badgesGrid"></div>
+      </div>
+
+      <!-- Weekly Challenges -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-bolt"></i> Weekly Challenges</div>
+        <div id="challengesList" class="challenges-list"></div>
+        <button class="btn-ghost" onclick="refreshChallenges()" style="margin-top:10px"><i class="fas fa-sync-alt"></i> Refresh Challenges</button>
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-ranking-star"></i> Leaderboard</div>
+        <p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:12px">Global simulated leaderboard — beat your best each week!</p>
+        <div id="leaderboardList" class="leaderboard-list"></div>
+      </div>
+    </section>
+
+    <!-- ===== WELLNESS PAGE ===== -->
+    <section id="page-wellness" class="page">
+      <div class="page-header">
+        <h2><i class="fas fa-heart-pulse"></i> Recovery & Wellness</h2>
+        <p>Sleep, hydration, injury tracking & stretching routines</p>
+      </div>
+
+      <!-- Wellness Summary Row -->
+      <div class="wellness-summary-row">
+        <div class="card wellness-mini-card">
+          <i class="fas fa-moon" style="color:var(--accent)"></i>
+          <span id="sleepToday">—</span>
+          <label>Sleep Last Night</label>
+        </div>
+        <div class="card wellness-mini-card">
+          <i class="fas fa-droplet" style="color:#42a5f5"></i>
+          <span id="hydrationToday">0ml</span>
+          <label>Water Today</label>
+        </div>
+        <div class="card wellness-mini-card">
+          <i class="fas fa-heart" style="color:#ef5350"></i>
+          <span id="wellnessScore">—</span>
+          <label>Wellness Score</label>
+        </div>
+        <div class="card wellness-mini-card">
+          <i class="fas fa-bandage" style="color:#ffa726"></i>
+          <span id="injuryCount">0</span>
+          <label>Active Injuries</label>
+        </div>
+      </div>
+
+      <!-- Sleep Tracker -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-moon"></i> Sleep Tracker</div>
+        <div class="form-row">
+          <div class="form-group"><label>Date</label><input type="date" id="sleepDate" /></div>
+          <div class="form-group"><label>Hours Slept</label><input type="number" id="sleepHours" placeholder="8" min="0" max="24" step="0.5" /></div>
+          <div class="form-group"><label>Target Hours</label><input type="number" id="sleepTargetHours" value="8" min="4" max="12" step="0.5" /></div>
+          <div class="form-group"><label>Quality (1–5 ⭐)</label>
+            <select id="sleepQuality">
+              <option value="1">1 — Terrible</option><option value="2">2 — Poor</option>
+              <option value="3" selected>3 — OK</option><option value="4">4 — Good</option><option value="5">5 — Great</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Notes</label><input type="text" id="sleepNotes" placeholder="Felt rested?" /></div>
+        </div>
+        <div class="sleep-action-row">
+          <button class="btn-primary" onclick="startSleepSession()"><i class="fas fa-bed"></i> Start Sleep</button>
+          <button class="btn-secondary" onclick="endSleepSession()"><i class="fas fa-alarm-clock"></i> End Sleep</button>
+          <button class="btn-ghost" onclick="logSleep()"><i class="fas fa-save"></i> Log Sleep Manually</button>
+        </div>
+        <div id="sleepLog" class="sleep-log-list" style="margin-top:14px"></div>
+      </div>
+
+      <!-- Hydration Tracker -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-droplet"></i> Hydration Tracker</div>
+        <div class="hydration-layout">
+          <div class="hydration-visual">
+            <div class="water-bottle">
+              <div class="water-fill" id="waterFill"></div>
+              <div class="water-label" id="waterLabel">0 / 2500ml</div>
+            </div>
+          </div>
+          <div class="hydration-controls">
+            <p style="color:var(--text-secondary);font-size:0.85rem">Daily Goal: <strong id="hydrationGoalDisplay">2500ml</strong></p>
+            <div class="hydration-quick-btns">
+              <button class="btn-secondary" onclick="addWater(150)">+ 150ml</button>
+              <button class="btn-secondary" onclick="addWater(250)">+ 250ml <small>🥤</small></button>
+              <button class="btn-secondary" onclick="addWater(500)">+ 500ml <small>🍶</small></button>
+              <button class="btn-secondary" onclick="addWater(750)">+ 750ml</button>
+            </div>
+            <div class="form-group" style="margin-top:10px">
+              <label>Custom (ml)</label>
+              <div style="display:flex;gap:8px">
+                <input type="number" id="customWater" placeholder="300" />
+                <button class="btn-primary" onclick="addCustomWater()"><i class="fas fa-plus"></i></button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Daily Goal (ml)</label>
+              <div style="display:flex;gap:8px">
+                <input type="number" id="hydrationGoalInput" placeholder="2500" />
+                <button class="btn-ghost" onclick="setHydrationGoal()">Set</button>
+              </div>
+            </div>
+            <button class="btn-ghost" onclick="resetWater()"><i class="fas fa-redo"></i> Reset Today</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Injury Log -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-bandage"></i> Injury Log</div>
+        <div class="form-row">
+          <div class="form-group"><label>Body Part</label>
+            <select id="injuryPart">
+              <option>Left Knee</option><option>Right Knee</option><option>Left Ankle</option><option>Right Ankle</option>
+              <option>Lower Back</option><option>Hamstring (L)</option><option>Hamstring (R)</option>
+              <option>Groin</option><option>Shoulder (L)</option><option>Shoulder (R)</option>
+              <option>Wrist (L)</option><option>Wrist (R)</option><option>Hip Flexor</option><option>Calf (L)</option><option>Calf (R)</option><option>Other</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Type</label>
+            <select id="injuryType">
+              <option>Strain</option><option>Sprain</option><option>Bruise</option><option>Overuse</option><option>Tendinitis</option><option>Fracture</option><option>Other</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Severity (1–10)</label><input type="number" id="injurySeverity" min="1" max="10" placeholder="5" /></div>
+          <div class="form-group"><label>Status</label>
+            <select id="injuryStatus"><option value="active">Active</option><option value="recovering">Recovering</option><option value="healed">Healed</option></select>
+          </div>
+        </div>
+        <div class="form-group"><label>Notes / Treatment</label><textarea id="injuryNotes" placeholder="Describe the injury and any treatment..."></textarea></div>
+        <button class="btn-primary" onclick="logInjury()"><i class="fas fa-plus"></i> Log Injury</button>
+        <div id="injuryLog" class="injury-log-list" style="margin-top:14px"></div>
+      </div>
+
+      <!-- Stretching Routines -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-person-walking"></i> Stretching & Recovery Routines</div>
+        <div class="stretch-tabs">
+          <button class="stretch-tab active" onclick="showStretches('pre')">Pre-Workout</button>
+          <button class="stretch-tab" onclick="showStretches('post')">Post-Workout</button>
+          <button class="stretch-tab" onclick="showStretches('recovery')">Recovery Day</button>
+          <button class="stretch-tab" onclick="showStretches('yoga')">Yoga</button>
+        </div>
+        <div id="stretchList" class="stretch-list"></div>
+      </div>
+    </section>
+
+    <!-- ===== DRILLS PAGE ===== -->
+    <section id="page-drills" class="page">
+      <div class="page-header">
+        <h2><i class="fas fa-play-circle"></i> Drills & Video Library</h2>
+        <p>Sport-specific drills, technique tips & training videos</p>
+      </div>
+      <div class="drills-top-bar">
+        <button class="btn-primary" onclick="openDrillTimer()"><i class="fas fa-stopwatch"></i> Interval Timer</button>
+      </div>
+      <div class="drills-filters">
+        <div class="filter-pills">
+          <button class="pill active" onclick="filterDrills('all', this)">All Sports</button>
+          <button class="pill" onclick="filterDrills('football', this)">⚽ Football</button>
+          <button class="pill" onclick="filterDrills('basketball', this)">🏀 Basketball</button>
+          <button class="pill" onclick="filterDrills('running', this)">🏃 Running</button>
+          <button class="pill" onclick="filterDrills('tennis', this)">🎾 Tennis</button>
+          <button class="pill" onclick="filterDrills('swimming', this)">🏊 Swimming</button>
+          <button class="pill" onclick="filterDrills('cycling', this)">🚴 Cycling</button>
+        </div>
+        <div class="filter-pills" style="margin-top:8px">
+          <button class="pill active" onclick="filterDrillsLevel('all', this)">All Levels</button>
+          <button class="pill" onclick="filterDrillsLevel('beginner', this)">Beginner</button>
+          <button class="pill" onclick="filterDrillsLevel('intermediate', this)">Intermediate</button>
+          <button class="pill" onclick="filterDrillsLevel('advanced', this)">Advanced</button>
+        </div>
+      </div>
+      <div id="drillsGrid" class="drills-grid"></div>
+    </section>
+
+    <!-- ===== VIDEO ANALYZER PAGE ===== -->
+    <section id="page-video" class="page">
+      <div class="page-header">
+        <h2><i class="fas fa-clapperboard"></i> Video Performer Analyzer</h2>
+        <p>Upload a full match or a short clip — get a complete stats breakdown of your performance</p>
+      </div>
+
+      <!-- Sport quick-select pills -->
+      <div class="video-sport-pills">
+        <button class="video-sport-pill active" data-sport="football" onclick="setVideoSport('football',this)">⚽ Football</button>
+        <button class="video-sport-pill" data-sport="basketball" onclick="setVideoSport('basketball',this)">🏀 Basketball</button>
+        <button class="video-sport-pill" data-sport="running" onclick="setVideoSport('running',this)">🏃 Running</button>
+        <button class="video-sport-pill" data-sport="tennis" onclick="setVideoSport('tennis',this)">🎾 Tennis</button>
+        <button class="video-sport-pill" data-sport="swimming" onclick="setVideoSport('swimming',this)">🏊 Swimming</button>
+        <button class="video-sport-pill" data-sport="cycling" onclick="setVideoSport('cycling',this)">🚴 Cycling</button>
+      </div>
+
+      <!-- Main analyzer card -->
+      <div class="video-analyzer-layout">
+        <div class="video-upload-panel card">
+          <div class="card-header"><i class="fas fa-upload"></i> Upload Your Video</div>
+
+          <div class="video-drop-zone" id="videoDropZone" onclick="document.getElementById('videoUpload').click()" ondragover="event.preventDefault()" ondrop="handleVideoDrop(event)">
+            <i class="fas fa-cloud-upload-alt video-drop-icon"></i>
+            <p class="video-drop-label">Click or drag &amp; drop your video here</p>
+            <p class="video-drop-hint">Supports MP4, MOV, AVI, MKV — full match or short clip</p>
+            <div id="videoFileChosen" class="video-file-chosen hidden"></div>
+          </div>
+          <input type="file" id="videoUpload" accept="video/*" onchange="handleVideoUpload(this)" style="display:none" />
+
+          <div class="form-group" style="margin-top:14px">
+            <label>Or paste a video link (YouTube, Drive, etc.)</label>
+            <input type="text" id="videoSource" placeholder="https://..." />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Match / Clip Title</label>
+              <input type="text" id="videoTitle" placeholder="e.g. Sunday League vs City FC" />
+            </div>
+            <div class="form-group">
+              <label>Video Type</label>
+              <select id="videoScope">
+                <option value="full">Full Match</option>
+                <option value="clip">Small Clip</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Duration (minutes)</label>
+              <input type="number" id="videoDuration" min="1" max="240" value="90" />
+            </div>
+            <div class="form-group">
+              <label>Sport</label>
+              <select id="videoSport">
+                <option value="football">⚽ Football</option>
+                <option value="basketball">🏀 Basketball</option>
+                <option value="running">🏃 Running</option>
+                <option value="tennis">🎾 Tennis</option>
+                <option value="swimming">🏊 Swimming</option>
+                <option value="cycling">🚴 Cycling</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="btn-primary btn-full" onclick="analyzeVideoPerformance()">
+            <i class="fas fa-magnifying-glass-chart"></i> Analyze Performance
+          </button>
+        </div>
+
+        <div class="video-results-panel">
+          <!-- Live output -->
+          <div id="videoPerformanceOutput" class="video-performance-output"></div>
+
+          <!-- Stats legend -->
+          <div class="card video-legend-card" id="videoLegendCard">
+            <div class="card-header"><i class="fas fa-circle-info"></i> What We Analyze</div>
+            <div class="video-legend-grid" id="videoLegendGrid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analysis history -->
+      <div class="card">
+        <div class="card-header" style="justify-content:space-between">
+          <span><i class="fas fa-history"></i> Analysis History</span>
+          <button class="btn-ghost small" onclick="clearVideoHistory()"><i class="fas fa-trash"></i> Clear All</button>
+        </div>
+        <div id="videoPerformanceHistory" class="video-performance-history"></div>
+      </div>
+    </section>
+
+    <!-- ===== GEAR PAGE ===== -->
+    <section id="page-gear" class="page">
+      <div class="page-header">
+        <h2><i class="fas fa-bag-shopping"></i> Gear & Kit Tracker</h2>
+        <p>Manage your equipment list and pack your kit bag</p>
+      </div>
+
+      <!-- Kit Bag Checklist -->
+      <div class="card">
+        <div class="card-header">
+          <span><i class="fas fa-briefcase"></i> Kit Bag Checklist</span>
+          <div style="display:flex;gap:8px">
+            <select id="kitSportFilter" onchange="renderKitList()">
+              <option value="football">⚽ Football</option>
+              <option value="basketball">🏀 Basketball</option>
+              <option value="running">🏃 Running</option>
+              <option value="tennis">🎾 Tennis</option>
+              <option value="swimming">🏊 Swimming</option>
+              <option value="cycling">🚴 Cycling</option>
+            </select>
+            <button class="btn-ghost small" onclick="checkAllKit()"><i class="fas fa-check-double"></i> All</button>
+            <button class="btn-ghost small" onclick="uncheckAllKit()"><i class="fas fa-times"></i> Clear</button>
+          </div>
+        </div>
+        <div id="kitList" class="kit-list"></div>
+        <div class="kit-ready" id="kitReady"></div>
+      </div>
+
+      <!-- Custom Gear -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-plus-circle"></i> Add Custom Gear Item</div>
+        <div class="form-row">
+          <div class="form-group"><label>Item Name</label><input type="text" id="customGearName" placeholder="e.g. Shin pads" /></div>
+          <div class="form-group"><label>Sport</label>
+            <select id="customGearSport">
+              <option value="football">Football</option><option value="basketball">Basketball</option>
+              <option value="running">Running</option><option value="tennis">Tennis</option>
+              <option value="swimming">Swimming</option><option value="cycling">Cycling</option><option value="all">All Sports</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Priority</label>
+            <select id="customGearPriority"><option value="essential">Essential</option><option value="recommended">Recommended</option><option value="optional">Optional</option></select>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="addCustomGear()"><i class="fas fa-plus"></i> Add Item</button>
+      </div>
+
+      <!-- Equipment Guide -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-info-circle"></i> Equipment Buying Guide</div>
+        <div id="equipmentGuide" class="equipment-guide"></div>
+      </div>
+    </section>
+
+    <!-- ===== PROFILE PAGE ===== -->
+    <section id="page-profile" class="page">
+      <div class="page-header">
+        <h2><i class="fas fa-user-circle"></i> Profile & Settings</h2>
+        <p>Manage your account, preferences and data</p>
+      </div>
+
+      <div class="profile-layout">
+        <div class="profile-main">
+          <!-- Profile Card -->
+          <div class="card profile-card">
+            <div class="profile-avatar-area">
+              <div class="profile-avatar" id="profileAvatarDisplay">
+                <span id="profileInitials">?</span>
+                <label class="avatar-upload-label" for="avatarUpload"><i class="fas fa-camera"></i></label>
+                <input type="file" id="avatarUpload" accept="image/*" style="display:none" onchange="uploadAvatar(this)" />
+              </div>
+              <div class="profile-info">
+                <h3 id="profileName">Your Name</h3>
+                <p id="profileSport" style="color:var(--accent)">Sport not set</p>
+                <p id="profileAge" style="color:var(--text-secondary);font-size:0.85rem"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Profile -->
+          <div class="card">
+            <div class="card-header"><i class="fas fa-edit"></i> Edit Profile</div>
+            <div class="form-row">
+              <div class="form-group"><label>Display Name</label><input type="text" id="profileNameInput" placeholder="Your name" /></div>
+              <div class="form-group"><label>Hometown / City</label><input type="text" id="profileCity" placeholder="e.g. London" /></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Favourite Team</label><input type="text" id="profileTeam" placeholder="e.g. Arsenal" /></div>
+              <div class="form-group"><label>Position / Role</label><input type="text" id="profilePosition" placeholder="e.g. Striker" /></div>
+            </div>
+            <div class="form-group"><label>Bio / Goals</label><textarea id="profileBio" placeholder="Tell us about your sporting goals..."></textarea></div>
+            <button class="btn-primary" onclick="saveProfile()"><i class="fas fa-save"></i> Save Profile</button>
+          </div>
+
+          <!-- Preferences -->
+          <div class="card">
+            <div class="card-header"><i class="fas fa-sliders-h"></i> Preferences</div>
+            <div class="pref-row">
+              <span>Weight Unit</span>
+              <div class="toggle-group">
+                <button class="toggle-opt active" id="pref-kg" onclick="setPref('weightUnit','kg')">kg</button>
+                <button class="toggle-opt" id="pref-lbs" onclick="setPref('weightUnit','lbs')">lbs</button>
+              </div>
+            </div>
+            <div class="pref-row">
+              <span>Distance Unit</span>
+              <div class="toggle-group">
+                <button class="toggle-opt active" id="pref-km" onclick="setPref('distUnit','km')">km</button>
+                <button class="toggle-opt" id="pref-mi" onclick="setPref('distUnit','mi')">miles</button>
+              </div>
+            </div>
+            <div class="pref-row">
+              <span>Session Reminders</span>
+              <label class="switch">
+                <input type="checkbox" id="reminderToggle" onchange="toggleReminders(this.checked)" />
+                <span class="slider-sw"></span>
+              </label>
+            </div>
+            <div class="pref-row reminder-time-row hidden" id="reminderTimeRow">
+              <span>Reminder Time</span>
+              <input type="time" id="reminderTime" value="07:00" onchange="setReminderTime(this.value)" style="background:var(--input-bg);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text-primary)" />
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-side">
+          <!-- Stats Summary -->
+          <div class="card">
+            <div class="card-header"><i class="fas fa-star"></i> My Stats Summary</div>
+            <div class="stats-list">
+              <div class="stat-row"><span>Total Sessions</span><strong id="prof-sessions">0</strong></div>
+              <div class="stat-row"><span>Personal Bests</span><strong id="prof-pbs">0</strong></div>
+              <div class="stat-row"><span>Badges Earned</span><strong id="prof-badges">0</strong></div>
+              <div class="stat-row"><span>Total XP</span><strong id="prof-xp">0</strong></div>
+              <div class="stat-row"><span>Streak</span><strong id="prof-streak">0 days</strong></div>
+              <div class="stat-row"><span>Challenges Done</span><strong id="prof-challenges">0</strong></div>
+            </div>
+          </div>
+
+          <!-- Export Data -->
+          <div class="card">
+            <div class="card-header"><i class="fas fa-download"></i> Export Data</div>
+            <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:12px">Download your training data as CSV files.</p>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <button class="btn-secondary btn-full" onclick="exportCSV('sessions')"><i class="fas fa-calendar"></i> Export Sessions</button>
+              <button class="btn-secondary btn-full" onclick="exportCSV('nutrition')"><i class="fas fa-utensils"></i> Export Food Log</button>
+              <button class="btn-secondary btn-full" onclick="exportCSV('measurements')"><i class="fas fa-ruler"></i> Export Measurements</button>
+              <button class="btn-secondary btn-full" onclick="exportCSV('pbs')"><i class="fas fa-medal"></i> Export PBs</button>
+            </div>
+          </div>
+
+          <!-- Photo Progress Wall -->
+          <div class="card">
+            <div class="card-header"><i class="fas fa-camera"></i> Progress Wall</div>
+            <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:12px">Document your physical transformation — add a photo after every milestone!</p>
+            <label class="btn-secondary" style="cursor:pointer;display:inline-flex;align-items:center;gap:8px">
+              <i class="fas fa-plus"></i> Add Photo
+              <input type="file" accept="image/*" style="display:none" onchange="addProgressPhoto(this)" />
+            </label>
+            <div id="progressPhotoWall" class="progress-photo-wall" style="margin-top:14px"></div>
+          </div>
+
+          <!-- Danger Zone -->
+          <div class="card danger-card">
+            <div class="card-header" style="color:#ff4444"><i class="fas fa-exclamation-triangle"></i> Danger Zone</div>
+            <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:12px">Permanently delete all your data.</p>
+            <button class="btn-danger" onclick="confirmReset()"><i class="fas fa-trash"></i> Reset All Data</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========== DRILL INTERVAL TIMER MODAL ========== -->
+  <div id="drillTimerModal" class="modal-overlay hidden">
+    <div class="modal-box dt-modal">
+      <div class="modal-header">
+        <h3><i class="fas fa-stopwatch"></i> Interval Drill Timer</h3>
+        <button class="close-btn" onclick="closeDrillTimer()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="dt-settings">
+        <div class="form-group"><label>Work (sec)</label><input type="number" id="dtWork" value="30" min="5" max="300" /></div>
+        <div class="form-group"><label>Rest (sec)</label><input type="number" id="dtRest" value="15" min="5" max="300" /></div>
+        <div class="form-group"><label>Rounds</label><input type="number" id="dtRounds" value="5" min="1" max="30" /></div>
+      </div>
+      <div class="dt-display">
+        <div id="dtPhase" class="dt-phase work">💥 WORK</div>
+        <div id="dtDisplay" class="dt-seconds">30</div>
+        <div id="dtRoundInfo" class="dt-round">Round 1 / 5</div>
+      </div>
+      <div class="dt-controls">
+        <button class="btn-primary" onclick="startDrillTimer()"><i class="fas fa-play"></i> Start</button>
+        <button class="btn-secondary" onclick="stopDrillTimer()"><i class="fas fa-pause"></i> Pause</button>
+        <button class="btn-ghost" onclick="resetDrillTimer()"><i class="fas fa-redo"></i> Reset</button>
+      </div>
+      <p class="dt-voice-note"><i class="fas fa-volume-up"></i> Voice cues enabled — turn up volume!</p>
+    </div>
+  </div>
+
+  <!-- ========== GAME DAY MODE MODAL ========== -->
+  <div id="gameDayModal" class="modal-overlay hidden">
+    <div class="modal-box gd-modal">
+      <div class="modal-header">
+        <h3><i class="fas fa-gamepad"></i> 🎮 Game Day Mode</h3>
+        <button class="close-btn" onclick="closeGameDay()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="gd-section">
+        <h4>Pre-Match Checklist</h4>
+        <div id="gameDayList" class="gd-list"></div>
+        <div id="gameDayReadiness"></div>
+        <button class="btn-ghost" style="margin-top:8px" onclick="resetGameDayChecklist()"><i class="fas fa-redo"></i> Reset Checklist</button>
+      </div>
+      <div class="gd-section gd-postmatch">
+        <h4>Post-Match Rating</h4>
+        <div class="form-row">
+          <div class="form-group"><label>My Performance (1–10)</label><input type="number" id="postMatchRating" min="1" max="10" placeholder="8" /></div>
+        </div>
+        <div class="form-group"><label>Match Notes</label><textarea id="postMatchNotes" placeholder="Key moments, what went well, what to improve..."></textarea></div>
+        <button class="btn-primary btn-full" onclick="logPostMatchRating()"><i class="fas fa-save"></i> Log Match Performance</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SPORT SWITCH MODAL ========== -->
+  <div id="sportSwitchModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fas fa-exchange-alt"></i> Switch Sport</h3>
+        <button class="close-btn" onclick="closeModal('sportSwitchModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <p>Select your active sport — this changes the app's colour theme!</p>
+      <div class="sport-selector large">
+        <button class="sport-btn" data-sport="football" onclick="switchSport('football')"><i class="fas fa-futbol"></i> Football</button>
+        <button class="sport-btn" data-sport="basketball" onclick="switchSport('basketball')"><i class="fas fa-basketball"></i> Basketball</button>
+        <button class="sport-btn" data-sport="running" onclick="switchSport('running')"><i class="fas fa-person-running"></i> Running</button>
+        <button class="sport-btn" data-sport="tennis" onclick="switchSport('tennis')"><i class="fas fa-baseball"></i> Tennis</button>
+        <button class="sport-btn" data-sport="swimming" onclick="switchSport('swimming')"><i class="fas fa-person-swimming"></i> Swimming</button>
+        <button class="sport-btn" data-sport="cycling" onclick="switchSport('cycling')"><i class="fas fa-bicycle"></i> Cycling</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== ADD PB MODAL ========== -->
+  <div id="addPBModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fas fa-medal"></i> Log Personal Best</h3>
+        <button class="close-btn" onclick="closeModal('addPBModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="form-group"><label>Record Type</label>
+        <select id="pbType">
+          <option value="sprint_10m">10m Sprint (seconds)</option>
+          <option value="sprint_40m">40m Sprint (seconds)</option>
+          <option value="sprint_100m">100m Sprint (seconds)</option>
+          <option value="max_squat">Max Squat (kg)</option>
+          <option value="max_bench">Max Bench Press (kg)</option>
+          <option value="max_deadlift">Max Deadlift (kg)</option>
+          <option value="pull_ups">Max Pull-Ups (reps)</option>
+          <option value="push_ups">Max Push-Ups (reps)</option>
+          <option value="vertical_jump">Vertical Jump (cm)</option>
+          <option value="broad_jump">Broad Jump (cm)</option>
+          <option value="5km_run">5km Run Time (mm:ss)</option>
+          <option value="plank">Plank Hold (seconds)</option>
+          <option value="custom">Custom Record</option>
+        </select>
+      </div>
+      <div class="form-group" id="pbCustomNameGroup" style="display:none"><label>Record Name</label><input type="text" id="pbCustomName" placeholder="e.g. Best Game Score" /></div>
+      <div class="form-group"><label>Value</label><input type="text" id="pbValue" placeholder="e.g. 4.2 or 12:30" /></div>
+      <div class="form-group"><label>Notes</label><input type="text" id="pbNotes" placeholder="Any context..." /></div>
+      <button class="btn-primary btn-full" onclick="savePB()"><i class="fas fa-save"></i> Save PB</button>
+    </div>
+  </div>
+
+  <!-- ========== TOAST NOTIFICATION ========== -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- ========== APP FOOTER ========== -->
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="footer-logo"><i class="fas fa-futbol"></i> Road to Pro</span>
+        <span class="footer-tagline">Your AI-powered journey to becoming a professional athlete.</span>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <span class="footer-col-title">Features</span>
+          <a onclick="navTo('plans')">Training Plans</a>
+          <a onclick="navTo('nutrition')">Nutrition Tracker</a>
+          <a onclick="navTo('gamify')">Streak Hub</a>
+          <a onclick="navTo('video')">Video Analyzer</a>
+          <a onclick="navTo('ai')">AI Coach</a>
+        </div>
+        <div class="footer-col">
+          <span class="footer-col-title">Tools</span>
+          <a onclick="navTo('stats')">Stats & PBs</a>
+          <a onclick="navTo('calendar')">Calendar</a>
+          <a onclick="navTo('wellness')">Recovery</a>
+          <a onclick="navTo('fields')">Find Fields</a>
+          <a onclick="navTo('drills')">Drills Library</a>
+        </div>
+        <div class="footer-col">
+          <span class="footer-col-title">App</span>
+          <a onclick="navTo('profile')">My Profile</a>
+          <a onclick="toggleTheme()">Toggle Theme</a>
+          <a onclick="openSportSwitch()">Switch Sport</a>
+          <a href="#" onclick="return false">Version 2.0.0</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="footer-made">
+          Made with <span class="footer-heart">❤️</span> for athletes worldwide &nbsp;·&nbsp;
+          <strong>Road to Pro</strong> &nbsp;·&nbsp; Built for the next generation of sports talent &nbsp;·&nbsp;
+          <span id="footerYear"></span>
+        </div>
+        <div class="footer-badges">
+          <span class="footer-badge"><i class="fas fa-shield-alt"></i> Private — All data stays on your device</span>
+          <span class="footer-badge"><i class="fas fa-bolt"></i> PWA Ready</span>
+          <span class="footer-badge"><i class="fas fa-moon"></i> Dark & Light Mode</span>
+          <span class="footer-badge"><i class="fas fa-globe"></i> Works Offline</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========== MOBILE BOTTOM NAV ========== -->
+  <nav class="mobile-bottom-nav" id="mobileBottomNav">
+    <button class="mbn-btn active" data-page="dashboard" onclick="navTo('dashboard')">
+      <i class="fas fa-home"></i><span>Home</span>
+    </button>
+    <button class="mbn-btn" data-page="plans" onclick="navTo('plans')">
+      <i class="fas fa-dumbbell"></i><span>Plans</span>
+    </button>
+    <button class="mbn-btn" data-page="calendar" onclick="navTo('calendar')">
+      <i class="fas fa-calendar-alt"></i><span>Calendar</span>
+    </button>
+    <button class="mbn-btn" data-page="gamify" onclick="navTo('gamify')">
+      <i class="fas fa-fire"></i><span>Streak</span>
+    </button>
+    <button class="mbn-btn mbn-more" onclick="toggleMobileMoreMenu()">
+      <i class="fas fa-grid-2"></i><span>More</span>
+    </button>
+  </nav>
+
+  <!-- Mobile "More" drawer -->
+  <div id="mobileMoreOverlay" class="mobile-more-overlay hidden" onclick="closeMobileMoreMenu()"></div>
+  <div id="mobileMoreDrawer" class="mobile-more-drawer hidden">
+    <div class="mmd-header"><span>All Sections</span><button onclick="closeMobileMoreMenu()"><i class="fas fa-times"></i></button></div>
+    <div class="mmd-grid">
+      <button onclick="navTo('nutrition');closeMobileMoreMenu()"><i class="fas fa-apple-alt"></i><span>Nutrition</span></button>
+      <button onclick="navTo('stats');closeMobileMoreMenu()"><i class="fas fa-chart-line"></i><span>Stats</span></button>
+      <button onclick="navTo('wellness');closeMobileMoreMenu()"><i class="fas fa-heart-pulse"></i><span>Wellness</span></button>
+      <button onclick="navTo('drills');closeMobileMoreMenu()"><i class="fas fa-play-circle"></i><span>Drills</span></button>
+      <button onclick="navTo('video');closeMobileMoreMenu()"><i class="fas fa-clapperboard"></i><span>Video</span></button>
+      <button onclick="navTo('gear');closeMobileMoreMenu()"><i class="fas fa-bag-shopping"></i><span>Gear</span></button>
+      <button onclick="navTo('fields');closeMobileMoreMenu()"><i class="fas fa-map-marker-alt"></i><span>Fields</span></button>
+      <button onclick="navTo('ai');closeMobileMoreMenu()"><i class="fas fa-comment-dots"></i><span>Coach</span></button>
+      <button onclick="navTo('profile');closeMobileMoreMenu()"><i class="fas fa-user-circle"></i><span>Profile</span></button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>document.getElementById('footerYear').textContent = new Date().getFullYear();</script>
+</body>
+</html>
