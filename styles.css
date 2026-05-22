@@ -1,5 +1,5 @@
 /* =====================================================
-   ROAD TO PRO — SPORTS AI HUB
+   ATHLETEMIND — SPORTS AI HUB
    Master Stylesheet with Full Theming System
    ===================================================== */
 
@@ -2728,3 +2728,41 @@ select:focus:not(:focus-visible) { outline: none; box-shadow: none; }
     align-items: flex-end;
   }
 }
+
+/* =====================================================
+   NEW FEATURES — Referral, Premium, Weekly, Share
+   ===================================================== */
+
+/* ── Referral Code ── */
+.referral-box {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface-alt, #1a1a1a); border: 1.5px solid var(--accent);
+  border-radius: 10px; padding: 10px 14px;
+}
+.referral-code {
+  font-family: 'Courier New', monospace; font-size: 1.1rem; font-weight: 700;
+  color: var(--accent); letter-spacing: .1em; flex: 1;
+}
+.btn-ghost.small { padding: 5px 10px; font-size: .78rem; }
+
+/* ── Premium / Paywall ── */
+.premium-card {
+  border: 1.5px solid var(--accent) !important;
+  background: linear-gradient(135deg, var(--card-bg) 0%, rgba(0,230,118,.05) 100%) !important;
+}
+.premium-features { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.pf-item { display: flex; align-items: center; gap: 10px; font-size: .85rem; }
+.pf-item i { color: var(--accent); width: 16px; }
+.premium-btn { background: linear-gradient(135deg, var(--accent), var(--accent-dark, #00b86b)) !important; font-weight: 800 !important; }
+.paywall-price {
+  font-size: 3rem; font-weight: 800; color: var(--accent); line-height: 1; margin: 16px 0 4px;
+}
+.paywall-price span { font-size: 1rem; color: var(--text-secondary); font-weight: 400; }
+
+/* ── Weekly Report ── */
+#weeklyReportBody .stat-card { transition: transform .2s; }
+#weeklyReportBody .stat-card:hover { transform: translateY(-2px); }
+
+/* ── Share Card ── */
+#shareCanvas { border: 1px solid var(--border); background: #111; }
+

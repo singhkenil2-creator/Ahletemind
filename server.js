@@ -5,10 +5,10 @@ const path    = require('path');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
-const DB   = path.join(__dirname, 'roadtopro_db.json');
+const DB   = path.join(__dirname, 'athletemind_db.json');
 
 // ─── ADMIN PASSWORD ─────────────────────────────────────────────────────────
-const ADMIN_PASSWORD = 'footballadmin';
+const ADMIN_PASSWORD = '213';
 // ─────────────────────────────────────────────────────────────────────────────
 
 app.use(cors());
@@ -31,7 +31,8 @@ function writeDB(db) {
 function now() { return new Date().toISOString(); }
 
 function authAdmin(req, res) {
-  if (req.headers['x-admin-password'] !== ADMIN_PASSWORD) {
+  const auth = req.headers['x-admin-password'] || req.query.pw;
+  if (auth !== ADMIN_PASSWORD) {
     res.status(401).json({ error: 'Unauthorized' });
     return false;
   }
@@ -145,20 +146,90 @@ app.delete('/api/admin/user/:id', (req, res) => {
   res.json({ ok: true });
 });
 
+// GET /api/admin/export — download all users as CSV
+app.get('/api/admin/export', (req, res) => {
+  if (!authAdmin(req, res)) return;
+  const db = readDB();
+  const users = Object.values(db.users);
+  const rows = [
+    ['device_id','name','email','sport','streak','xp','sessions','first_seen','last_seen'].join(','),
+    ...users.map(u => [
+      u.device_id,
+      `"${(u.name||'').replace(/"/g,'""')}"`,
+      `"${(u.data?.user?.email||'').replace(/"/g,'""')}"`,
+      u.sport,
+      u.streak,
+      u.xp,
+      u.data?.sessions || 0,
+      u.first_seen,
+      u.last_seen
+    ].join(','))
+  ].join('\n');
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', `attachment; filename="athletemind-users-${new Date().toISOString().slice(0,10)}.csv"`);
+  res.send(rows);
+});
+
+// POST /api/referral — track referrals
+app.post('/api/referral', (req, res) => {
+  try {
+    const { deviceId, referralCode } = req.body;
+    if (!deviceId || !referralCode) return res.status(400).json({ error: 'Missing fields' });
+    const db = readDB();
+    // Find the referrer
+    const referrer = Object.values(db.users).find(u => u.data?.referralCode === referralCode);
+    if (referrer) {
+      referrer.data.referralCount = (referrer.data.referralCount || 0) + 1;
+      referrer.data.xp = (referrer.data.xp || 0) + 100; // 100 XP bonus
+      db.users[referrer.device_id] = referrer;
+      writeDB(db);
+    }
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// POST /api/chat — AI coach via OpenAI
+app.post('/api/chat', async (req, res) => {
+  const OPENAI_KEY = process.env.OPENAI_API_KEY;
+  if (!OPENAI_KEY) {
+    return res.json({ reply: null }); // fall back to local responses
+  }
+  try {
+    const { message, sport, name, history = [] } = req.body;
+    const systemPrompt = `You are AthleteMind, an expert AI sports coach specialising in ${sport}. You are coaching ${name}. Be encouraging, specific and concise. Keep responses under 150 words unless a detailed plan is requested. Use emojis occasionally.`;
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      ...history.slice(-8),
+      { role: 'user', content: message }
+    ];
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
+      body: JSON.stringify({ model: 'gpt-4o-mini', messages, max_tokens: 300, temperature: 0.8 })
+    });
+    const data = await response.json();
+    const reply = data.choices?.[0]?.message?.content || null;
+    res.json({ reply });
+  } catch(e) {
+    console.error('OpenAI error:', e.message);
+    res.json({ reply: null });
+  }
+});
+
 // Admin panel
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 
-// All other routes → main app
-app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+// 404 page
+app.use((req, res) => res.status(404).sendFile(path.join(__dirname, '404.html')));
 
 app.listen(PORT, () => {
   console.log('');
   console.log('  ╔══════════════════════════════════════╗');
-  console.log('  ║     Road to Pro — Server Running     ║');
+  console.log('  ║     AthleteMind — Server Running      ║');
   console.log('  ╠══════════════════════════════════════╣');
   console.log(`  ║  App:    http://localhost:${PORT}         ║`);
   console.log(`  ║  Admin:  http://localhost:${PORT}/admin   ║`);
-  console.log(`  ║  DB:     roadtopro_db.json            ║`);
+  console.log(`  ║  DB:     athletemind_db.json          ║`);
   console.log('  ╚══════════════════════════════════════╝');
   console.log('');
 });

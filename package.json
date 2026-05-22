@@ -1,7 +1,7 @@
 {
-  "name": "road-to-pro",
+  "name": "athletemind",
   "version": "1.0.0",
-  "description": "Road to Pro Sports PWA backend",
+  "description": "AthleteMind Sports PWA backend",
   "main": "server.js",
   "engines": {
     "node": ">=18.0.0"

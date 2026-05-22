@@ -1,5 +1,5 @@
 /* =====================================================
-   ROAD TO PRO — app.js
+   ATHLETEMIND — app.js
    Full interactive logic for all modules
    ===================================================== */
 
@@ -204,13 +204,13 @@ function saveToStorage() {
     matchHistory: AppState.matchHistory,
     progressPhotos: AppState.progressPhotos,
   };
-  localStorage.setItem('roadToPro_v2', JSON.stringify(data));
+  localStorage.setItem('athletemind_v2', JSON.stringify(data));
   syncToServer(data);
 }
 
 function loadFromStorage() {
   try {
-    const raw = localStorage.getItem('roadToPro_v2');
+    const raw = localStorage.getItem('athletemind_v2');
     if (!raw) return;
     const data = JSON.parse(raw);
     Object.assign(AppState, data);
@@ -319,6 +319,7 @@ function submitAgeGate() {
 
   AppState.user = {
     name, dob, age,
+    email: document.getElementById('userEmail')?.value.trim() || '',
     sport,
     weightKg, weightUnit: weightRaw ? weightUnit : null,
     heightCm, heightUnit: heightRaw ? heightUnit : null,
@@ -2414,7 +2415,7 @@ const ALL_BADGES = [
   { id: 'xp_1000', icon: '👑', name: 'Elite Earner', desc: 'Earn 1000 XP', check: s => (s.xp||0) >= 1000 },
   { id: 'injury_aware', icon: '🩺', name: 'Body Aware', desc: 'Log an injury for monitoring', check: s => (s.injuryLog||[]).length >= 1 },
   { id: 'planner', icon: '📅', name: 'Planner', desc: 'Schedule 5 upcoming sessions', check: s => s.calendarEvents.filter(e => e.date >= getTodayStr()).length >= 5 },
-  { id: 'road_to_pro', icon: '🚀', name: 'Road to Pro', desc: 'Generate a training plan', check: s => s.planGenerated === true },
+  { id: 'road_to_pro', icon: '🚀', name: 'AthleteMind', desc: 'Generate a training plan', check: s => s.planGenerated === true },
 ];
 
 // =====================================================
@@ -3390,7 +3391,7 @@ function scheduleReminder() {
       if (next <= now) next.setDate(next.getDate() + 1);
       const ms = next - now;
       setTimeout(() => {
-        new Notification('Road to Pro 🏆', { body: `Time to train, ${AppState.user?.name || 'athlete'}! Let's go! 💪`, icon: '⚽' });
+        new Notification('AthleteMind 🏆', { body: `Time to train, ${AppState.user?.name || 'athlete'}! Let's go! 💪`, icon: '⚽' });
       }, ms);
       showToast(`Reminder set for ${time} ⏰`);
     }
@@ -3425,7 +3426,7 @@ function exportCSV(type) {
 
 function confirmReset() {
   if (confirm('⚠️ This will permanently delete ALL your data. Are you sure?')) {
-    localStorage.removeItem('roadToPro_v2');
+    localStorage.removeItem('athletemind_v2');
     location.reload();
   }
 }
@@ -3891,5 +3892,542 @@ document.addEventListener('DOMContentLoaded', () => {
   window.setVideoSport = setVideoSport;
   window.handleVideoDrop = handleVideoDrop;
   window.initVideoPage = initVideoPage;
+
+  // ── Secret admin: long-press footer logo for 2 seconds ──
+  let holdTimer = null;
+  const logoEl = document.getElementById('secretLogoTap');
+  if (logoEl) {
+    const startHold = () => { holdTimer = setTimeout(() => { openAdminOverlay(); }, 2000); };
+    const cancelHold = () => { clearTimeout(holdTimer); holdTimer = null; };
+    logoEl.addEventListener('mousedown',  startHold);
+    logoEl.addEventListener('touchstart', startHold,  { passive: true });
+    logoEl.addEventListener('mouseup',    cancelHold);
+    logoEl.addEventListener('mouseleave', cancelHold);
+    logoEl.addEventListener('touchend',   cancelHold);
+    logoEl.addEventListener('touchcancel',cancelHold);
+    // Prevent context menu on long-press mobile
+    logoEl.addEventListener('contextmenu', e => e.preventDefault());
+  }
+});
+
+// =====================================================
+// ADMIN OVERLAY (in-app secret admin panel)
+// =====================================================
+let _adminPw = '';
+let _adminUsers = [];
+
+function openAdminOverlay() {
+  document.getElementById('adminOverlay').style.display = 'block';
+  document.getElementById('adminGate').style.display = 'flex';
+  document.getElementById('adminDashboard').style.display = 'none';
+  document.getElementById('overlayPwdInput').value = '';
+  document.getElementById('overlayLoginErr').style.display = 'none';
+  setTimeout(() => document.getElementById('overlayPwdInput').focus(), 100);
+}
+
+function closeAdminOverlay() {
+  document.getElementById('adminOverlay').style.display = 'none';
+  _adminPw = '';
+}
+
+async function overlayLogin() {
+  const pw = document.getElementById('overlayPwdInput').value.trim();
+  if (!pw) return;
+  // Try server auth first, fall back to local password check
+  let stats = null;
+  try {
+    const r = await fetch('/api/admin/stats', { headers: { 'x-admin-password': pw } });
+    if (r.ok) {
+      stats = await r.json();
+    } else {
+      // Server returned error — wrong password
+      document.getElementById('overlayLoginErr').style.display = 'block';
+      return;
+    }
+  } catch {
+    // Server unreachable — allow access with hardcoded password for offline use
+    if (pw !== '213') {
+      document.getElementById('overlayLoginErr').style.display = 'block';
+      return;
+    }
+    stats = { totalUsers: 0, totalSyncs: 0, activeLast7: 0, topSports: [], topStreaks: [], syncsPerDay: [] };
+  }
+  _adminPw = pw;
+  document.getElementById('adminGate').style.display = 'none';
+  document.getElementById('adminDashboard').style.display = 'block';
+  const exportEl = document.getElementById('overlayExportBtn');
+  if (exportEl) { exportEl.href = `/api/admin/export?pw=${encodeURIComponent(pw)}`; exportEl.download = 'athletemind-users.csv'; }
+  ovRenderStats(stats);
+  ovLoadUsers(stats);
+}
+
+async function ovLoadUsers(stats) {
+  const r = await fetch('/api/admin/users', { headers: { 'x-admin-password': _adminPw } });
+  _adminUsers = await r.json();
+  ovRenderUsers(_adminUsers);
+  if (stats) ovRenderCharts(stats);
+}
+
+function ovRenderStats(s) {
+  document.getElementById('ov-stats').innerHTML = [
+    ['Total Users', s.totalUsers, '#00e676'],
+    ['Active (7d)', s.activeLast7, '#00b0ff'],
+    ['Total Syncs', s.totalSyncs, '#ffd600'],
+    ['Sports', s.topSports.length, '#e040fb']
+  ].map(([l, v, c]) => `
+    <div style="background:#1e1e1e;border:1px solid #2a2a2a;border-radius:10px;padding:16px;text-align:center">
+      <div style="font-size:1.8rem;font-weight:800;color:${c}">${v}</div>
+      <div style="font-size:.72rem;color:#888;text-transform:uppercase;margin-top:3px">${l}</div>
+    </div>`).join('');
+}
+
+function ovRenderUsers(users) {
+  const tbody = document.getElementById('ovUsersBody');
+  document.getElementById('ov-user-count').textContent = `${users.length} user${users.length !== 1 ? 's' : ''}`;
+  if (!users.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:#888">No users yet</td></tr>'; return; }
+  tbody.innerHTML = users.map((u, i) => `
+    <tr style="border-bottom:1px solid #1e1e1e" onmouseover="this.style.background='#1a1a1a'" onmouseout="this.style.background=''">
+      <td style="padding:11px 14px;color:#555;font-size:.8rem">${i+1}</td>
+      <td style="padding:11px 14px"><strong style="font-size:.88rem">${ovEsc(u.name)}</strong><br><span style="font-size:.7rem;color:#555;font-family:monospace">${u.device_id.slice(0,12)}…</span></td>
+      <td style="padding:11px 14px"><span style="padding:3px 8px;border-radius:20px;font-size:.7rem;font-weight:700;border:1px solid #444;text-transform:capitalize">${u.sport}</span></td>
+      <td style="padding:11px 14px">🔥 ${u.streak}</td>
+      <td style="padding:11px 14px">⚡ ${u.xp}</td>
+      <td style="padding:11px 14px;font-size:.78rem;color:#888">${ovTimeAgo(u.last_seen)}</td>
+      <td style="padding:11px 14px">
+        <button onclick="ovViewUser('${u.device_id}')" style="background:none;border:1px solid #00b0ff;color:#00b0ff;border-radius:5px;padding:4px 9px;cursor:pointer;font-size:.75rem">View</button>
+        <button onclick="ovDeleteUser('${u.device_id}','${ovEsc(u.name)}')" style="background:none;border:1px solid #2a2a2a;color:#888;border-radius:5px;padding:4px 9px;cursor:pointer;font-size:.75rem;margin-left:5px">Del</button>
+      </td>
+    </tr>`).join('');
+}
+
+function ovFilter() {
+  const q = document.getElementById('ovSearch').value.toLowerCase();
+  ovRenderUsers(_adminUsers.filter(u => u.name.toLowerCase().includes(q) || u.sport.toLowerCase().includes(q)));
+}
+
+function ovRenderCharts(s) {
+  const maxS = Math.max(...s.topSports.map(x => x.count), 1);
+  document.getElementById('ov-sports-chart').innerHTML = s.topSports.map(x => `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+      <div style="width:80px;font-size:.8rem;text-transform:capitalize">${x.sport}</div>
+      <div style="flex:1;background:#1e1e1e;border-radius:4px;height:9px;overflow:hidden">
+        <div style="height:100%;background:#00e676;border-radius:4px;width:${(x.count/maxS*100).toFixed(0)}%"></div>
+      </div>
+      <div style="font-size:.75rem;color:#888;width:24px;text-align:right">${x.count}</div>
+    </div>`).join('') || '<span style="color:#888;font-size:.82rem">No data yet</span>';
+
+  const ranks = ['#ffd600','#b0bec5','#ff7043'];
+  document.getElementById('ov-leaderboard').innerHTML = s.topStreaks.map((u,i) => `
+    <li style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #1e1e1e;font-size:.83rem">
+      <span style="width:20px;font-weight:800;color:${ranks[i]||'#555'}">${i+1}</span>
+      <span style="flex:1">${ovEsc(u.name)} <span style="color:#555;font-size:.72rem">(${u.sport})</span></span>
+      <span style="color:#00e676;font-weight:700">🔥${u.streak}</span>
+    </li>`).join('') || '<li style="color:#888">No data</li>';
+}
+
+async function ovViewUser(id) {
+  const r = await fetch(`/api/admin/user/${id}`, { headers: { 'x-admin-password': _adminPw } });
+  const u = await r.json();
+  document.getElementById('ovDetailTitle').textContent = `${u.name} · ${u.sport}`;
+  document.getElementById('ovDetailGrid').innerHTML = [
+    ['Streak', `🔥 ${u.streak}`], ['XP', `⚡ ${u.xp}`],
+    ['Email', u.data?.user?.email || '—'], ['Sessions', u.data?.sessions || 0],
+    ['Longest Streak', u.data?.longestStreak || 0], ['Badges', (u.data?.earnedBadges||[]).length],
+    ['First Seen', ovTimeAgo(u.first_seen)], ['Last Seen', ovTimeAgo(u.last_seen)]
+  ].map(([l,v]) => `
+    <div style="background:#1e1e1e;border-radius:8px;padding:11px">
+      <div style="font-size:.68rem;color:#888;text-transform:uppercase;margin-bottom:3px">${l}</div>
+      <div style="font-size:.95rem;font-weight:700">${v}</div>
+    </div>`).join('');
+  document.getElementById('ovDetailJson').textContent = JSON.stringify(u.data, null, 2);
+  document.getElementById('ovUserDetail').style.display = 'block';
+  document.getElementById('ovUserDetail').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function ovDeleteUser(id, name) {
+  if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+  await fetch(`/api/admin/user/${id}`, { method: 'DELETE', headers: { 'x-admin-password': _adminPw } });
+  const stats = await (await fetch('/api/admin/stats', { headers: { 'x-admin-password': _adminPw } })).json();
+  ovLoadUsers(stats);
+}
+
+function ovShowTab(name, btn) {
+  document.querySelectorAll('.ov-tab').forEach(t => {
+    t.style.background = 'none'; t.style.color = '#888'; t.style.fontWeight = '400';
+  });
+  btn.style.background = '#00e676'; btn.style.color = '#000'; btn.style.fontWeight = '700';
+  document.getElementById('ov-tab-users').style.display  = name === 'users'  ? 'block' : 'none';
+  document.getElementById('ov-tab-charts').style.display = name === 'charts' ? 'block' : 'none';
+}
+
+function ovTimeAgo(iso) {
+  if (!iso) return '—';
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1)  return 'just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h/24)}d ago`;
+}
+
+function ovEsc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// =====================================================
+// ── REAL AI COACH (OpenAI via server)
+// =====================================================
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const message = input.value.trim();
+  if (!message) return;
+  input.value = '';
+
+  addChatMessage(message, 'user');
+
+  // Save to history
+  AppState.chatHistory = AppState.chatHistory || [];
+  AppState.chatHistory.push({ role: 'user', content: message });
+  if (AppState.chatHistory.length > 40) AppState.chatHistory = AppState.chatHistory.slice(-40);
+
+  // Show typing indicator
+  const typingId = 'typing-' + Date.now();
+  const chatEl = document.getElementById('chatMessages');
+  const typingDiv = document.createElement('div');
+  typingDiv.id = typingId;
+  typingDiv.className = 'chat-msg ai-msg';
+  typingDiv.innerHTML = `<div class="msg-avatar"><i class="fas fa-robot"></i></div><div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`;
+  chatEl.appendChild(typingDiv);
+  chatEl.scrollTop = chatEl.scrollHeight;
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message,
+        sport: AppState.sport,
+        name: AppState.user?.name || 'Athlete',
+        history: AppState.chatHistory.slice(-10)
+      })
+    });
+    const data = await res.json();
+    typingDiv.remove();
+    const reply = data.reply || getAIResponse(message);
+    AppState.chatHistory.push({ role: 'assistant', content: reply });
+    addChatMessage(reply, 'ai');
+    saveToStorage();
+  } catch(e) {
+    typingDiv.remove();
+    // Fall back to local responses if server offline
+    const response = getAIResponse(message);
+    addChatMessage(response, 'ai');
+  }
+}
+
+// =====================================================
+// ── SHARE CARD (Canvas)
+// =====================================================
+function openShareCard() {
+  document.getElementById('shareCardModal').classList.remove('hidden');
+  setTimeout(drawShareCard, 100);
+}
+
+function drawShareCard() {
+  const canvas = document.getElementById('shareCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = 540, H = 300;
+  canvas.width = W; canvas.height = H;
+
+  // Sport accent colour
+  const SPORT_COLOURS = {
+    football: '#00e676', basketball: '#ff6d00', running: '#00b0ff',
+    tennis: '#ffd600', swimming: '#00e5ff', cycling: '#e040fb'
+  };
+  const accent = SPORT_COLOURS[AppState.sport] || '#00e676';
+
+  // Background
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#0d0d0d');
+  bg.addColorStop(1, '#1a1a1a');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Accent glow circle
+  const glow = ctx.createRadialGradient(W - 80, 60, 0, W - 80, 60, 160);
+  glow.addColorStop(0, accent + '33');
+  glow.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, W, H);
+
+  // Left accent bar
+  ctx.fillStyle = accent;
+  ctx.fillRect(0, 0, 5, H);
+
+  // Logo text
+  ctx.fillStyle = accent;
+  ctx.font = 'bold 18px Inter, sans-serif';
+  ctx.fillText('AthleteMind', 24, 36);
+
+  // Name
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 32px Inter, sans-serif';
+  ctx.fillText(AppState.user?.name || 'Athlete', 24, 90);
+
+  // Sport
+  ctx.fillStyle = accent;
+  ctx.font = '600 16px Inter, sans-serif';
+  const sportLabels = { football:'⚽ Football', basketball:'🏀 Basketball', running:'🏃 Running', tennis:'🎾 Tennis', swimming:'🏊 Swimming', cycling:'🚴 Cycling' };
+  ctx.fillText(sportLabels[AppState.sport] || AppState.sport, 24, 116);
+
+  // Streak stat
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 56px Inter, sans-serif';
+  ctx.fillText(`${AppState.streak}`, 24, 200);
+  ctx.fillStyle = '#888';
+  ctx.font = '14px Inter, sans-serif';
+  ctx.fillText('DAY STREAK 🔥', 24, 222);
+
+  // XP stat
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 56px Inter, sans-serif';
+  ctx.fillText(`${AppState.xp || 0}`, 200, 200);
+  ctx.fillStyle = '#888';
+  ctx.font = '14px Inter, sans-serif';
+  ctx.fillText('TOTAL XP ⚡', 200, 222);
+
+  // Sessions stat
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 56px Inter, sans-serif';
+  ctx.fillText(`${AppState.sessions || 0}`, 360, 200);
+  ctx.fillStyle = '#888';
+  ctx.font = '14px Inter, sans-serif';
+  ctx.fillText('SESSIONS 💪', 360, 222);
+
+  // Bottom tagline
+  ctx.fillStyle = '#555';
+  ctx.font = '13px Inter, sans-serif';
+  ctx.fillText('Join me on AthleteMind — your AI sports training hub', 24, 278);
+}
+
+function downloadShareCard() {
+  drawShareCard();
+  const canvas = document.getElementById('shareCanvas');
+  const link = document.createElement('a');
+  link.download = 'athletemind-progress.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+async function shareShareCard() {
+  drawShareCard();
+  const canvas = document.getElementById('shareCanvas');
+  canvas.toBlob(async blob => {
+    const file = new File([blob], 'athletemind-progress.png', { type: 'image/png' });
+    if (navigator.share && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'My AthleteMind Progress', text: `I'm on a ${AppState.streak}-day streak! Join me on AthleteMind 🔥` });
+    } else {
+      downloadShareCard();
+    }
+  });
+}
+
+// =====================================================
+// ── WEEKLY REPORT
+// =====================================================
+function openWeeklyReport() {
+  const modal = document.getElementById('weeklyReportModal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+
+  const now = new Date();
+  const dayOfWeek = now.getDay(); // 0=Sun
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - ((dayOfWeek + 6) % 7)); // Mon
+  startOfWeek.setHours(0, 0, 0, 0);
+
+  const weekStr = startOfWeek.toISOString().split('T')[0];
+
+  // Sessions this week
+  const weekEvents = (AppState.calendarEvents || []).filter(e => e.date >= weekStr);
+  const trainingSessions = weekEvents.filter(e => ['training', 'match', 'team', 'gym', 'drill', 'game', 'race', 'tournament'].includes(e.type));
+
+  // Calories this week
+  const allLogs = AppState.allFoodLogs || {};
+  let totalCals = 0, logDays = 0;
+  Object.entries(allLogs).forEach(([date, items]) => {
+    if (date >= weekStr) {
+      totalCals += items.reduce((s, f) => s + (f.calories || 0), 0);
+      logDays++;
+    }
+  });
+
+  // XP / streak
+  const xpThisWeek = (AppState.xp || 0); // approximate
+  const body = document.getElementById('weeklyReportBody');
+
+  const dateLabel = startOfWeek.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+  const endLabel  = new Date(startOfWeek.getTime() + 6*86400000).toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+
+  body.innerHTML = `
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:.82rem;color:var(--text-secondary)">Week of ${dateLabel} – ${endLabel}</div>
+      <div style="font-size:1.2rem;font-weight:700;margin-top:4px">Your Weekly Summary 📊</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+      <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center">
+        <div style="font-size:2rem;font-weight:800;color:var(--accent)">${trainingSessions.length}</div>
+        <div style="font-size:.78rem;color:var(--text-secondary);text-transform:uppercase">Sessions</div>
+      </div>
+      <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center">
+        <div style="font-size:2rem;font-weight:800;color:var(--accent)">🔥 ${AppState.streak}</div>
+        <div style="font-size:.78rem;color:var(--text-secondary);text-transform:uppercase">Current Streak</div>
+      </div>
+      <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center">
+        <div style="font-size:2rem;font-weight:800;color:var(--accent)">${Math.round(totalCals)}</div>
+        <div style="font-size:.78rem;color:var(--text-secondary);text-transform:uppercase">Calories Logged</div>
+      </div>
+      <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center">
+        <div style="font-size:2rem;font-weight:800;color:var(--accent)">⚡ ${AppState.xp || 0}</div>
+        <div style="font-size:.78rem;color:var(--text-secondary);text-transform:uppercase">Total XP</div>
+      </div>
+    </div>
+    ${trainingSessions.length === 0 ? '<p style="text-align:center;color:var(--text-secondary);font-size:.9rem">No training sessions logged this week. Get out there! 💪</p>' : ''}
+    <button class="btn-primary btn-full" onclick="openShareCard();closeModal('weeklyReportModal')">
+      <i class="fas fa-share-alt"></i> Share This Week's Stats
+    </button>
+  `;
+}
+
+// Auto-show weekly report every Monday
+function checkWeeklyReport() {
+  const today = new Date();
+  if (today.getDay() !== 1) return; // only Monday
+  const lastShown = localStorage.getItem('am_weekly_shown');
+  const todayStr = getTodayStr();
+  if (lastShown === todayStr) return;
+  localStorage.setItem('am_weekly_shown', todayStr);
+  setTimeout(() => openWeeklyReport(), 3000);
+}
+
+// =====================================================
+// ── REFERRAL CODE
+// =====================================================
+function getOrCreateReferralCode() {
+  let code = AppState.referralCode;
+  if (!code) {
+    const name = (AppState.user?.name || 'athlete').replace(/\s+/g, '').slice(0, 6).toUpperCase();
+    code = name + Math.random().toString(36).slice(2, 6).toUpperCase();
+    AppState.referralCode = code;
+    saveToStorage();
+  }
+  return code;
+}
+
+function renderReferralCode() {
+  const el = document.getElementById('referralCodeDisplay');
+  if (el) el.textContent = getOrCreateReferralCode();
+  const countEl = document.getElementById('referralCount');
+  if (countEl) countEl.textContent = AppState.referralCount || 0;
+}
+
+function copyReferralCode() {
+  const code = getOrCreateReferralCode();
+  const text = `Join me on AthleteMind — the AI sports training app! Use my code ${code} when you sign up: https://athletemind.app`;
+  navigator.clipboard.writeText(text).then(() => showToast('Invite link copied! 🎉'));
+}
+
+// Check if user came via referral
+function checkReferralOnLoad() {
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get('ref');
+  if (ref && !AppState.usedReferralCode) {
+    AppState.usedReferralCode = ref;
+    saveToStorage();
+    // Tell server about the referral
+    fetch('/api/referral', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ deviceId: getDeviceId(), referralCode: ref })
+    }).catch(() => {});
+    showToast(`Welcome! Referred by ${ref} 🎉`);
+  }
+}
+
+// =====================================================
+// ── PAYWALL / PREMIUM
+// =====================================================
+function openPaywall() {
+  document.getElementById('paywallModal').classList.remove('hidden');
+}
+
+function handleUpgrade() {
+  // Stripe integration point — for now show a coming soon message
+  showToast('Payment coming soon! Email us at hello@athletemind.app to get early access 🚀', 5000);
+  closeModal('paywallModal');
+}
+
+function isPremium() {
+  return AppState.isPremium === true;
+}
+
+// Lock premium features — show paywall instead
+function requirePremium(fn) {
+  if (isPremium()) { fn(); return; }
+  openPaywall();
+}
+
+// =====================================================
+// ── PUSH NOTIFICATIONS
+// =====================================================
+async function requestPushPermission() {
+  if (!('Notification' in window)) return;
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted') {
+    showToast('Push notifications enabled! 🔔');
+    AppState.pushEnabled = true;
+    saveToStorage();
+    scheduleDailyReminder();
+  }
+}
+
+function scheduleDailyReminder() {
+  // Use setTimeout to fire at next reminder time
+  if (!AppState.prefs?.reminderTime) return;
+  const [h, m] = (AppState.prefs.reminderTime || '07:00').split(':').map(Number);
+  const now = new Date();
+  const target = new Date();
+  target.setHours(h, m, 0, 0);
+  if (target <= now) target.setDate(target.getDate() + 1);
+  const ms = target - now;
+  setTimeout(() => {
+    if (Notification.permission === 'granted' && AppState.pushEnabled) {
+      new Notification('AthleteMind 🏆', {
+        body: `Time to train, ${AppState.user?.name || 'Athlete'}! Let's go! 💪`,
+        icon: 'https://via.placeholder.com/192x192/00e676/000000?text=AM'
+      });
+    }
+    scheduleDailyReminder(); // reschedule for tomorrow
+  }, ms);
+}
+
+// =====================================================
+// ── INIT all new features on load
+// =====================================================
+document.addEventListener('DOMContentLoaded', () => {
+  checkReferralOnLoad();
+  checkWeeklyReport();
+  // Render referral code when profile page is opened
+  const origNavTo = window.navTo;
+  if (origNavTo) {
+    const _nav = origNavTo;
+    window.navTo = function(page) {
+      _nav(page);
+      if (page === 'profile') setTimeout(renderReferralCode, 100);
+    };
+  }
+  if (AppState.pushEnabled) scheduleDailyReminder();
 });
 

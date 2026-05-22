@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Road to Pro — Admin</title>
+<title>AthleteMind — Admin</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -189,7 +189,7 @@
 <div id="loginScreen">
   <div class="login-box">
     <h1>🔐 Admin Panel</h1>
-    <p>Road to Pro — Internal Dashboard</p>
+    <p>AthleteMind — Internal Dashboard</p>
     <input type="password" id="pwdInput" placeholder="Enter admin password" autocomplete="off"/>
     <button class="btn-login" onclick="doLogin()">Access Dashboard</button>
     <div class="login-error" id="loginErr">Incorrect password</div>
@@ -199,7 +199,7 @@
 <!-- ── ADMIN PANEL ── -->
 <div id="adminPanel">
   <div class="admin-header">
-    <h1>Road to Pro <span>Admin</span><span class="badge-live">LIVE</span></h1>
+    <h1>AthleteMind <span>Admin</span><span class="badge-live">LIVE</span></h1>
     <button class="btn-logout" onclick="doLogout()">Log out</button>
   </div>
 
@@ -225,6 +225,7 @@
           <input type="text" id="searchInput" placeholder="Search by name or sport…" oninput="filterTable()"/>
           <div style="display:flex;align-items:center;gap:10px;">
             <span class="count-badge" id="userCount"></span>
+            <a id="exportBtn" class="btn-refresh" style="text-decoration:none">⬇ Export CSV</a>
             <button class="btn-refresh" onclick="loadAll()"><span class="spinner" id="refreshSpinner" style="display:none"></span>Refresh</button>
           </div>
         </div>
@@ -292,6 +293,8 @@ function doLogin() {
   loadAll().then(() => {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'block';
+    document.getElementById('exportBtn').href = `/api/admin/export?pw=${encodeURIComponent(ADMIN_PW)}`;
+    document.getElementById('exportBtn').download = 'athletemind-users.csv';
   }).catch(() => {
     document.getElementById('loginErr').style.display = 'block';
     ADMIN_PW = '';
