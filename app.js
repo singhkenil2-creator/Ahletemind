@@ -60,6 +60,12 @@ const AppState = {
   injuryCoachHistory: [],      // Coach Alex chat history
   mealPlan: null,              // last generated meal plan
   offlineQueue: [],            // pending syncs when offline
+  gdprAccepted: false,
+  whatsNewSeen: false,
+  ratePromptDone: false,
+  notifications: [],           // [{ id, text, icon, time, read }]
+  feedbackList: [],
+  selectedStars: 0,
 };
 
 // =====================================================
@@ -132,6 +138,11 @@ document.addEventListener('DOMContentLoaded', () => {
   renderWeeklyGoals();
   renderTeamPage();
   initInjurySafeMode();
+  initSplashScreen();
+  initGDPR();
+  initWhatsNew();
+  initRatePrompt();
+  initNotifications();
 
   // ── Feature 6: Render activity feed ──
   setTimeout(renderActivityFeed, 200);
@@ -224,6 +235,11 @@ function saveToStorage() {
     injurySafeMode: AppState.injurySafeMode,
     injuryCoachHistory: AppState.injuryCoachHistory,
     mealPlan: AppState.mealPlan,
+    gdprAccepted: AppState.gdprAccepted,
+    whatsNewSeen: AppState.whatsNewSeen,
+    ratePromptDone: AppState.ratePromptDone,
+    notifications: AppState.notifications,
+    feedbackList: AppState.feedbackList,
   };
   localStorage.setItem('athletemind_v2', JSON.stringify(data));
   syncToServer(data);
@@ -488,8 +504,8 @@ function toggleTheme() {
 function applyTheme(theme) {
   AppState.theme = theme;
   document.documentElement.setAttribute('data-theme', theme);
-  const icon = document.getElementById('themeIcon');
-  if (icon) icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+  const label = document.getElementById('themeLabel');
+  if (label) label.textContent = theme === 'dark' ? 'Dark' : 'Light';
   // Update PWA theme-color meta so the browser chrome matches
   updatePWAThemeColor();
 }
@@ -1954,18 +1970,57 @@ function showToast(msg, duration = 3500) {
   const toast = document.getElementById('toast');
   if (!toast) return;
   toast.innerHTML = msg;
-  // Remove both possible hidden states, then force reflow, then show
   toast.classList.remove('hidden');
   toast.classList.remove('toast-show');
-  // Force reflow so the transition fires from the start position
   void toast.offsetWidth;
   toast.classList.add('toast-show');
   clearTimeout(toastTimeout);
   toastTimeout = setTimeout(() => {
     toast.classList.remove('toast-show');
-    // After transition completes, add hidden again
     setTimeout(() => toast.classList.add('hidden'), 320);
   }, duration);
+}
+
+// Generic XP award helper
+function awardXP(amount, reason) {
+  AppState.xp = (AppState.xp || 0) + amount;
+  saveToStorage();
+  showToast(`+${amount} XP — ${reason}!`);
+  updateXPDisplay?.();
+}
+
+// Confetti celebration
+function launchConfetti() {
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99998';
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const pieces = Array.from({length: 120}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * -canvas.height,
+    r: Math.random() * 8 + 4,
+    c: `hsl(${Math.random()*360},90%,60%)`,
+    vx: (Math.random()-0.5)*4,
+    vy: Math.random()*4+2,
+    rot: Math.random()*360,
+    vrot: (Math.random()-0.5)*8,
+  }));
+  let frame = 0;
+  const anim = () => {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    pieces.forEach(p => {
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+      ctx.fillStyle = p.c; ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r);
+      ctx.restore();
+      p.x+=p.vx; p.y+=p.vy; p.rot+=p.vrot;
+    });
+    frame++;
+    if (frame < 180) requestAnimationFrame(anim);
+    else canvas.remove();
+  };
+  requestAnimationFrame(anim);
 }
 
 // =====================================================
@@ -3916,6 +3971,206 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // =====================================================
+// =====================================================
+// SPLASH SCREEN
+// =====================================================
+function initSplashScreen() {
+  const splash = document.getElementById('splashScreen');
+  if (!splash) return;
+  // Fill bar animation
+  const bar = document.getElementById('splashBarFill');
+  let w = 0;
+  const iv = setInterval(() => {
+    w += 4;
+    if (bar) bar.style.width = w + '%';
+    if (w >= 100) { clearInterval(iv); hideSplash(); }
+  }, 20);
+}
+function hideSplash() {
+  const splash = document.getElementById('splashScreen');
+  if (!splash) return;
+  splash.classList.add('splash-out');
+  setTimeout(() => splash.remove(), 600);
+}
+
+// =====================================================
+// GDPR CONSENT
+// =====================================================
+function initGDPR() {
+  if (AppState.gdprAccepted) return;
+  setTimeout(() => {
+    const el = document.getElementById('gdprBanner');
+    if (el) el.classList.remove('hidden');
+  }, 2200);
+}
+function acceptGdpr() {
+  AppState.gdprAccepted = true;
+  saveToStorage();
+  document.getElementById('gdprBanner')?.classList.add('hidden');
+  pushNotif('🔒 Privacy accepted', 'Your data stays on your device. Welcome!', 'fas fa-shield-alt');
+}
+function rejectGdpr() {
+  document.getElementById('gdprBanner')?.classList.add('hidden');
+  showToast('Some features may be limited without consent.');
+}
+function openPrivacyPolicy() {
+  openModal('privacyModal');
+}
+
+// =====================================================
+// WHAT'S NEW
+// =====================================================
+function initWhatsNew() {
+  if (AppState.whatsNewSeen) return;
+  // Only show after splash clears
+  setTimeout(() => {
+    openModal('whatsNewModal');
+  }, 2800);
+}
+function closeWhatsNew() {
+  AppState.whatsNewSeen = true;
+  saveToStorage();
+  closeModal('whatsNewModal');
+}
+
+// =====================================================
+// RATE THE APP
+// =====================================================
+function initRatePrompt() {
+  if (AppState.ratePromptDone) return;
+  // Show after 7 days of use (approximated by session count > 7)
+  const sessions = AppState.sessions || 0;
+  if (sessions >= 7) {
+    setTimeout(() => openModal('rateModal'), 3000);
+  }
+}
+function selectStar(n) {
+  AppState.selectedStars = n;
+  const stars = document.querySelectorAll('#rateStars span');
+  stars.forEach((s, i) => { s.style.opacity = i < n ? '1' : '0.3'; });
+  const msgs = ['', 'We\'ll do better! 💪', 'Thanks for your honesty 🙏', 'Good to hear! ⭐', 'Awesome! You\'re a star 🌟', 'Amazing! You\'re the GOAT 🐐'];
+  const msg = document.getElementById('rateMsg');
+  if (msg) msg.textContent = msgs[n] || '';
+}
+function submitRate() {
+  const n = AppState.selectedStars || 5;
+  AppState.ratePromptDone = true;
+  saveToStorage();
+  closeModal('rateModal');
+  showToast(`⭐ Thanks for your ${n}-star rating!`);
+  awardXP(25, 'App rated');
+  if (n >= 4) pushNotif('⭐ Thanks for rating!', 'Share the app with your teammates to help them too.', 'fas fa-star');
+}
+
+// =====================================================
+// NOTIFICATIONS
+// =====================================================
+function initNotifications() {
+  renderNotifBadge();
+  // Auto-notify on streak at risk
+  const s = AppState.streak || 0;
+  const last = AppState.lastStreakDate;
+  const today = getTodayStr();
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().split('T')[0];
+  if (s > 0 && last === yesterdayStr) {
+    pushNotif('🔥 Streak at risk!', `You have a ${s}-day streak — log a session today to keep it alive!`, 'fas fa-fire', false);
+  }
+  if ((AppState.xp || 0) >= 100 && !(AppState.earnedBadges || []).length) {
+    pushNotif('🏅 Badge unlocked!', 'Check Streak Hub to see your new achievement.', 'fas fa-award', false);
+  }
+}
+
+function pushNotif(title, body, icon = 'fas fa-bell', save = true) {
+  AppState.notifications = AppState.notifications || [];
+  const notif = { id: Date.now(), title, body, icon, time: new Date().toISOString(), read: false };
+  AppState.notifications.unshift(notif);
+  if (AppState.notifications.length > 30) AppState.notifications = AppState.notifications.slice(0, 30);
+  if (save) saveToStorage();
+  renderNotifBadge();
+}
+
+function renderNotifBadge() {
+  const unread = (AppState.notifications || []).filter(n => !n.read).length;
+  const badge = document.getElementById('notifBadge');
+  if (!badge) return;
+  if (unread > 0) {
+    badge.textContent = unread > 9 ? '9+' : unread;
+    badge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+  }
+}
+
+function toggleNotifDropdown() {
+  const dd = document.getElementById('notifDropdown');
+  if (!dd) return;
+  const isOpen = !dd.classList.contains('hidden');
+  if (isOpen) { dd.classList.add('hidden'); return; }
+  // Mark all read
+  (AppState.notifications || []).forEach(n => n.read = true);
+  saveToStorage();
+  renderNotifBadge();
+  renderNotifList();
+  dd.classList.remove('hidden');
+  // Close on outside click
+  setTimeout(() => {
+    const close = (e) => {
+      if (!dd.contains(e.target) && e.target.id !== 'notifBellBtn') {
+        dd.classList.add('hidden');
+        document.removeEventListener('click', close);
+      }
+    };
+    document.addEventListener('click', close);
+  }, 10);
+}
+
+function renderNotifList() {
+  const el = document.getElementById('notifList');
+  if (!el) return;
+  const notifs = AppState.notifications || [];
+  if (!notifs.length) {
+    el.innerHTML = '<p class="notif-empty">No notifications yet</p>';
+    return;
+  }
+  el.innerHTML = notifs.slice(0, 10).map(n => `
+    <div class="notif-item ${n.read ? '' : 'notif-unread'}">
+      <div class="notif-item-icon"><i class="${n.icon || 'fas fa-bell'}"></i></div>
+      <div class="notif-item-body">
+        <strong>${ovEsc(n.title)}</strong>
+        <p>${ovEsc(n.body)}</p>
+        <span class="notif-time">${ovTimeAgo(n.time)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function clearAllNotifs() {
+  AppState.notifications = [];
+  saveToStorage();
+  renderNotifList();
+  renderNotifBadge();
+}
+
+// =====================================================
+// FEEDBACK
+// =====================================================
+function submitFeedback() {
+  const type = document.getElementById('feedbackType').value;
+  const text = document.getElementById('feedbackText').value.trim();
+  if (!text) { showToast('Please write something first!'); return; }
+  AppState.feedbackList = AppState.feedbackList || [];
+  AppState.feedbackList.push({ type, text, time: new Date().toISOString() });
+  saveToStorage();
+  document.getElementById('feedbackText').value = '';
+  closeModal('feedbackModal');
+  showToast('💬 Thanks for your feedback!');
+  awardXP(5, 'Sent feedback');
+  // Also try to sync to server so you see it in admin
+  syncToServer({ type: 'feedback', deviceId: getDeviceId(), feedbackType: type, text, time: new Date().toISOString() });
+}
+
+// =====================================================
 // OFFLINE SYNC QUEUE
 // =====================================================
 function initOfflineSyncQueue() {
@@ -3998,6 +4253,14 @@ function renderWeeklyGoals() {
     </div>
     ${(sessP >= 100 && drillP >= 100) ? '<div class="goal-complete-banner">🏆 All goals crushed this week! +100 XP earned!</div>' : ''}
   `;
+  // Fire confetti + notif when all goals hit
+  if (sessP >= 100 && drillP >= 100 && !AppState._weeklyGoalCelebrated) {
+    AppState._weeklyGoalCelebrated = true;
+    AppState.xp = (AppState.xp || 0) + 100;
+    saveToStorage();
+    launchConfetti();
+    pushNotif('🏆 Weekly goals complete!', 'All goals crushed — +100 XP awarded!', 'fas fa-trophy');
+  }
 }
 
 function wgBar(label, current, target, pct) {

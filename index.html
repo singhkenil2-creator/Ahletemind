@@ -27,6 +27,138 @@
 </head>
 <body>
 
+  <!-- ===== SPLASH SCREEN ===== -->
+  <div id="splashScreen">
+    <div class="splash-inner">
+      <div class="splash-logo-wrap">
+        <div class="splash-bolt">⚡</div>
+        <div class="splash-ring"></div>
+      </div>
+      <h1 class="splash-title">AthleteMind</h1>
+      <p class="splash-sub">Your AI Sports Hub</p>
+      <div class="splash-bar"><div class="splash-bar-fill" id="splashBarFill"></div></div>
+    </div>
+  </div>
+
+  <!-- ===== GDPR / DATA CONSENT BANNER ===== -->
+  <div id="gdprBanner" class="gdpr-banner hidden">
+    <div class="gdpr-inner">
+      <span class="gdpr-icon">🔒</span>
+      <div class="gdpr-text">
+        <strong>Your data, your device.</strong> AthleteMind stores all your data locally on your device only. We never sell your data. By continuing you accept our
+        <button class="gdpr-link" onclick="openPrivacyPolicy()">Privacy Policy</button>.
+      </div>
+      <div class="gdpr-actions">
+        <button class="btn-ghost small" onclick="rejectGdpr()">Decline</button>
+        <button class="btn-primary small" onclick="acceptGdpr()">Accept &amp; Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== NOTIFICATION BELL DROPDOWN ===== -->
+  <div id="notifDropdown" class="notif-dropdown hidden">
+    <div class="notif-header">
+      <strong>Notifications</strong>
+      <button onclick="clearAllNotifs()" style="background:none;border:none;color:var(--text-secondary);font-size:.75rem;cursor:pointer">Clear all</button>
+    </div>
+    <div id="notifList"></div>
+  </div>
+
+  <!-- ===== WHAT'S NEW POPUP ===== -->
+  <div id="whatsNewModal" class="modal-overlay hidden">
+    <div class="modal-box whats-new-box">
+      <div class="whats-new-header">
+        <span class="whats-new-badge">✨ What's New</span>
+        <button class="close-btn" onclick="closeWhatsNew()"><i class="fas fa-times"></i></button>
+      </div>
+      <h2 class="whats-new-title">AthleteMind v3.0</h2>
+      <p class="whats-new-date">May 2026</p>
+      <ul class="whats-new-list">
+        <li><span class="wn-tag new">NEW</span> 🍽️ Meal Plan Generator — sport-specific daily meals</li>
+        <li><span class="wn-tag new">NEW</span> 👥 Team Mode — compare streaks with friends</li>
+        <li><span class="wn-tag new">NEW</span> 🎯 Weekly Goals — set targets, earn bonus XP</li>
+        <li><span class="wn-tag new">NEW</span> 👨‍⚕️ Coach Alex — injury recovery specialist</li>
+        <li><span class="wn-tag new">NEW</span> 🛡️ Injury-Safe Mode — recovery-focused plans</li>
+        <li><span class="wn-tag improved">IMPROVED</span> 🌙 Dark/Light mode toggle redesigned</li>
+        <li><span class="wn-tag improved">IMPROVED</span> 📴 Offline sync queue — never lose data</li>
+      </ul>
+      <button class="btn-primary btn-full" onclick="closeWhatsNew()">Let's Go! 🚀</button>
+    </div>
+  </div>
+
+  <!-- ===== PRIVACY POLICY MODAL ===== -->
+  <div id="privacyModal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width:560px">
+      <div class="modal-header">
+        <h3><i class="fas fa-shield-alt"></i> Privacy Policy</h3>
+        <button class="close-btn" onclick="closeModal('privacyModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="privacy-body">
+        <p><strong>Last updated:</strong> May 2026</p>
+        <h4>Data we collect</h4>
+        <p>AthleteMind stores all your data (name, training logs, nutrition, stats) <strong>locally on your device</strong> using localStorage. Nothing is uploaded to external servers unless you enable cloud sync.</p>
+        <h4>What we don't do</h4>
+        <ul>
+          <li>We do <strong>not</strong> sell your data to third parties</li>
+          <li>We do <strong>not</strong> use advertising trackers</li>
+          <li>We do <strong>not</strong> require account creation</li>
+        </ul>
+        <h4>Your rights (GDPR)</h4>
+        <p>You can delete all your data at any time via Profile → Clear All Data. This permanently removes everything from your device.</p>
+        <h4>Cookies</h4>
+        <p>We use localStorage (not cookies) to save your preferences and training data locally.</p>
+        <h4>Contact</h4>
+        <p>Questions? Use the feedback button in the app.</p>
+      </div>
+      <button class="btn-primary btn-full" onclick="closeModal('privacyModal')">Got it</button>
+    </div>
+  </div>
+
+  <!-- ===== RATE THE APP MODAL ===== -->
+  <div id="rateModal" class="modal-overlay hidden">
+    <div class="modal-box" style="text-align:center;max-width:380px">
+      <div style="font-size:3rem;margin-bottom:10px">⭐</div>
+      <h2 style="font-size:1.2rem;margin-bottom:8px">Enjoying AthleteMind?</h2>
+      <p style="color:var(--text-secondary);font-size:.88rem;margin-bottom:20px">You've been training for 7 days! Share the app with your teammates.</p>
+      <div class="rate-stars" id="rateStars">
+        <span onclick="selectStar(1)">⭐</span><span onclick="selectStar(2)">⭐</span>
+        <span onclick="selectStar(3)">⭐</span><span onclick="selectStar(4)">⭐</span><span onclick="selectStar(5)">⭐</span>
+      </div>
+      <p id="rateMsg" style="color:var(--accent);font-size:.85rem;min-height:20px;margin:8px 0 16px"></p>
+      <button class="btn-primary btn-full" onclick="submitRate()">Submit Rating</button>
+      <button class="btn-ghost btn-full" style="margin-top:8px" onclick="closeModal('rateModal')">Maybe later</button>
+    </div>
+  </div>
+
+  <!-- ===== FEEDBACK MODAL ===== -->
+  <div id="feedbackModal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width:420px">
+      <div class="modal-header">
+        <h3><i class="fas fa-comment-alt"></i> Send Feedback</h3>
+        <button class="close-btn" onclick="closeModal('feedbackModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="form-group">
+        <label>Type</label>
+        <select id="feedbackType">
+          <option value="feedback">💡 Feedback / Idea</option>
+          <option value="bug">🐛 Bug Report</option>
+          <option value="feature">🚀 Feature Request</option>
+          <option value="praise">❤️ Praise</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Message</label>
+        <textarea id="feedbackText" placeholder="Tell us what you think..." style="height:120px;resize:vertical"></textarea>
+      </div>
+      <button class="btn-primary btn-full" onclick="submitFeedback()"><i class="fas fa-paper-plane"></i> Send</button>
+    </div>
+  </div>
+
+  <!-- ===== FLOATING FEEDBACK BUTTON ===== -->
+  <button id="feedbackFab" class="feedback-fab" onclick="openModal('feedbackModal')" title="Send feedback">
+    <i class="fas fa-comment-alt"></i>
+  </button>
+
   <!-- Page transition bar -->
   <div id="pageLoader" class="page-loader hidden"></div>
 
@@ -275,9 +407,18 @@
       <button class="nav-btn" data-page="team"><i class="fas fa-users"></i><span>Team</span></button>
     </nav>
     <div class="header-right">
+      <button class="notif-bell-btn" onclick="toggleNotifDropdown()" title="Notifications" id="notifBellBtn">
+        <i class="fas fa-bell"></i>
+        <span class="notif-badge hidden" id="notifBadge"></span>
+      </button>
       <button class="sport-toggle-btn" onclick="openSportSwitch()"><i class="fas fa-exchange-alt"></i> <span id="currentSportLabel">Football</span></button>
-      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
-        <i class="fas fa-moon" id="themeIcon"></i>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark / light mode" id="themeToggleBtn">
+        <span class="theme-toggle-track">
+          <span class="theme-toggle-thumb"></span>
+          <i class="fas fa-moon theme-icon-dark"></i>
+          <i class="fas fa-sun theme-icon-light"></i>
+        </span>
+        <span class="theme-toggle-label" id="themeLabel">Dark</span>
       </button>
     </div>
   </header>
