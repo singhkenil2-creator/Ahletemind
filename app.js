@@ -286,7 +286,7 @@ const SPORT_EQUIPMENT = {
 
 function setupAgeGateDobMax() {
   const maxDate = new Date();
-  maxDate.setFullYear(maxDate.getFullYear() - 4);
+  maxDate.setFullYear(maxDate.getFullYear() - 13);
   document.getElementById('userDob').max = maxDate.toISOString().split('T')[0];
 }
 
@@ -302,7 +302,7 @@ function onboardNext(step) {
     let age = today.getFullYear() - dobDate.getFullYear();
     const m = today.getMonth() - dobDate.getMonth();
     if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) age--;
-    if (age < 4) { errEl.classList.remove('hidden'); return; }
+    if (age < 13) { errEl.classList.remove('hidden'); return; }
     errEl.classList.add('hidden');
   }
   if (step === 2) {

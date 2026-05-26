@@ -46,7 +46,8 @@
       <span class="gdpr-icon">🔒</span>
       <div class="gdpr-text">
         <strong>Your data, your device.</strong> AthleteMind stores all your data locally on your device only. We never sell your data. By continuing you accept our
-        <button class="gdpr-link" onclick="openPrivacyPolicy()">Privacy Policy</button>.
+        <button class="gdpr-link" onclick="openPrivacyPolicy()">Privacy Policy</button> and
+        <button class="gdpr-link" onclick="openModal('termsModal')">Terms &amp; Conditions</button>.
       </div>
       <div class="gdpr-actions">
         <button class="btn-ghost small" onclick="rejectGdpr()">Decline</button>
@@ -108,7 +109,7 @@
         <h4>Cookies</h4>
         <p>We use localStorage (not cookies) to save your preferences and training data locally.</p>
         <h4>Contact</h4>
-        <p>Questions? Use the feedback button in the app.</p>
+        <p>Questions? Email us at <strong>contact@athletemind.app</strong> or use the feedback button in the app. Data controller: <strong>Kenil Singh</strong>.</p>
       </div>
       <button class="btn-primary btn-full" onclick="closeModal('privacyModal')">Got it</button>
     </div>
@@ -204,10 +205,10 @@
           <input type="email" id="userEmail" placeholder="your@email.com" />
         </div>
         <div class="form-group">
-          <label>Date of Birth <span class="hint">(must be 4+ years old)</span></label>
+          <label>Date of Birth <span class="hint">(must be 13+ years old)</span></label>
           <input type="date" id="userDob" max="" />
         </div>
-        <div id="ageError" class="error-msg hidden">You must be at least 4 years old to use this app.</div>
+        <div id="ageError" class="error-msg hidden">You must be at least 13 years old to use this app. Please ask a parent or guardian to set up an account for you.</div>
         <button class="btn-primary btn-full" onclick="onboardNext(1)">
           Next <i class="fas fa-arrow-right"></i>
         </button>
@@ -1349,6 +1350,7 @@
               <div>
                 <strong style="font-size:.9rem">Coach Alex</strong>
                 <p style="font-size:.75rem;color:var(--text-secondary);margin:0">Injury & Recovery Specialist</p>
+                <p style="font-size:.65rem;color:var(--text-secondary);margin:2px 0 0;opacity:.75">⚡ AI-powered · Not a substitute for professional medical advice</p>
               </div>
               <span style="margin-left:auto;background:#00e67622;color:#00e676;font-size:.7rem;padding:3px 8px;border-radius:20px">● Online</span>
             </div>
@@ -1888,14 +1890,21 @@
           <a onclick="navTo('profile')">My Profile</a>
           <a onclick="toggleTheme()">Toggle Theme</a>
           <a onclick="openSportSwitch()">Switch Sport</a>
-          <a href="#" onclick="return false">Version 2.0.0</a>
+          <a href="#" onclick="return false">Version 3.0.0</a>
+        </div>
+        <div class="footer-col">
+          <span class="footer-col-title">Legal</span>
+          <a onclick="openModal('privacyModal')">Privacy Policy</a>
+          <a onclick="openModal('termsModal')">Terms &amp; Conditions</a>
+          <a onclick="openModal('medicalModal')">Medical Disclaimer</a>
+          <a onclick="openModal('feedbackModal')">Contact / Feedback</a>
         </div>
       </div>
       <div class="footer-bottom">
         <div class="footer-made">
           Made with <span class="footer-heart">❤️</span> for athletes worldwide &nbsp;·&nbsp;
-          <strong>AthleteMind</strong> &nbsp;·&nbsp; Built for the next generation of sports talent &nbsp;·&nbsp;
-          <span id="footerYear"></span>
+          <strong>AthleteMind</strong> &nbsp;·&nbsp; Built for the next generation of sports talent<br>
+          &copy; <span id="footerYear"></span> AthleteMind by <strong>Kenil Singh</strong>. All rights reserved.
         </div>
         <div class="footer-badges">
           <span class="footer-badge"><i class="fas fa-shield-alt"></i> Private — All data stays on your device</span>
@@ -1983,6 +1992,67 @@
         <div id="teamActivity" style="margin-top:8px"></div>
       </div>
     </section>
+
+  <!-- ===== TERMS & CONDITIONS MODAL ===== -->
+  <div id="termsModal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width:560px">
+      <div class="modal-header">
+        <h3><i class="fas fa-file-contract"></i> Terms &amp; Conditions</h3>
+        <button class="close-btn" onclick="closeModal('termsModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="privacy-body">
+        <p><strong>Last updated:</strong> May 2026 &nbsp;&nbsp; <strong>Version:</strong> 3.0</p>
+
+        <h4>1. Acceptance</h4>
+        <p>By using AthleteMind you agree to these Terms. If you do not agree, please do not use the app.</p>
+
+        <h4>2. Age Requirement</h4>
+        <p>You must be <strong>13 years or older</strong> to use AthleteMind. Users under 18 should have parental or guardian consent. We comply with COPPA (Children's Online Privacy Protection Act).</p>
+
+        <h4>3. Medical Disclaimer</h4>
+        <p>AthleteMind is a <strong>fitness tracking and coaching tool only</strong>. It is <strong>not medical advice</strong>. Always consult a qualified doctor, physiotherapist or sports medicine professional before starting any training programme, especially if you have an existing injury or health condition. Coach Alex responses are informational only and do not replace professional medical advice.</p>
+
+        <h4>4. No Warranties</h4>
+        <p>AthleteMind is provided "as is" without warranties of any kind. Training plans, nutrition advice and AI responses are generated automatically and may not be suitable for your individual circumstances.</p>
+
+        <h4>5. Limitation of Liability</h4>
+        <p>AthleteMind and its developers are not liable for any injury, illness, or loss arising from use of the app, including reliance on training plans, nutrition advice, or injury guidance.</p>
+
+        <h4>6. Intellectual Property</h4>
+        <p>All content, design and code in AthleteMind is owned by AthleteMind. You may not copy, redistribute or reverse-engineer any part of the app.</p>
+
+        <h4>7. Data</h4>
+        <p>See our Privacy Policy for full details. Your data is stored locally on your device.</p>
+
+        <h4>8. Changes</h4>
+        <p>We may update these Terms at any time. Continued use after changes means you accept the new Terms.</p>
+
+        <h4>9. Governing Law</h4>
+        <p>These Terms are governed by the laws of England and Wales.</p>
+      </div>
+      <button class="btn-primary btn-full" onclick="closeModal('termsModal')">I understand</button>
+    </div>
+  </div>
+
+  <!-- ===== MEDICAL DISCLAIMER MODAL ===== -->
+  <div id="medicalModal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width:480px;text-align:center">
+      <div style="font-size:2.5rem;margin-bottom:10px">⚠️</div>
+      <h2 style="font-size:1.1rem;margin-bottom:10px">Medical &amp; Fitness Disclaimer</h2>
+      <div class="privacy-body" style="text-align:left">
+        <p>AthleteMind provides <strong>general fitness and sports coaching information only</strong>.</p>
+        <ul>
+          <li>Training plans are <strong>not personalised medical programmes</strong></li>
+          <li>Nutrition advice is <strong>not a substitute for a registered dietitian</strong></li>
+          <li>Injury guidance from Coach Alex is <strong>informational only</strong> — always see a physiotherapist or doctor for injuries</li>
+          <li>Stop any exercise immediately if you feel pain, dizziness or discomfort</li>
+          <li>Consult your GP before starting a new training programme if you have any health conditions</li>
+        </ul>
+        <p>By using AthleteMind you acknowledge these limitations and agree to our <button class="gdpr-link" onclick="closeModal('medicalModal');openModal('termsModal')">Terms &amp; Conditions</button>.</p>
+      </div>
+      <button class="btn-primary btn-full" onclick="closeMedicalDisclaimer()">I understand &amp; agree</button>
+    </div>
+  </div>
 
   <div id="adminOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:#0d0d0d;overflow-y:auto">
     <!-- Password gate -->
