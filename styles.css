@@ -2766,3 +2766,46 @@ select:focus:not(:focus-visible) { outline: none; box-shadow: none; }
 /* ── Share Card ── */
 #shareCanvas { border: 1px solid var(--border); background: #111; }
 
+/* ====================================================
+   NEW FEATURES CSS
+   ==================================================== */
+
+/* Weekly Goals */
+.weekly-goals-grid { display: flex; flex-direction: column; gap: 12px; }
+.wg-item { padding: 10px 0; }
+.wg-item.wg-done .wg-label { color: var(--accent); }
+.wg-label { display: flex; justify-content: space-between; font-size: .85rem; margin-bottom: 6px; font-weight: 600; }
+.wg-bar-bg { background: var(--border); border-radius: 99px; height: 8px; overflow: hidden; }
+.wg-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #00bcd4); border-radius: 99px; transition: width .5s ease; }
+.wg-done .wg-bar-fill { background: var(--accent); }
+.goal-complete-banner { margin-top: 14px; background: linear-gradient(135deg, #00e67622, #00bcd422); border: 1px solid var(--accent); border-radius: 10px; padding: 12px 16px; text-align: center; font-weight: 700; color: var(--accent); font-size: .9rem; }
+.weekly-goals-setup { padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+
+/* Team Mode */
+.team-lb-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: .85rem; }
+.team-lb-row:last-child { border-bottom: none; }
+.team-lb-me { background: var(--accent)11; border-radius: 8px; padding: 8px 10px; margin: 0 -10px; }
+.team-lb-rank { font-size: 1.1rem; width: 28px; text-align: center; flex-shrink: 0; }
+.team-lb-name { flex: 1; font-weight: 600; }
+.team-lb-sport { font-size: 1.1rem; }
+.team-lb-streak { color: #ff7043; font-size: .8rem; }
+.team-lb-xp { color: var(--accent); font-weight: 700; font-size: .85rem; }
+.team-activity-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+.team-activity-row:last-child { border-bottom: none; }
+.team-act-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #00bcd4); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: .9rem; color: #000; flex-shrink: 0; }
+.team-act-info { font-size: .83rem; line-height: 1.4; }
+.team-act-info strong { font-weight: 700; }
+.team-act-time { display: block; color: var(--text-secondary); font-size: .75rem; }
+
+/* Toggle Switch */
+.toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: var(--border); border-radius: 24px; transition: .3s; }
+.toggle-slider:before { position: absolute; content: ''; height: 18px; width: 18px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: .3s; }
+input:checked + .toggle-slider { background: var(--accent); }
+input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+/* Meal plan output */
+#mealPlanOutput .btn-ghost { margin-top: 8px; }
+
+

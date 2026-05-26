@@ -272,6 +272,7 @@
       <button class="nav-btn" data-page="gear"><i class="fas fa-bag-shopping"></i><span>Gear</span></button>
       <button class="nav-btn" data-page="profile"><i class="fas fa-user-circle"></i><span>Profile</span></button>
       <button class="nav-btn" data-page="ai"><i class="fas fa-comment-dots"></i><span>Coach</span></button>
+      <button class="nav-btn" data-page="team"><i class="fas fa-users"></i><span>Team</span></button>
     </nav>
     <div class="header-right">
       <button class="sport-toggle-btn" onclick="openSportSwitch()"><i class="fas fa-exchange-alt"></i> <span id="currentSportLabel">Football</span></button>
@@ -767,6 +768,37 @@
         </div>
       </div>
 
+      <!-- Meal Plan Generator -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-utensils"></i> 🍽️ Meal Plan Generator</div>
+        <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:14px">Get a personalised daily meal plan based on your sport, goals and calorie target.</p>
+        <div class="form-row">
+          <div class="form-group"><label>Goal</label>
+            <select id="mealGoal">
+              <option value="performance">Peak Performance</option>
+              <option value="bulk">Build Muscle</option>
+              <option value="cut">Lose Fat</option>
+              <option value="maintain">Maintain Weight</option>
+              <option value="recovery">Injury Recovery</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Calorie Target</label>
+            <input type="number" id="mealCalTarget" placeholder="2500" value="2500" />
+          </div>
+          <div class="form-group"><label>Diet Preference</label>
+            <select id="mealDiet">
+              <option value="standard">Standard</option>
+              <option value="vegetarian">Vegetarian</option>
+              <option value="vegan">Vegan</option>
+              <option value="high-protein">High Protein</option>
+              <option value="keto">Keto</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="generateMealPlan()"><i class="fas fa-magic"></i> Generate My Plan</button>
+        <div id="mealPlanOutput" style="margin-top:16px"></div>
+      </div>
+
       <!-- Nutrition Advice -->
       <div class="card ai-nutrition-card">
         <div class="card-header"><i class="fas fa-lightbulb"></i> Nutrition Advice</div>
@@ -1018,6 +1050,21 @@
         <button class="btn-ghost" onclick="refreshChallenges()" style="margin-top:10px"><i class="fas fa-sync-alt"></i> Refresh Challenges</button>
       </div>
 
+      <!-- Weekly Goals -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-bullseye"></i> Weekly Goals</div>
+        <p style="color:var(--text-secondary);font-size:0.83rem;margin-bottom:14px">Set weekly targets — tick them off to earn bonus XP 🎯</p>
+        <div class="weekly-goals-setup" id="weeklyGoalsSetup">
+          <div class="form-row">
+            <div class="form-group"><label>Sessions / week</label><input type="number" id="wgSessions" min="1" max="14" placeholder="5" /></div>
+            <div class="form-group"><label>Drills / week</label><input type="number" id="wgDrills" min="0" max="20" placeholder="3" /></div>
+            <div class="form-group"><label>Calorie goal / day</label><input type="number" id="wgCalories" min="500" max="6000" placeholder="2500" /></div>
+          </div>
+          <button class="btn-primary" onclick="saveWeeklyGoals()"><i class="fas fa-save"></i> Set Goals</button>
+        </div>
+        <div id="weeklyGoalsProgress" style="margin-top:14px"></div>
+      </div>
+
       <!-- Leaderboard -->
       <div class="card">
         <div class="card-header"><i class="fas fa-ranking-star"></i> Leaderboard</div>
@@ -1142,6 +1189,41 @@
         <div class="form-group"><label>Notes / Treatment</label><textarea id="injuryNotes" placeholder="Describe the injury and any treatment..."></textarea></div>
         <button class="btn-primary" onclick="logInjury()"><i class="fas fa-plus"></i> Log Injury</button>
         <div id="injuryLog" class="injury-log-list" style="margin-top:14px"></div>
+      </div>
+
+      <!-- Injury Safe Mode + Coach Alex -->
+      <div class="card" id="injuryCoachCard">
+        <div class="card-header" style="justify-content:space-between">
+          <span><i class="fas fa-shield-heart"></i> Injury-Safe Mode</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="injurySafeToggle" onchange="toggleInjurySafeMode(this.checked)" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <p style="color:var(--text-secondary);font-size:0.83rem;margin-bottom:10px" id="injurySafeDesc">Enable injury-safe mode to swap intense workouts with recovery-focused training.</p>
+        <div id="injuryCoachChat" style="display:none">
+          <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+              <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#00e676,#00bcd4);display:flex;align-items:center;justify-content:center;font-size:1.2rem">👨‍⚕️</div>
+              <div>
+                <strong style="font-size:.9rem">Coach Alex</strong>
+                <p style="font-size:.75rem;color:var(--text-secondary);margin:0">Injury & Recovery Specialist</p>
+              </div>
+              <span style="margin-left:auto;background:#00e67622;color:#00e676;font-size:.7rem;padding:3px 8px;border-radius:20px">● Online</span>
+            </div>
+            <div id="injuryCoachMessages" class="chat-messages" style="max-height:280px;min-height:120px"></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <input type="text" id="injuryCoachInput" placeholder="Ask Coach Alex about your recovery..." style="flex:1;padding:10px 14px;background:var(--input-bg);border:1px solid var(--border);border-radius:9px;color:var(--text-primary);outline:none" onkeydown="if(event.key==='Enter')sendInjuryCoachMsg()" />
+            <button class="btn-primary" onclick="sendInjuryCoachMsg()"><i class="fas fa-paper-plane"></i></button>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+            <button class="quick-prompt-btn" onclick="injuryQuickPrompt(this)">🦵 Knee pain tips</button>
+            <button class="quick-prompt-btn" onclick="injuryQuickPrompt(this)">🔥 Reduce swelling</button>
+            <button class="quick-prompt-btn" onclick="injuryQuickPrompt(this)">⏱️ Return to training</button>
+            <button class="quick-prompt-btn" onclick="injuryQuickPrompt(this)">💊 Should I rest?</button>
+          </div>
+        </div>
       </div>
 
       <!-- Stretching Routines -->
@@ -1721,6 +1803,46 @@
   </div>
 
   <!-- ========== ADMIN OVERLAY (secret access) ========== -->
+    <!-- ===== TEAM PAGE ===== -->
+    <section id="page-team" class="page">
+      <div class="page-header">
+        <h2><i class="fas fa-users"></i> Team Mode</h2>
+        <p>Add friends, compare streaks & compete on your private leaderboard</p>
+      </div>
+
+      <!-- My Team Code -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-id-badge"></i> My Athlete ID</div>
+        <p style="color:var(--text-secondary);font-size:.85rem;margin-bottom:12px">Share your Athlete ID with friends so they can add you to their team.</p>
+        <div class="referral-box">
+          <span class="referral-code" id="myAthleteId">Loading...</span>
+          <button class="btn-ghost small" onclick="copyAthleteId()"><i class="fas fa-copy"></i> Copy</button>
+        </div>
+      </div>
+
+      <!-- Add Friend -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-user-plus"></i> Add a Friend</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <input type="text" id="friendIdInput" placeholder="Enter their Athlete ID" style="flex:1;padding:10px 14px;background:var(--input-bg);border:1px solid var(--border);border-radius:9px;color:var(--text-primary);outline:none" />
+          <button class="btn-primary" onclick="addTeamFriend()"><i class="fas fa-plus"></i> Add</button>
+        </div>
+        <p style="font-size:.78rem;color:var(--text-secondary)" id="addFriendMsg"></p>
+      </div>
+
+      <!-- Team Leaderboard -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-trophy"></i> Team Leaderboard</div>
+        <div id="teamLeaderboard" style="margin-top:8px"></div>
+      </div>
+
+      <!-- Team Activity -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-bell"></i> Team Activity</div>
+        <div id="teamActivity" style="margin-top:8px"></div>
+      </div>
+    </section>
+
   <div id="adminOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:#0d0d0d;overflow-y:auto">
     <!-- Password gate -->
     <div id="adminGate" style="display:flex;align-items:center;justify-content:center;height:100vh">

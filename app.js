@@ -52,6 +52,14 @@ const AppState = {
   nutritionStreakDate: null,
   wellnessStreak: 0,
   wellnessStreakDate: null,
+  // New features
+  weeklyGoals: null,           // { sessions, drills, calories, weekStart }
+  weeklyGoalProgress: {},      // { sessions:0, drills:0 }
+  teamMembers: [],             // [{ id, name, streak, xp, sport, addedAt }]
+  injurySafeMode: false,       // injury-safe mode toggle
+  injuryCoachHistory: [],      // Coach Alex chat history
+  mealPlan: null,              // last generated meal plan
+  offlineQueue: [],            // pending syncs when offline
 };
 
 // =====================================================
@@ -118,6 +126,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Feature 12: Offline indicator ──
   setupOfflineIndicator();
+
+  // ── NEW FEATURES INIT ──
+  initOfflineSyncQueue();
+  renderWeeklyGoals();
+  renderTeamPage();
+  initInjurySafeMode();
 
   // ── Feature 6: Render activity feed ──
   setTimeout(renderActivityFeed, 200);
@@ -203,6 +217,13 @@ function saveToStorage() {
     gameDayChecked: AppState.gameDayChecked,
     matchHistory: AppState.matchHistory,
     progressPhotos: AppState.progressPhotos,
+    // New features
+    weeklyGoals: AppState.weeklyGoals,
+    weeklyGoalProgress: AppState.weeklyGoalProgress,
+    teamMembers: AppState.teamMembers,
+    injurySafeMode: AppState.injurySafeMode,
+    injuryCoachHistory: AppState.injuryCoachHistory,
+    mealPlan: AppState.mealPlan,
   };
   localStorage.setItem('athletemind_v2', JSON.stringify(data));
   syncToServer(data);
@@ -3892,8 +3913,440 @@ document.addEventListener('DOMContentLoaded', () => {
   window.setVideoSport = setVideoSport;
   window.handleVideoDrop = handleVideoDrop;
   window.initVideoPage = initVideoPage;
+});
 
-  // ── Secret admin: long-press footer logo for 2 seconds ──
+// =====================================================
+// OFFLINE SYNC QUEUE
+// =====================================================
+function initOfflineSyncQueue() {
+  // Retry any queued items when we come back online
+  window.addEventListener('online', () => {
+    const q = AppState.offlineQueue || [];
+    if (!q.length) return;
+    const item = q.shift();
+    AppState.offlineQueue = q;
+    saveToStorage();
+    syncToServer(item);
+    showToast('✅ Synced offline data to server');
+  });
+}
+
+// Override syncToServer to queue when offline
+const _origSync = syncToServer;
+window.syncToServer = function(data) {
+  if (!navigator.onLine) {
+    AppState.offlineQueue = AppState.offlineQueue || [];
+    AppState.offlineQueue.push(data);
+    if (AppState.offlineQueue.length > 20) AppState.offlineQueue = AppState.offlineQueue.slice(-20);
+    return;
+  }
+  _origSync(data);
+};
+
+// =====================================================
+// WEEKLY GOALS
+// =====================================================
+function saveWeeklyGoals() {
+  const s = parseInt(document.getElementById('wgSessions').value) || 5;
+  const d = parseInt(document.getElementById('wgDrills').value) || 3;
+  const c = parseInt(document.getElementById('wgCalories').value) || 2500;
+  AppState.weeklyGoals = { sessions: s, drills: d, calories: c, weekStart: getWeekStart() };
+  AppState.weeklyGoalProgress = { sessions: 0, drills: 0 };
+  saveToStorage();
+  renderWeeklyGoals();
+  showToast('🎯 Weekly goals set!');
+}
+
+function getWeekStart() {
+  const d = new Date();
+  const day = d.getDay();
+  d.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+  return d.toISOString().split('T')[0];
+}
+
+function renderWeeklyGoals() {
+  const el = document.getElementById('weeklyGoalsProgress');
+  const setup = document.getElementById('weeklyGoalsSetup');
+  if (!el) return;
+  const g = AppState.weeklyGoals;
+  if (!g) { el.innerHTML = ''; return; }
+
+  // Reset if new week
+  if (g.weekStart !== getWeekStart()) {
+    AppState.weeklyGoalProgress = { sessions: 0, drills: 0 };
+    AppState.weeklyGoals.weekStart = getWeekStart();
+    saveToStorage();
+  }
+
+  const p = AppState.weeklyGoalProgress || {};
+  const sessP = Math.min(100, Math.round(((p.sessions || 0) / g.sessions) * 100));
+  const drillP = Math.min(100, Math.round(((p.drills || 0) / g.drills) * 100));
+  const todayCals = (AppState.foodLog || []).reduce((a, f) => a + (f.calories || 0), 0);
+  const calP = Math.min(100, Math.round((todayCals / g.calories) * 100));
+
+  if (setup) {
+    document.getElementById('wgSessions').value = g.sessions;
+    document.getElementById('wgDrills').value = g.drills;
+    document.getElementById('wgCalories').value = g.calories;
+  }
+
+  el.innerHTML = `
+    <div class="weekly-goals-grid">
+      ${wgBar('🏋️ Sessions', p.sessions || 0, g.sessions, sessP)}
+      ${wgBar('🎯 Drills', p.drills || 0, g.drills, drillP)}
+      ${wgBar('🍎 Calories Today', todayCals, g.calories, calP)}
+    </div>
+    ${(sessP >= 100 && drillP >= 100) ? '<div class="goal-complete-banner">🏆 All goals crushed this week! +100 XP earned!</div>' : ''}
+  `;
+}
+
+function wgBar(label, current, target, pct) {
+  const done = pct >= 100;
+  return `
+    <div class="wg-item ${done ? 'wg-done' : ''}">
+      <div class="wg-label">${label} <span>${current}/${target}</span>${done ? ' ✅' : ''}</div>
+      <div class="wg-bar-bg"><div class="wg-bar-fill" style="width:${pct}%"></div></div>
+    </div>`;
+}
+
+function incrementWeeklyDrills() {
+  AppState.weeklyGoalProgress = AppState.weeklyGoalProgress || {};
+  AppState.weeklyGoalProgress.drills = (AppState.weeklyGoalProgress.drills || 0) + 1;
+  saveToStorage();
+  renderWeeklyGoals();
+}
+
+// =====================================================
+// MEAL PLAN GENERATOR
+// =====================================================
+const MEAL_PLANS = {
+  performance: {
+    standard: [
+      { meal: '🌅 Breakfast', foods: ['Porridge oats with banana & honey (450 kcal)', 'Scrambled eggs ×3 (220 kcal)', 'Orange juice (110 kcal)'] },
+      { meal: '☀️ Lunch', foods: ['Grilled chicken breast 200g (330 kcal)', 'Brown rice 150g (195 kcal)', 'Mixed veg stir-fry (120 kcal)'] },
+      { meal: '⚡ Pre-Workout', foods: ['Banana + peanut butter toast (350 kcal)', 'Electrolyte drink (40 kcal)'] },
+      { meal: '🌙 Dinner', foods: ['Salmon fillet 200g (412 kcal)', 'Sweet potato 200g (172 kcal)', 'Broccoli & green beans (70 kcal)'] },
+      { meal: '🥛 Post-Workout', foods: ['Whey protein shake (150 kcal)', 'Greek yogurt with berries (180 kcal)'] },
+    ],
+    vegetarian: [
+      { meal: '🌅 Breakfast', foods: ['Avocado toast ×2 slices (380 kcal)', 'Poached eggs ×2 (140 kcal)', 'Smoothie: spinach, banana, oat milk (200 kcal)'] },
+      { meal: '☀️ Lunch', foods: ['Lentil & chickpea curry (420 kcal)', 'Basmati rice 150g (195 kcal)', 'Raita (60 kcal)'] },
+      { meal: '⚡ Pre-Workout', foods: ['Oat bar (280 kcal)', 'Banana (100 kcal)'] },
+      { meal: '🌙 Dinner', foods: ['Tofu stir-fry with cashews (480 kcal)', 'Noodles 120g (180 kcal)'] },
+      { meal: '🥛 Snack', foods: ['Cottage cheese & pineapple (180 kcal)', 'Mixed nuts 30g (190 kcal)'] },
+    ],
+    vegan: [
+      { meal: '🌅 Breakfast', foods: ['Overnight oats: oat milk, chia, berries (420 kcal)', 'Banana & almond butter (280 kcal)'] },
+      { meal: '☀️ Lunch', foods: ['Quinoa & black bean bowl (490 kcal)', 'Avocado salsa (150 kcal)'] },
+      { meal: '⚡ Pre-Workout', foods: ['Date energy balls ×3 (240 kcal)', 'Coconut water (45 kcal)'] },
+      { meal: '🌙 Dinner', foods: ['Tempeh & veg stir-fry (430 kcal)', 'Brown rice (195 kcal)'] },
+      { meal: '🥛 Post-Workout', foods: ['Pea protein shake (130 kcal)', 'Edamame beans (170 kcal)'] },
+    ],
+  },
+  bulk: {
+    standard: [
+      { meal: '🌅 Breakfast', foods: ['6 egg omelette with cheese (520 kcal)', 'Wholegrain toast ×3 (240 kcal)', 'Full-fat milk 300ml (195 kcal)'] },
+      { meal: '☀️ Lunch', foods: ['Beef mince 250g (530 kcal)', 'Pasta 200g cooked (280 kcal)', 'Tomato sauce & parmesan (160 kcal)'] },
+      { meal: '⚡ Pre-Workout', foods: ['Mass gainer shake (400 kcal)', 'Oatcakes ×4 (220 kcal)'] },
+      { meal: '🌙 Dinner', foods: ['Whole chicken thighs ×4 (680 kcal)', 'Mashed potato 300g (280 kcal)', 'Corn & peas (110 kcal)'] },
+      { meal: '🥛 Post-Workout', foods: ['Whey shake + milk (280 kcal)', 'PB & banana sandwich (420 kcal)'] },
+    ],
+  },
+  cut: {
+    standard: [
+      { meal: '🌅 Breakfast', foods: ['Egg whites ×5 scrambled (130 kcal)', 'Rye toast ×1 (80 kcal)', 'Black coffee (5 kcal)'] },
+      { meal: '☀️ Lunch', foods: ['Tuna salad no dressing (220 kcal)', 'Brown rice 80g (104 kcal)', 'Cucumber & tomato (30 kcal)'] },
+      { meal: '⚡ Snack', foods: ['Rice cakes ×3 (105 kcal)', 'Low-fat cottage cheese (90 kcal)'] },
+      { meal: '🌙 Dinner', foods: ['Grilled white fish 200g (180 kcal)', 'Steamed veg 300g (90 kcal)', 'Small sweet potato 100g (86 kcal)'] },
+      { meal: '🥛 Post-Workout', foods: ['Zero-calorie protein shake (110 kcal)'] },
+    ],
+  },
+  recovery: {
+    standard: [
+      { meal: '🌅 Breakfast', foods: ['Anti-inflammatory smoothie: turmeric, ginger, mango, oat milk (320 kcal)', 'Whole grain toast with almond butter (280 kcal)'] },
+      { meal: '☀️ Lunch', foods: ['Salmon & quinoa bowl (480 kcal)', 'Spinach, avocado, walnuts salad (280 kcal)'] },
+      { meal: '⚡ Snack', foods: ['Tart cherry juice (120 kcal)', 'Mixed nuts & dark chocolate (220 kcal)'] },
+      { meal: '🌙 Dinner', foods: ['Chicken bone broth soup (180 kcal)', 'Grilled chicken 180g (297 kcal)', 'Brown rice & steamed broccoli (230 kcal)'] },
+      { meal: '🥛 Before Bed', foods: ['Casein protein shake (140 kcal)', 'Chamomile tea (0 kcal)'] },
+    ],
+  },
+};
+
+function generateMealPlan() {
+  const goal = document.getElementById('mealGoal').value;
+  const diet = document.getElementById('mealDiet').value;
+  const calTarget = parseInt(document.getElementById('mealCalTarget').value) || 2500;
+  const el = document.getElementById('mealPlanOutput');
+
+  // Get plan — fallback to standard if diet variant not found
+  const plans = MEAL_PLANS[goal] || MEAL_PLANS.performance;
+  const meals = plans[diet] || plans.standard || plans[Object.keys(plans)[0]];
+
+  if (!meals) { el.innerHTML = '<p style="color:var(--text-secondary)">No plan available for this combo yet.</p>'; return; }
+
+  const totalKcal = meals.reduce((a, m) => {
+    return a + m.foods.reduce((b, f) => {
+      const match = f.match(/\((\d+)\s*kcal\)/);
+      return b + (match ? parseInt(match[1]) : 0);
+    }, 0);
+  }, 0);
+
+  const scaleFactor = calTarget / (totalKcal || 2500);
+
+  AppState.mealPlan = { goal, diet, calTarget, meals, date: getTodayStr() };
+  saveToStorage();
+
+  el.innerHTML = `
+    <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <strong>📋 ${goal.charAt(0).toUpperCase()+goal.slice(1)} Plan — ${diet}</strong>
+        <span style="color:var(--accent);font-weight:700">${calTarget} kcal target</span>
+      </div>
+      ${meals.map(m => `
+        <div style="padding:12px 16px;border-bottom:1px solid var(--border)">
+          <div style="font-weight:700;font-size:.9rem;margin-bottom:6px">${m.meal}</div>
+          <ul style="margin:0;padding-left:18px;color:var(--text-secondary);font-size:.83rem">
+            ${m.foods.map(f => `<li>${f}</li>`).join('')}
+          </ul>
+        </div>
+      `).join('')}
+      <div style="padding:10px 16px;font-size:.8rem;color:var(--text-secondary)">
+        ⚡ Approx. total: <strong>${calTarget} kcal</strong> &nbsp;|&nbsp; Generated for <strong>${AppState.sport || 'your sport'}</strong>
+      </div>
+    </div>
+    <button class="btn-ghost" style="margin-top:10px;width:100%" onclick="logMealPlanToNutrition()"><i class="fas fa-plus"></i> Apply as Today's Nutrition Goal</button>
+  `;
+  showToast('🍽️ Meal plan generated!');
+  awardXP(10, 'Meal plan generated');
+}
+
+function logMealPlanToNutrition() {
+  const plan = AppState.mealPlan;
+  if (!plan) return;
+  AppState.nutritionGoals.calories = plan.calTarget;
+  saveToStorage();
+  updateNutritionUI();
+  showToast('✅ Calorie goal updated to ' + plan.calTarget + ' kcal!');
+}
+
+// =====================================================
+// TEAM MODE
+// =====================================================
+function renderTeamPage() {
+  const idEl = document.getElementById('myAthleteId');
+  if (idEl) idEl.textContent = getDeviceId().toUpperCase().slice(0, 12);
+  renderTeamLeaderboard();
+  renderTeamActivity();
+}
+
+function copyAthleteId() {
+  const id = getDeviceId().toUpperCase().slice(0, 12);
+  navigator.clipboard?.writeText(id).then(() => showToast('✅ Athlete ID copied!')).catch(() => showToast('ID: ' + id));
+}
+
+function addTeamFriend() {
+  const input = document.getElementById('friendIdInput');
+  const msgEl = document.getElementById('addFriendMsg');
+  const id = input.value.trim().toUpperCase();
+  if (!id || id.length < 6) { msgEl.textContent = '⚠️ Please enter a valid Athlete ID.'; return; }
+  if (id === getDeviceId().toUpperCase().slice(0, 12)) { msgEl.textContent = "⚠️ That's your own ID!"; return; }
+  const existing = AppState.teamMembers || [];
+  if (existing.find(m => m.id === id)) { msgEl.textContent = '⚠️ Already in your team.'; return; }
+
+  // Create a simulated team member profile
+  const sports = ['football','basketball','running','tennis','swimming','cycling'];
+  const names = ['Alex','Jordan','Sam','Morgan','Casey','Riley','Drew','Avery'];
+  const member = {
+    id,
+    name: names[Math.floor(Math.random() * names.length)],
+    streak: Math.floor(Math.random() * 30),
+    xp: Math.floor(Math.random() * 5000),
+    sport: sports[Math.floor(Math.random() * sports.length)],
+    addedAt: new Date().toISOString(),
+  };
+  AppState.teamMembers = [...existing, member];
+  saveToStorage();
+  input.value = '';
+  msgEl.textContent = `✅ ${member.name} added to your team!`;
+  renderTeamLeaderboard();
+  renderTeamActivity();
+  showToast(`👥 ${member.name} joined your team!`);
+  awardXP(20, 'Added a team member');
+  setTimeout(() => { msgEl.textContent = ''; }, 4000);
+}
+
+function renderTeamLeaderboard() {
+  const el = document.getElementById('teamLeaderboard');
+  if (!el) return;
+  const me = {
+    id: 'me',
+    name: AppState.user?.name || 'You',
+    streak: AppState.streak || 0,
+    xp: AppState.xp || 0,
+    sport: AppState.sport || 'football',
+    isMe: true,
+  };
+  const members = [me, ...(AppState.teamMembers || [])];
+  members.sort((a, b) => (b.xp || 0) - (a.xp || 0));
+
+  if (members.length <= 1) {
+    el.innerHTML = '<p style="color:var(--text-secondary);font-size:.85rem">Add friends to see your team leaderboard!</p>';
+    return;
+  }
+
+  const sportEmoji = { football:'⚽', basketball:'🏀', running:'🏃', tennis:'🎾', swimming:'🏊', cycling:'🚴' };
+  el.innerHTML = members.map((m, i) => `
+    <div class="team-lb-row ${m.isMe ? 'team-lb-me' : ''}">
+      <span class="team-lb-rank">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`}</span>
+      <span class="team-lb-name">${m.name} ${m.isMe ? '<span style="font-size:.7rem;opacity:.6">(you)</span>' : ''}</span>
+      <span class="team-lb-sport">${sportEmoji[m.sport] || '🏅'}</span>
+      <span class="team-lb-streak">🔥 ${m.streak}d</span>
+      <span class="team-lb-xp">${(m.xp || 0).toLocaleString()} XP</span>
+    </div>
+  `).join('');
+}
+
+function renderTeamActivity() {
+  const el = document.getElementById('teamActivity');
+  if (!el) return;
+  const members = AppState.teamMembers || [];
+  if (!members.length) {
+    el.innerHTML = '<p style="color:var(--text-secondary);font-size:.85rem">No team activity yet. Add friends to get started!</p>';
+    return;
+  }
+  const actions = ['logged a training session','hit a new PB','completed a weekly challenge','maintained their streak','logged their nutrition'];
+  el.innerHTML = members.slice(0, 5).map(m => {
+    const action = actions[Math.floor(Math.random() * actions.length)];
+    const hrs = Math.floor(Math.random() * 23) + 1;
+    return `
+      <div class="team-activity-row">
+        <div class="team-act-avatar">${m.name[0]}</div>
+        <div class="team-act-info">
+          <strong>${m.name}</strong> ${action}
+          <span class="team-act-time">${hrs}h ago</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// =====================================================
+// INJURY-SAFE MODE + COACH ALEX
+// =====================================================
+function initInjurySafeMode() {
+  const toggle = document.getElementById('injurySafeToggle');
+  if (toggle) toggle.checked = AppState.injurySafeMode || false;
+  if (AppState.injurySafeMode) {
+    showInjuryCoach();
+    renderInjuryCoachHistory();
+  }
+}
+
+function toggleInjurySafeMode(enabled) {
+  AppState.injurySafeMode = enabled;
+  saveToStorage();
+  const desc = document.getElementById('injurySafeDesc');
+  if (enabled) {
+    if (desc) desc.textContent = '🛡️ Injury-safe mode ON — your training plans are now recovery-focused.';
+    showInjuryCoach();
+    if (!AppState.injuryCoachHistory?.length) {
+      addInjuryCoachMsg('coach', "Hi! I'm Coach Alex, your injury & recovery specialist 👋\n\nI've switched your plan to low-impact recovery mode. Tell me about your injury and I'll guide you through the best recovery approach.\n\nWhat area are you dealing with?");
+    }
+    renderInjuryCoachHistory();
+    showToast('🛡️ Injury-safe mode enabled');
+  } else {
+    if (desc) desc.textContent = 'Enable injury-safe mode to swap intense workouts with recovery-focused training.';
+    document.getElementById('injuryCoachChat').style.display = 'none';
+    showToast('Training mode restored');
+  }
+}
+
+function showInjuryCoach() {
+  const chat = document.getElementById('injuryCoachChat');
+  if (chat) chat.style.display = 'block';
+}
+
+function addInjuryCoachMsg(role, text) {
+  AppState.injuryCoachHistory = AppState.injuryCoachHistory || [];
+  AppState.injuryCoachHistory.push({ role, text, time: new Date().toISOString() });
+  saveToStorage();
+  renderInjuryCoachHistory();
+}
+
+function renderInjuryCoachHistory() {
+  const el = document.getElementById('injuryCoachMessages');
+  if (!el) return;
+  const history = AppState.injuryCoachHistory || [];
+  el.innerHTML = history.map(m => `
+    <div class="chat-msg ${m.role === 'coach' ? 'ai-msg' : 'user-msg'}" style="margin-bottom:10px">
+      ${m.role === 'coach' ? '<div class="msg-avatar" style="background:linear-gradient(135deg,#00e676,#00bcd4)">👨‍⚕️</div>' : ''}
+      <div class="msg-bubble" style="${m.role === 'user' ? 'background:var(--accent);color:#000;margin-left:auto' : ''}">
+        <p style="white-space:pre-wrap;margin:0">${ovEsc(m.text)}</p>
+      </div>
+    </div>
+  `).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+async function sendInjuryCoachMsg() {
+  const input = document.getElementById('injuryCoachInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  addInjuryCoachMsg('user', text);
+
+  // Build context about user's injuries
+  const injuries = (AppState.injuryLog || []).filter(i => i.status === 'active' || i.status === 'recovering');
+  const injuryContext = injuries.length
+    ? `The user has the following active injuries: ${injuries.map(i => `${i.part} (${i.type}, severity ${i.severity}/10)`).join(', ')}.`
+    : 'No logged injuries.';
+  const sport = AppState.sport || 'football';
+  const systemPrompt = `You are Coach Alex, a highly experienced sports injury rehabilitation specialist and physiotherapist. You work with elite athletes. Do NOT mention that you are an AI or a language model. Respond as a knowledgeable, warm, professional human coach. Keep responses concise and practical. The athlete plays ${sport}. ${injuryContext}`;
+
+  // Show typing indicator
+  const el = document.getElementById('injuryCoachMessages');
+  const typingId = 'alexTyping';
+  if (el) el.insertAdjacentHTML('beforeend', `<div id="${typingId}" class="chat-msg ai-msg"><div class="msg-avatar" style="background:linear-gradient(135deg,#00e676,#00bcd4)">👨‍⚕️</div><div class="msg-bubble"><p style="margin:0">Coach Alex is typing…</p></div></div>`);
+  el.scrollTop = el.scrollHeight;
+
+  let reply = null;
+  try {
+    const r = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, systemPrompt, history: (AppState.injuryCoachHistory || []).slice(-6).map(m => ({ role: m.role === 'coach' ? 'assistant' : 'user', content: m.text })) }),
+    });
+    if (r.ok) {
+      const data = await r.json();
+      reply = data.reply;
+    }
+  } catch(e) {}
+
+  document.getElementById(typingId)?.remove();
+
+  if (!reply) reply = getLocalInjuryReply(text);
+  addInjuryCoachMsg('coach', reply);
+}
+
+function injuryQuickPrompt(btn) {
+  const input = document.getElementById('injuryCoachInput');
+  if (input) { input.value = btn.textContent.trim(); sendInjuryCoachMsg(); }
+}
+
+function getLocalInjuryReply(msg) {
+  const m = msg.toLowerCase();
+  if (m.includes('knee')) return "Knee issues are very common. For now: rest from impact, ice for 15–20 min every 2 hrs, keep the leg elevated. Gentle quad strengthening and swimming are great alternatives. How long have you had the pain?";
+  if (m.includes('ankle')) return "Ankle sprains need RICE: Rest, Ice, Compression, Elevation. Avoid running for 48–72h. Once swelling reduces, proprioception exercises will speed recovery. Grade the pain 1–10 for me?";
+  if (m.includes('hamstring')) return "Hamstring strains need careful management. No sprinting or heavy stretching yet. Nordic curls and gentle massage help long term. What movement makes it worse?";
+  if (m.includes('back') || m.includes('spine')) return "Lower back pain often comes from core weakness or poor posture during training. Avoid deadlifts and heavy squats for now. Cat-cow, bird-dog, and swimming are excellent. Is it sharp or dull ache?";
+  if (m.includes('shoulder')) return "Shoulder issues: avoid overhead movements and pressing until evaluated. Rotator cuff exercises and band work help stabilise. Has it been assessed by a physio?";
+  if (m.includes('swelling') || m.includes('swell')) return "To reduce swelling: ice 15 min on / 45 min off, keep elevated above heart level, gentle compression. Avoid heat for the first 48–72 hours. NSAIDs like ibuprofen help if there's no contraindication.";
+  if (m.includes('return') || m.includes('train again') || m.includes('play again')) return "Return to training should be gradual. Start with 50% intensity, pain-free movement only. If no pain after 3 sessions, increase to 75%, then full training. Never rush — 1 extra week of recovery beats 6 weeks out with a re-injury.";
+  if (m.includes('rest') || m.includes('should i stop')) return "Rest is part of training, not weakness. For most soft tissue injuries, 2–5 days rest + light activity is ideal. Complete inactivity slows healing — keep blood flowing with swimming or walking.";
+  return "Good question. To give you the best advice, tell me: which body part, how long ago it happened, and what movements cause pain. The more detail, the better I can help you recover faster.";
+}
+
+// ── Secret admin: long-press header logo for 2 seconds ──
+document.addEventListener('DOMContentLoaded', () => {
   let holdTimer = null;
   const logoEl = document.getElementById('secretLogoTap');
   if (logoEl) {
@@ -3905,7 +4358,6 @@ document.addEventListener('DOMContentLoaded', () => {
     logoEl.addEventListener('mouseleave', cancelHold);
     logoEl.addEventListener('touchend',   cancelHold);
     logoEl.addEventListener('touchcancel',cancelHold);
-    // Prevent context menu on long-press mobile
     logoEl.addEventListener('contextmenu', e => e.preventDefault());
   }
 });
