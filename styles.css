@@ -2586,7 +2586,7 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
   padding: 0 4px;
   padding-bottom: env(safe-area-inset-bottom);
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
   align-items: center;
 }
 @media (min-width: 900px) { .mobile-bottom-nav { display: none !important; } }
