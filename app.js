@@ -73,6 +73,7 @@ const AppState = {
 // INIT
 // =====================================================
 document.addEventListener('DOMContentLoaded', () => {
+  initEmailJS();
   loadFromStorage();
   checkStreakOnLoad();
   setupAgeGateDobMax();
@@ -315,6 +316,41 @@ function setupAgeGateDobMax() {
   dobField.min = minDate.toISOString().split('T')[0];
 }
 
+// =====================================================
+// EMAILJS — WELCOME EMAIL
+// =====================================================
+// To activate: sign up at https://www.emailjs.com (free)
+// 1. Create a Gmail service  → copy Service ID  → replace EMAILJS_SERVICE_ID
+// 2. Create an email template → copy Template ID → replace EMAILJS_TEMPLATE_ID
+//    Template variables available: {{to_name}}, {{to_email}}, {{sport}}, {{app_url}}
+// 3. Copy your Public Key (Account → API Keys) → replace EMAILJS_PUBLIC_KEY
+
+const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';   // e.g. 'service_abc123'
+const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';  // e.g. 'template_xyz789'
+const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';   // e.g. 'abcDEFghiJKL'
+
+function initEmailJS() {
+  if (typeof emailjs !== 'undefined' && EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
+    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+  }
+}
+
+function sendWelcomeEmail(name, email, sport) {
+  if (!email) return;
+  if (typeof emailjs === 'undefined') return;
+  if (EMAILJS_PUBLIC_KEY === 'YOUR_PUBLIC_KEY') return; // not configured yet
+  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+    to_name:  name,
+    to_email: email,
+    sport:    getSportLabel(sport),
+    app_url:  'https://singhkenil2-creator.github.io/Ahletemind'
+  }).then(() => {
+    console.log('Welcome email sent to', email);
+  }).catch(err => {
+    console.warn('EmailJS error:', err);
+  });
+}
+
 function onboardNext(step) {
   if (step === 1) {
     const name = document.getElementById('userName').value.trim();
@@ -430,6 +466,8 @@ function submitAgeGate() {
   gateEl.classList.add('hidden');
 
   showToast(`Welcome, ${name}! Your pro journey begins now! 🚀`);
+  // Send welcome/thank-you email if user provided one
+  sendWelcomeEmail(name, AppState.user.email, sport);
 }
 
 // Age gate sport buttons
