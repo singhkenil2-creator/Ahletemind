@@ -2951,6 +2951,32 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
 /* ====================================================
    FEEDBACK FAB
    ==================================================== */
+/* ====== QUICK ADD EVENTS ====== */
+.quick-event-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 8px;
+  margin-top: 4px;
+}
+.quick-ev-btn {
+  background: var(--card-bg);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: .78rem;
+  padding: 8px 6px;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, transform .1s;
+  text-align: center;
+  white-space: nowrap;
+}
+.quick-ev-btn:hover, .quick-ev-btn:active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+  transform: scale(1.04);
+}
+
 /* ====== PWA INSTALL BANNER ====== */
 .install-banner {
   position: fixed; bottom: 64px; left: 0; right: 0; z-index: 199;

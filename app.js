@@ -1523,6 +1523,24 @@ function addCalendarEvent() {
   showToast(`${cfg.icon} ${title} added to your calendar!`);
 }
 
+function quickAddEvent(subtype, eventType, defaultTitle, colour) {
+  // Fill the form with sensible defaults for this special event
+  selectedEventType = eventType;
+  // Update type button UI
+  document.querySelectorAll('#eventTypeGrid .event-type-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.type === eventType);
+  });
+  // Set title
+  document.getElementById('eventTitle').value = defaultTitle;
+  // Show/hide sport group
+  const sportGroup = document.getElementById('eventSportGroup');
+  if (sportGroup) sportGroup.style.display = (eventType === 'training' || eventType === 'team') ? '' : 'none';
+  // Scroll add-event card into view
+  document.querySelector('.add-event-card')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  document.getElementById('eventTitle').focus();
+  showToast(`✏️ Fill in the date & time for your ${defaultTitle}!`);
+}
+
 function renderUpcomingEvents() {
   let events = AppState.calendarEvents
     .filter(e => e.date >= getTodayStr());
@@ -4449,7 +4467,19 @@ function addTeamFriend() {
   setTimeout(() => { msgEl.textContent = ''; }, 4000);
 }
 
+function ensureDemoTeamMembers() {
+  if (!AppState.teamMembers || AppState.teamMembers.length === 0) {
+    AppState.teamMembers = [
+      { id:'DEMO001', name:'Jordan', streak:14, xp:3200, sport:'football', addedAt: new Date().toISOString(), isDemo:true },
+      { id:'DEMO002', name:'Riley',  streak:7,  xp:1850, sport:'basketball', addedAt: new Date().toISOString(), isDemo:true },
+      { id:'DEMO003', name:'Alex',   streak:21, xp:5100, sport:'running', addedAt: new Date().toISOString(), isDemo:true },
+    ];
+    saveToStorage();
+  }
+}
+
 function renderTeamLeaderboard() {
+  ensureDemoTeamMembers();
   const el = document.getElementById('teamLeaderboard');
   if (!el) return;
   const me = {

@@ -713,6 +713,21 @@
           <div class="card add-event-card">
             <div class="card-header"><i class="fas fa-plus-circle"></i> Add Event</div>
 
+            <!-- Quick Add Special Events -->
+            <div class="form-group">
+              <label>⚡ Quick Add</label>
+              <div class="quick-event-grid">
+                <button class="quick-ev-btn" onclick="quickAddEvent('matchday','team','Matchday','#42a5f5')" title="Matchday">⚽ Matchday</button>
+                <button class="quick-ev-btn" onclick="quickAddEvent('tournament','team','Tournament Day','#ffd600')" title="Tournament">🏆 Tournament</button>
+                <button class="quick-ev-btn" onclick="quickAddEvent('schooltest','school','School Test','#ffa726')" title="School Test">📝 School Test</button>
+                <button class="quick-ev-btn" onclick="quickAddEvent('exam','school','Exam','#ff7043')" title="Exam">📚 Exam</button>
+                <button class="quick-ev-btn" onclick="quickAddEvent('teamtraining','training','Team Training','#00e5ff')" title="Team Training">🏋️ Team Training</button>
+                <button class="quick-ev-btn" onclick="quickAddEvent('restday','rest','Rest Day','#ef5350')" title="Rest Day">😴 Rest Day</button>
+                <button class="quick-ev-btn" onclick="quickAddEvent('pb','personal','PB Attempt','#ab47bc')" title="PB Attempt">🎯 PB Attempt</button>
+                <button class="quick-ev-btn" onclick="quickAddEvent('friendly','team','Friendly Match','#26a69a')" title="Friendly">🤝 Friendly</button>
+              </div>
+            </div>
+
             <!-- Event Type Quick Selector -->
             <div class="form-group">
               <label>Event Type</label>
