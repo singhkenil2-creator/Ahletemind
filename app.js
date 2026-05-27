@@ -1955,8 +1955,13 @@ function updateSidebarStats() {
 // =====================================================
 // MODALS
 // =====================================================
+function openModal(id) {
+  const el = document.getElementById(id);
+  if (el) { el.classList.remove('hidden'); el.classList.add('active'); }
+}
 function closeModal(id) {
-  document.getElementById(id).classList.add('hidden');
+  const el = document.getElementById(id);
+  if (el) { el.classList.add('hidden'); el.classList.remove('active'); }
 }
 
 // Close modal on overlay click
