@@ -2166,7 +2166,10 @@
     document.getElementById('footerYear').textContent = new Date().getFullYear();
     // Register service worker
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(() => {});
+      // Unregister any old service workers to prevent caching issues
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(r => r.unregister());
+      });
     }
   </script>
 </body>
