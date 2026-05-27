@@ -238,6 +238,14 @@
           <button class="sport-btn" data-sport="tennis"><i class="fas fa-baseball"></i><span>Tennis</span></button>
           <button class="sport-btn" data-sport="swimming"><i class="fas fa-person-swimming"></i><span>Swimming</span></button>
           <button class="sport-btn" data-sport="cycling"><i class="fas fa-bicycle"></i><span>Cycling</span></button>
+          <button class="sport-btn" data-sport="rugby"><i class="fas fa-football"></i><span>Rugby</span></button>
+          <button class="sport-btn" data-sport="cricket"><i class="fas fa-circle-dot"></i><span>Cricket</span></button>
+          <button class="sport-btn" data-sport="boxing"><i class="fas fa-hand-fist"></i><span>Boxing</span></button>
+          <button class="sport-btn" data-sport="gym"><i class="fas fa-dumbbell"></i><span>Gym / Fitness</span></button>
+          <button class="sport-btn" data-sport="martial_arts"><i class="fas fa-person-praying"></i><span>Martial Arts</span></button>
+          <button class="sport-btn" data-sport="athletics"><i class="fas fa-medal"></i><span>Athletics</span></button>
+          <button class="sport-btn" data-sport="volleyball"><i class="fas fa-volleyball"></i><span>Volleyball</span></button>
+          <button class="sport-btn" data-sport="hockey"><i class="fas fa-hockey-puck"></i><span>Hockey</span></button>
         </div>
         <div class="onboard-nav">
           <button class="btn-ghost" onclick="onboardBack(2)"><i class="fas fa-arrow-left"></i> Back</button>
@@ -427,6 +435,7 @@
       </button>
       <button class="sport-toggle-btn" onclick="openSportSwitch()"><i class="fas fa-exchange-alt"></i> <span id="currentSportLabel">Football</span></button>
       <button id="reinstallChip" onclick="showInstallBanner()" title="Install App" style="display:none;background:var(--accent);color:#000;border:none;border-radius:20px;padding:5px 12px;font-size:.75rem;font-weight:800;cursor:pointer;flex-shrink:0"><i class="fas fa-download"></i> Install</button>
+      <button class="sport-toggle-btn" onclick="openModal('langModal')" title="Change Language" style="gap:4px"><i class="fas fa-language"></i> <span id="langLabel">EN</span></button>
       <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark / light mode" id="themeToggleBtn">
         <span class="theme-toggle-track">
           <span class="theme-toggle-thumb"></span>
@@ -551,6 +560,14 @@
               <option value="tennis">🎾 Tennis</option>
               <option value="swimming">🏊 Swimming</option>
               <option value="cycling">🚴 Cycling</option>
+              <option value="rugby">🏉 Rugby</option>
+              <option value="cricket">🏏 Cricket</option>
+              <option value="boxing">🥊 Boxing</option>
+              <option value="gym">🏋️ Gym / Fitness</option>
+              <option value="martial_arts">🥋 Martial Arts</option>
+              <option value="athletics">🏅 Athletics</option>
+              <option value="volleyball">🏐 Volleyball</option>
+              <option value="hockey">🏑 Hockey</option>
             </select>
           </div>
           <div class="form-group">
@@ -792,6 +809,14 @@
                 <option value="tennis">🎾 Tennis</option>
                 <option value="swimming">🏊 Swimming</option>
                 <option value="cycling">🚴 Cycling</option>
+                <option value="rugby">🏉 Rugby</option>
+                <option value="cricket">🏏 Cricket</option>
+                <option value="boxing">🥊 Boxing</option>
+                <option value="gym">🏋️ Gym / Fitness</option>
+                <option value="martial_arts">🥋 Martial Arts</option>
+                <option value="athletics">🏅 Athletics</option>
+                <option value="volleyball">🏐 Volleyball</option>
+                <option value="hockey">🏑 Hockey</option>
               </select>
             </div>
 
@@ -1999,6 +2024,14 @@
         <button class="sport-btn" data-sport="tennis" onclick="switchSport('tennis')"><i class="fas fa-baseball"></i> Tennis</button>
         <button class="sport-btn" data-sport="swimming" onclick="switchSport('swimming')"><i class="fas fa-person-swimming"></i> Swimming</button>
         <button class="sport-btn" data-sport="cycling" onclick="switchSport('cycling')"><i class="fas fa-bicycle"></i> Cycling</button>
+        <button class="sport-btn" data-sport="rugby" onclick="switchSport('rugby')"><i class="fas fa-football"></i> Rugby</button>
+        <button class="sport-btn" data-sport="cricket" onclick="switchSport('cricket')"><i class="fas fa-circle-dot"></i> Cricket</button>
+        <button class="sport-btn" data-sport="boxing" onclick="switchSport('boxing')"><i class="fas fa-hand-fist"></i> Boxing</button>
+        <button class="sport-btn" data-sport="gym" onclick="switchSport('gym')"><i class="fas fa-dumbbell"></i> Gym / Fitness</button>
+        <button class="sport-btn" data-sport="martial_arts" onclick="switchSport('martial_arts')"><i class="fas fa-person-praying"></i> Martial Arts</button>
+        <button class="sport-btn" data-sport="athletics" onclick="switchSport('athletics')"><i class="fas fa-medal"></i> Athletics</button>
+        <button class="sport-btn" data-sport="volleyball" onclick="switchSport('volleyball')"><i class="fas fa-volleyball"></i> Volleyball</button>
+        <button class="sport-btn" data-sport="hockey" onclick="switchSport('hockey')"><i class="fas fa-hockey-puck"></i> Hockey</button>
       </div>
     </div>
   </div>
@@ -2117,6 +2150,8 @@
     <div class="mmd-header"><span>All Sections</span><button onclick="closeMobileMoreMenu()"><i class="fas fa-times"></i></button></div>
     <div class="mmd-grid">
       <button onclick="triggerInstall();closeMobileMoreMenu()"><i class="fas fa-download"></i><span>Install App</span></button>
+      <button onclick="openModal('langModal');closeMobileMoreMenu()"><i class="fas fa-language"></i><span>Language</span></button>
+      <button onclick="openModal('bizCardModal');closeMobileMoreMenu()"><i class="fas fa-id-card"></i><span>Share App</span></button>
       <button onclick="navTo('nutrition');closeMobileMoreMenu()"><i class="fas fa-apple-alt"></i><span>Nutrition</span></button>
       <button onclick="navTo('stats');closeMobileMoreMenu()"><i class="fas fa-chart-line"></i><span>Stats</span></button>
       <button onclick="navTo('wellness');closeMobileMoreMenu()"><i class="fas fa-heart-pulse"></i><span>Wellness</span></button>
@@ -2126,6 +2161,58 @@
       <button onclick="navTo('fields');closeMobileMoreMenu()"><i class="fas fa-map-marker-alt"></i><span>Fields</span></button>
       <button onclick="navTo('ai');closeMobileMoreMenu()"><i class="fas fa-comment-dots"></i><span>Coach</span></button>
       <button onclick="navTo('profile');closeMobileMoreMenu()"><i class="fas fa-user-circle"></i><span>Profile</span></button>
+    </div>
+  </div>
+
+  <!-- ========== LANGUAGE MODAL ========== -->
+  <div id="langModal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width:380px">
+      <div class="modal-header">
+        <h3><i class="fas fa-language"></i> Language</h3>
+        <button class="close-btn" onclick="closeModal('langModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <p style="margin-bottom:14px;opacity:.7;font-size:.85rem">Changing language updates navigation labels and key UI text.</p>
+      <div class="lang-grid">
+        <button class="lang-btn active" data-lang="en" onclick="setLanguage('en')">🇬🇧 English</button>
+        <button class="lang-btn" data-lang="es" onclick="setLanguage('es')">🇪🇸 Español</button>
+        <button class="lang-btn" data-lang="fr" onclick="setLanguage('fr')">🇫🇷 Français</button>
+        <button class="lang-btn" data-lang="de" onclick="setLanguage('de')">🇩🇪 Deutsch</button>
+        <button class="lang-btn" data-lang="pt" onclick="setLanguage('pt')">🇧🇷 Português</button>
+        <button class="lang-btn" data-lang="ar" onclick="setLanguage('ar')">🇸🇦 العربية</button>
+        <button class="lang-btn" data-lang="hi" onclick="setLanguage('hi')">🇮🇳 हिन्दी</button>
+        <button class="lang-btn" data-lang="zh" onclick="setLanguage('zh')">🇨🇳 中文</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== BUSINESS CARD MODAL ========== -->
+  <div id="bizCardModal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width:420px;padding:0;overflow:hidden;border-radius:20px;position:relative">
+      <button class="close-btn" onclick="closeModal('bizCardModal')" style="position:absolute;top:12px;right:14px;z-index:10"><i class="fas fa-times"></i></button>
+      <div class="biz-card">
+        <div class="biz-card-top">
+          <div class="biz-logo"><i class="fas fa-futbol"></i></div>
+          <div class="biz-name">AthleteMind</div>
+          <div class="biz-tagline">Your AI-Powered Sports Coach</div>
+          <div class="biz-badges">
+            <span>🏆 Training Plans</span>
+            <span>🤖 AI Coach</span>
+            <span>📊 Stats &amp; PBs</span>
+            <span>🍎 Nutrition</span>
+            <span>🔥 Streak Hub</span>
+            <span>📱 Works Offline</span>
+          </div>
+        </div>
+        <div class="biz-card-bottom">
+          <div class="biz-detail"><i class="fas fa-globe"></i> <a href="https://singhkenil2-creator.github.io/Ahletemind" target="_blank" rel="noopener">singhkenil2-creator.github.io/Ahletemind</a></div>
+          <div class="biz-detail"><i class="fas fa-user"></i> Built by <strong>Kenil Singh</strong></div>
+          <div class="biz-detail"><i class="fas fa-shield-alt"></i> Free &nbsp;·&nbsp; No account &nbsp;·&nbsp; Works offline</div>
+          <div style="margin-top:16px;display:flex;gap:10px">
+            <button class="btn-primary" style="flex:1" onclick="navigator.clipboard?.writeText('https://singhkenil2-creator.github.io/Ahletemind').then(()=>showToast('🔗 Link copied!'))"><i class="fas fa-copy"></i> Copy Link</button>
+            <button class="btn-ghost" style="flex:1" onclick="window.open('https://singhkenil2-creator.github.io/Ahletemind','_blank')"><i class="fas fa-external-link-alt"></i> Open App</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

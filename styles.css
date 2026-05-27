@@ -3063,4 +3063,73 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
 .privacy-body ul { padding-left: 18px; }
 .privacy-body p, .privacy-body li { margin-bottom: 6px; }
 
+/* ====================================================
+   LANGUAGE GRID
+   ==================================================== */
+.lang-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.lang-btn {
+  background: var(--card-bg);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 10px;
+  font-size: .9rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: all .2s;
+  text-align: center;
+}
+.lang-btn:hover { border-color: var(--accent); background: var(--hover-bg); }
+.lang-btn.active { border-color: var(--accent); background: var(--accent); color: #000; }
+
+/* ====================================================
+   BUSINESS CARD
+   ==================================================== */
+.biz-card { font-family: inherit; }
+.biz-card-top {
+  background: linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 60%, #000) 100%);
+  color: #fff;
+  padding: 36px 28px 28px;
+  text-align: center;
+}
+.biz-logo {
+  width: 64px; height: 64px;
+  background: rgba(255,255,255,.2);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem;
+  margin: 0 auto 12px;
+  backdrop-filter: blur(4px);
+}
+.biz-name { font-size: 1.8rem; font-weight: 900; letter-spacing: -0.5px; }
+.biz-tagline { font-size: .85rem; opacity: .85; margin-top: 4px; }
+.biz-badges {
+  display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 16px;
+}
+.biz-badges span {
+  background: rgba(255,255,255,.18);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: .75rem;
+  font-weight: 600;
+  backdrop-filter: blur(2px);
+}
+.biz-card-bottom {
+  padding: 22px 24px 24px;
+  background: var(--card-bg);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.biz-detail {
+  font-size: .85rem;
+  color: var(--text-secondary);
+  display: flex; align-items: center; gap: 8px;
+}
+.biz-detail i { color: var(--accent); width: 16px; flex-shrink: 0; }
+.biz-detail a { color: var(--accent); text-decoration: none; font-weight: 600; word-break: break-all; }
+.biz-detail a:hover { text-decoration: underline; }
+
 

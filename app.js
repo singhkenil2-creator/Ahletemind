@@ -88,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Auto-apply saved theme & sport
   applyTheme(AppState.theme);
   applySport(AppState.sport);
+  applyStoredLanguage();
 
   // If user already set up, skip age gate
   if (AppState.user) {
@@ -276,6 +277,14 @@ const SPORT_POSITIONS = {
   tennis: ['Baseline Player','Serve & Volley','All-Court Player','Doubles Specialist'],
   swimming: ['Freestyle','Backstroke','Breaststroke','Butterfly','Individual Medley','Open Water'],
   cycling: ['Road Cyclist','Track Cyclist','Mountain Biker','Triathlete','BMX','Gravel Rider'],
+  rugby: ['Prop','Hooker','Lock','Flanker','Number 8','Scrum-half','Fly-half','Centre','Wing','Full-back'],
+  cricket: ['Batsman','Bowler (Fast)','Bowler (Spin)','All-Rounder','Wicket-keeper','Opening Batsman','Middle Order'],
+  boxing: ['Orthodox Boxer','Southpaw Boxer','Counter Puncher','Pressure Fighter','Out-Boxer','Swarmer'],
+  gym: ['Powerlifter','Bodybuilder','CrossFit Athlete','Olympic Weightlifter','Calisthenics','General Fitness'],
+  martial_arts: ['Striker','Grappler','Mixed (MMA)','Stand-up Fighter','Ground Fighter','Judoka','Wrestler'],
+  athletics: ['100m Sprinter','400m Runner','800m Runner','High Jumper','Long Jumper','Pole Vaulter','Javelin','Shot Put','Heptathlon/Decathlon'],
+  volleyball: ['Setter','Libero','Outside Hitter','Middle Blocker','Opposite Hitter','Defensive Specialist'],
+  hockey: ['Goalkeeper','Defender','Midfielder','Forward','Striker','Penalty Corner Specialist'],
 };
 
 const SPORT_EQUIPMENT = {
@@ -285,6 +294,14 @@ const SPORT_EQUIPMENT = {
   tennis: ['Tennis Racket','Tennis Shoes','Balls','Ball Machine Access','Training Bag'],
   swimming: ['Goggles','Swim Cap','Kickboard','Pull Buoy','Training Fins'],
   cycling: ['Road/MTB Bike','Helmet','Cycling Shoes','Cycling Computer','Repair Kit','Training Turbo'],
+  rugby: ['Rugby Boots','Mouthguard','Scrum Cap','Shoulder Pads','Training Balls','Tackle Bags'],
+  cricket: ['Cricket Bat','Batting Pads','Batting Gloves','Helmet','Cricket Shoes','Ball','Chest Guard'],
+  boxing: ['Boxing Gloves','Hand Wraps','Heavy Bag','Speed Bag','Jump Rope','Head Guard','Mouthguard'],
+  gym: ['Gym Shoes','Weight Belt','Lifting Straps','Resistance Bands','Foam Roller','Protein Shaker'],
+  martial_arts: ['Gi / Rash Guard','Mouth Guard','Shin Guards','Gloves','Grappling Shorts','Headgear'],
+  athletics: ['Spikes','Starting Blocks','Pole (Pole Vault)','Throwing Equipment','GPS Watch','Compression Kit'],
+  volleyball: ['Volleyball Shoes','Knee Pads','Volleyball','Ankle Braces','Training Net'],
+  hockey: ['Hockey Stick','Shin Guards','Mouthguard','Hockey Shoes','Gloves','Goalkeeper Kit'],
 };
 
 function setupAgeGateDobMax() {
@@ -480,12 +497,20 @@ window.closeMobileMoreMenu = function() {
 
 // Sport accent colours for PWA theme-color meta
 const SPORT_ACCENT_COLORS = {
-  football:   { dark: '#00e676', light: '#1a7f3c' },
-  basketball: { dark: '#ff6d00', light: '#e65100' },
-  running:    { dark: '#00b0ff', light: '#0277bd' },
-  tennis:     { dark: '#d4e157', light: '#9e9d24' },
-  swimming:   { dark: '#00e5ff', light: '#006064' },
-  cycling:    { dark: '#ff1744', light: '#c62828' },
+  football:    { dark: '#00e676', light: '#1a7f3c' },
+  basketball:  { dark: '#ff6d00', light: '#e65100' },
+  running:     { dark: '#00b0ff', light: '#0277bd' },
+  tennis:      { dark: '#d4e157', light: '#9e9d24' },
+  swimming:    { dark: '#00e5ff', light: '#006064' },
+  cycling:     { dark: '#ff1744', light: '#c62828' },
+  rugby:       { dark: '#ff6f00', light: '#e65100' },
+  cricket:     { dark: '#aeea00', light: '#558b2f' },
+  boxing:      { dark: '#e040fb', light: '#6a1b9a' },
+  gym:         { dark: '#40c4ff', light: '#01579b' },
+  martial_arts:{ dark: '#ef5350', light: '#b71c1c' },
+  athletics:   { dark: '#ffca28', light: '#f57f17' },
+  volleyball:  { dark: '#26c6da', light: '#00838f' },
+  hockey:      { dark: '#66bb6a', light: '#2e7d32' },
 };
 
 function updatePWAThemeColor() {
@@ -536,8 +561,11 @@ function getSportIconClass(sport) {
 }
 
 function getSportLabel(sport) {
-  const map = { football:'Football', basketball:'Basketball', running:'Running', tennis:'Tennis', swimming:'Swimming', cycling:'Cycling' };
-  return map[sport] || 'Football';
+  const map = {
+    football:'Football', basketball:'Basketball', running:'Running', tennis:'Tennis', swimming:'Swimming', cycling:'Cycling',
+    rugby:'Rugby', cricket:'Cricket', boxing:'Boxing', gym:'Gym / Fitness', martial_arts:'Martial Arts', athletics:'Athletics', volleyball:'Volleyball', hockey:'Hockey'
+  };
+  return map[sport] || sport || 'Football';
 }
 
 function applySport(sport) {
@@ -1572,7 +1600,10 @@ function deleteEvent(id) {
 }
 
 function getSportEmoji(sport) {
-  const map = { football:'⚽', basketball:'🏀', running:'🏃', tennis:'🎾', swimming:'🏊', cycling:'🚴' };
+  const map = {
+    football:'⚽', basketball:'🏀', running:'🏃', tennis:'🎾', swimming:'🏊', cycling:'🚴',
+    rugby:'🏉', cricket:'🏏', boxing:'🥊', gym:'🏋️', martial_arts:'🥋', athletics:'🏅', volleyball:'🏐', hockey:'🏑'
+  };
   return map[sport] || '🏅';
 }
 
@@ -1983,6 +2014,125 @@ function openModal(id) {
 function closeModal(id) {
   const el = document.getElementById(id);
   if (el) { el.classList.add('hidden'); el.classList.remove('active'); }
+}
+
+// =====================================================
+// LANGUAGE / i18n SYSTEM
+// =====================================================
+const TRANSLATIONS = {
+  en: {
+    langLabel:'EN', home:'Home', plans:'Plans', calendar:'Calendar', streak:'Streak', more:'More',
+    nutrition:'Nutrition', stats:'Stats', wellness:'Wellness', drills:'Drills', video:'Video',
+    gear:'Gear', fields:'Fields', ai:'Coach', profile:'Profile', team:'Team',
+    logSession:'Log Session', today:'Today',
+    toastLang:'🌐 Language set to English'
+  },
+  es: {
+    langLabel:'ES', home:'Inicio', plans:'Planes', calendar:'Calendario', streak:'Racha', more:'Más',
+    nutrition:'Nutrición', stats:'Estadísticas', wellness:'Bienestar', drills:'Ejercicios', video:'Vídeo',
+    gear:'Equipo', fields:'Campos', ai:'Entrenador', profile:'Perfil', team:'Equipo',
+    logSession:'Registrar sesión', today:'Hoy',
+    toastLang:'🌐 Idioma configurado a Español'
+  },
+  fr: {
+    langLabel:'FR', home:'Accueil', plans:'Plans', calendar:'Calendrier', streak:'Série', more:'Plus',
+    nutrition:'Nutrition', stats:'Statistiques', wellness:'Bien-être', drills:'Exercices', video:'Vidéo',
+    gear:'Équipement', fields:'Terrains', ai:'Coach', profile:'Profil', team:'Équipe',
+    logSession:'Enregistrer', today:"Aujourd'hui",
+    toastLang:'🌐 Langue définie sur le Français'
+  },
+  de: {
+    langLabel:'DE', home:'Start', plans:'Pläne', calendar:'Kalender', streak:'Serie', more:'Mehr',
+    nutrition:'Ernährung', stats:'Statistiken', wellness:'Wohlbefinden', drills:'Übungen', video:'Video',
+    gear:'Ausrüstung', fields:'Felder', ai:'Coach', profile:'Profil', team:'Team',
+    logSession:'Einheit speichern', today:'Heute',
+    toastLang:'🌐 Sprache auf Deutsch eingestellt'
+  },
+  pt: {
+    langLabel:'PT', home:'Início', plans:'Planos', calendar:'Calendário', streak:'Sequência', more:'Mais',
+    nutrition:'Nutrição', stats:'Estatísticas', wellness:'Bem-estar', drills:'Treinos', video:'Vídeo',
+    gear:'Equipamento', fields:'Campos', ai:'Treinador', profile:'Perfil', team:'Time',
+    logSession:'Registar sessão', today:'Hoje',
+    toastLang:'🌐 Idioma definido para Português'
+  },
+  ar: {
+    langLabel:'AR', home:'الرئيسية', plans:'الخطط', calendar:'التقويم', streak:'السلسلة', more:'المزيد',
+    nutrition:'التغذية', stats:'الإحصاء', wellness:'الصحة', drills:'التدريبات', video:'فيديو',
+    gear:'المعدات', fields:'الملاعب', ai:'المدرب', profile:'الملف', team:'الفريق',
+    logSession:'تسجيل جلسة', today:'اليوم',
+    toastLang:'🌐 تم تعيين اللغة إلى العربية'
+  },
+  hi: {
+    langLabel:'HI', home:'होम', plans:'योजनाएं', calendar:'कैलेंडर', streak:'स्ट्रीक', more:'अधिक',
+    nutrition:'पोषण', stats:'आँकड़े', wellness:'स्वास्थ्य', drills:'अभ्यास', video:'वीडियो',
+    gear:'उपकरण', fields:'मैदान', ai:'कोच', profile:'प्रोफाइल', team:'टीम',
+    logSession:'सत्र लॉग करें', today:'आज',
+    toastLang:'🌐 भाषा हिन्दी में सेट की गई'
+  },
+  zh: {
+    langLabel:'ZH', home:'主页', plans:'计划', calendar:'日历', streak:'连续', more:'更多',
+    nutrition:'营养', stats:'统计', wellness:'健康', drills:'训练', video:'视频',
+    gear:'装备', fields:'场地', ai:'教练', profile:'个人', team:'团队',
+    logSession:'记录训练', today:'今天',
+    toastLang:'🌐 语言已设置为中文'
+  }
+};
+
+function setLanguage(lang) {
+  const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
+  AppState.prefs = AppState.prefs || {};
+  AppState.prefs.language = lang;
+  saveToStorage();
+
+  // Update lang label chip in header
+  const chip = document.getElementById('langLabel');
+  if (chip) chip.textContent = t.langLabel;
+
+  // Update bottom nav labels
+  const navMap = { 'nav-home':'home','nav-plans':'plans','nav-calendar':'calendar','nav-streak':'streak','nav-more':'more' };
+  Object.entries(navMap).forEach(([id, key]) => {
+    const el = document.querySelector(`[data-nav="${id}"] .nav-label, #${id} .nav-label`);
+    if (el && t[key]) el.textContent = t[key];
+  });
+
+  // Update nav tab labels using data-section attributes
+  document.querySelectorAll('.nav-tab[data-section]').forEach(tab => {
+    const sec = tab.dataset.section;
+    if (t[sec]) {
+      const span = tab.querySelector('span');
+      if (span) span.textContent = t[sec];
+    }
+  });
+
+  // Update mobile bottom nav buttons
+  document.querySelectorAll('.mobile-bottom-nav button[data-page]').forEach(btn => {
+    const page = btn.dataset.page;
+    if (t[page]) {
+      const span = btn.querySelector('span');
+      if (span) span.textContent = t[page];
+    }
+  });
+
+  // Update document direction for Arabic
+  document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+
+  // Highlight active lang button
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === lang);
+  });
+
+  closeModal('langModal');
+  showToast(t.toastLang);
+}
+window.setLanguage = setLanguage;
+
+function applyStoredLanguage() {
+  const lang = AppState.prefs?.language || 'en';
+  if (lang !== 'en') setLanguage(lang);
+  else {
+    const chip = document.getElementById('langLabel');
+    if (chip) chip.textContent = 'EN';
+  }
 }
 
 // Close modal on overlay click
