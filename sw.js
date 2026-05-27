@@ -1,5 +1,5 @@
-/* AthleteMind — Service Worker v6 (network-first for app files) */
-const CACHE = 'athletemind-v6';
+/* AthleteMind — Service Worker v7 (network-first for app files) */
+const CACHE = 'athletemind-v7';
 
 // Install — skip waiting immediately
 self.addEventListener('install', e => {

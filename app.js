@@ -66,6 +66,7 @@ const AppState = {
   notifications: [],           // [{ id, text, icon, time, read }]
   feedbackList: [],
   selectedStars: 0,
+  matchLog: [],                // [{ id, date, opponent, result, score, goals, assists, minutes, rating, notes }]
 };
 
 // =====================================================
@@ -241,6 +242,7 @@ function saveToStorage() {
     ratePromptDone: AppState.ratePromptDone,
     notifications: AppState.notifications,
     feedbackList: AppState.feedbackList,
+    matchLog: AppState.matchLog,
   };
   localStorage.setItem('athletemind_v2', JSON.stringify(data));
   syncToServer(data);
@@ -453,12 +455,12 @@ function navTo(page) {
   if (page === 'fields') { setTimeout(initMap, 100); loadWeather(); }
   if (page === 'ai') updateSidebarStats();
   if (page === 'dashboard') updateDashboardStats();
-  if (page === 'stats') setTimeout(initStatsPage, 100);
+  if (page === 'stats') setTimeout(() => { initStatsPage(); renderMatchLog(); const md = document.getElementById('matchDate'); if (md && !md.value) md.value = getTodayStr(); }, 100);
   if (page === 'gamify') setTimeout(initGamifyPage, 100);
   if (page === 'wellness') setTimeout(initWellnessPage, 100);
   if (page === 'drills') setTimeout(() => renderDrillsGrid('all', 'all'), 100);
   if (page === 'video') setTimeout(initVideoPage, 100);
-  if (page === 'gear') setTimeout(renderKitList, 100);
+  if (page === 'team') setTimeout(renderTeamPage, 100);
   if (page === 'profile') setTimeout(() => { initProfilePage(); renderProgressWall(); }, 100);
   if (page === 'dashboard') { setTimeout(renderActivityFeed, 100); setTimeout(renderMascot, 150); }
 }
@@ -582,6 +584,7 @@ function updateDashboardStats() {
   const level = getLevel();
   document.getElementById('stat-level').textContent = level;
   updateNavStreakBadge();
+  renderWeeklySummaryWidget();
 }
 
 function updateNavStreakBadge() {
@@ -4429,6 +4432,7 @@ function renderTeamPage() {
   if (idEl) idEl.textContent = getDeviceId().toUpperCase().slice(0, 12);
   renderTeamLeaderboard();
   renderTeamActivity();
+  renderTeamChallenges();
 }
 
 function copyAthleteId() {
@@ -5287,3 +5291,244 @@ async function triggerInstall() {
     showToast('📲 Open this page in Chrome and tap "Add to Home Screen" from the menu.');
   }
 }
+
+// =====================================================
+// ── SESSION TIMER
+// =====================================================
+let _timerInterval = null;
+let _timerRunning = false;
+let _timerSeconds = 0;
+let _timerLaps = [];
+
+function openSessionTimer() {
+  openModal('sessionTimerModal');
+}
+
+function closeSessionTimer() {
+  closeModal('sessionTimerModal');
+}
+
+function timerStartPause() {
+  const btn = document.getElementById('timerStartBtn');
+  const lapBtn = document.getElementById('timerLapBtn');
+  if (_timerRunning) {
+    clearInterval(_timerInterval);
+    _timerRunning = false;
+    btn.innerHTML = '<i class="fas fa-play"></i> Resume';
+    btn.classList.remove('btn-danger');
+    btn.classList.add('btn-primary');
+  } else {
+    _timerRunning = true;
+    btn.innerHTML = '<i class="fas fa-pause"></i> Pause';
+    btn.classList.remove('btn-primary');
+    btn.classList.add('btn-danger');
+    if (lapBtn) lapBtn.disabled = false;
+    _timerInterval = setInterval(() => {
+      _timerSeconds++;
+      const h = String(Math.floor(_timerSeconds / 3600)).padStart(2, '0');
+      const m = String(Math.floor((_timerSeconds % 3600) / 60)).padStart(2, '0');
+      const s = String(_timerSeconds % 60).padStart(2, '0');
+      const el = document.getElementById('timerDisplay');
+      if (el) el.textContent = `${h}:${m}:${s}`;
+    }, 1000);
+  }
+}
+
+function timerLap() {
+  if (!_timerRunning) return;
+  const h = String(Math.floor(_timerSeconds / 3600)).padStart(2, '0');
+  const m = String(Math.floor((_timerSeconds % 3600) / 60)).padStart(2, '0');
+  const s = String(_timerSeconds % 60).padStart(2, '0');
+  _timerLaps.push(`${h}:${m}:${s}`);
+  const el = document.getElementById('timerLaps');
+  if (el) el.innerHTML = _timerLaps.map((l, i) => `<div>Lap ${i + 1}: <strong>${l}</strong></div>`).join('');
+}
+
+function timerReset() {
+  clearInterval(_timerInterval);
+  _timerRunning = false;
+  _timerSeconds = 0;
+  _timerLaps = [];
+  const display = document.getElementById('timerDisplay');
+  if (display) display.textContent = '00:00:00';
+  const laps = document.getElementById('timerLaps');
+  if (laps) laps.innerHTML = '';
+  const btn = document.getElementById('timerStartBtn');
+  if (btn) { btn.innerHTML = '<i class="fas fa-play"></i> Start'; btn.classList.remove('btn-danger'); btn.classList.add('btn-primary'); }
+  const lapBtn = document.getElementById('timerLapBtn');
+  if (lapBtn) lapBtn.disabled = true;
+}
+
+function saveTimerSession() {
+  if (_timerSeconds < 10) { showToast('Start the timer first!'); return; }
+  const name = document.getElementById('timerSessionName')?.value.trim() || 'Training Session';
+  const mins = Math.round(_timerSeconds / 60);
+  const today = getTodayStr();
+  AppState.calendarEvents.push({
+    id: Date.now(),
+    title: name,
+    date: today,
+    time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+    duration: mins,
+    eventType: 'training',
+    sport: AppState.sport || 'football',
+    notes: `Timed session: ${Math.floor(_timerSeconds/3600)}h ${Math.floor((_timerSeconds%3600)/60)}m ${_timerSeconds%60}s`,
+  });
+  AppState.sessions = (AppState.sessions || 0) + 1;
+  recordStreakActivity('training');
+  saveToStorage();
+  updateDashboardStats();
+  showToast(`✅ ${name} (${mins} min) saved to calendar!`);
+  timerReset();
+  closeSessionTimer();
+}
+
+// =====================================================
+// ── MATCH STATS LOGGER
+// =====================================================
+function logMatchStats() {
+  const date     = document.getElementById('matchDate')?.value || getTodayStr();
+  const opponent = document.getElementById('matchOpponent')?.value.trim() || 'Opponent';
+  const result   = document.getElementById('matchResult')?.value || 'win';
+  const score    = document.getElementById('matchScore')?.value.trim() || '';
+  const goals    = parseInt(document.getElementById('matchGoals')?.value) || 0;
+  const assists  = parseInt(document.getElementById('matchAssists')?.value) || 0;
+  const minutes  = parseInt(document.getElementById('matchMinutes')?.value) || 90;
+  const rating   = parseInt(document.getElementById('matchRating')?.value) || 7;
+  const notes    = document.getElementById('matchNotes')?.value.trim() || '';
+
+  const match = { id: Date.now(), date, opponent, result, score, goals, assists, minutes, rating, notes };
+  AppState.matchLog = AppState.matchLog || [];
+  AppState.matchLog.unshift(match);
+  saveToStorage();
+  showToast(`⚽ Match vs ${opponent} saved!`);
+  awardXP(15, 'Logged match stats');
+  renderMatchLog();
+  // reset
+  ['matchOpponent','matchScore','matchNotes'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['matchGoals','matchAssists'].forEach(id => { const el = document.getElementById(id); if (el) el.value = '0'; });
+  ['matchMinutes','matchRating'].forEach((id, i) => { const el = document.getElementById(id); if (el) el.value = i === 0 ? '90' : '7'; });
+}
+
+function renderMatchLog() {
+  const el = document.getElementById('matchLogList');
+  if (!el) return;
+  const logs = AppState.matchLog || [];
+  if (!logs.length) { el.innerHTML = '<p style="color:var(--text-secondary);font-size:.85rem">No matches logged yet.</p>'; return; }
+  const resultIcon = { win: '✅', draw: '🤝', loss: '❌' };
+  el.innerHTML = `
+    <div style="font-weight:700;margin-bottom:8px;font-size:.85rem">Recent Matches</div>
+    ${logs.slice(0, 10).map(m => `
+      <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <strong>${resultIcon[m.result]} vs ${m.opponent} ${m.score ? `(${m.score})` : ''}</strong>
+          <span style="font-size:.78rem;color:var(--text-secondary)">${m.date}</span>
+        </div>
+        <div style="font-size:.82rem;color:var(--text-secondary)">⚽ ${m.goals} goals &nbsp;🅰️ ${m.assists} assists &nbsp;⏱️ ${m.minutes} min &nbsp;⭐ ${m.rating}/10</div>
+        ${m.notes ? `<div style="font-size:.8rem;color:var(--text-secondary);margin-top:4px">${m.notes}</div>` : ''}
+      </div>`).join('')}`;
+}
+
+// =====================================================
+// ── FULL JSON BACKUP & RESTORE
+// =====================================================
+function exportFullBackup() {
+  const data = JSON.stringify(AppState, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `athletemind-backup-${getTodayStr()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('💾 Full backup downloaded!');
+}
+
+function importFullBackup(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data || typeof data !== 'object') throw new Error('Invalid');
+      if (!confirm('⚠️ This will REPLACE all your current data with the backup. Are you sure?')) return;
+      Object.assign(AppState, data);
+      saveToStorage();
+      showToast('✅ Backup restored successfully!');
+      setTimeout(() => location.reload(), 1500);
+    } catch {
+      showToast('❌ Invalid backup file. Please use a valid AthleteMind JSON backup.');
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+// =====================================================
+// ── WEEKLY SUMMARY WIDGET (dashboard)
+// =====================================================
+function renderWeeklySummaryWidget() {
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+  startOfWeek.setHours(0,0,0,0);
+  const weekStr = startOfWeek.toISOString().split('T')[0];
+
+  const sessions = (AppState.calendarEvents || []).filter(e => e.date >= weekStr && ['training','team'].includes(e.eventType)).length;
+  const allLogs = AppState.allFoodLogs || {};
+  let cals = 0;
+  Object.entries(allLogs).forEach(([date, items]) => { if (date >= weekStr) cals += items.reduce((s,f) => s+(f.calories||0), 0); });
+
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  set('wsw-sessions', sessions);
+  set('wsw-cals', Math.round(cals).toLocaleString());
+  set('wsw-streak', AppState.streak || 0);
+  set('wsw-xp', (AppState.xp || 0).toLocaleString());
+}
+
+// =====================================================
+// ── TEAM CHALLENGES
+// =====================================================
+function renderTeamChallenges() {
+  const el = document.getElementById('teamChallengesPanel');
+  if (!el) return;
+  const members = AppState.teamMembers || [];
+  const me = { id:'me', name: AppState.user?.name || 'You', sessions: AppState.sessions || 0, streak: AppState.streak || 0, xp: AppState.xp || 0, isMe: true };
+  const all = [me, ...members];
+
+  const challenges = [
+    { title: '🏋️ Most Sessions This Week', key: 'sessions', unit: 'sessions' },
+    { title: '🔥 Longest Streak', key: 'streak', unit: 'days' },
+    { title: '⚡ Most XP', key: 'xp', unit: 'XP' },
+  ];
+
+  el.innerHTML = challenges.map(ch => {
+    const sorted = [...all].sort((a, b) => (b[ch.key] || 0) - (a[ch.key] || 0));
+    const leader = sorted[0];
+    return `
+      <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px">
+        <div style="font-weight:700;margin-bottom:8px">${ch.title}</div>
+        ${sorted.slice(0,3).map((m, i) => `
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)">
+            <span style="width:24px;text-align:center">${i===0?'🥇':i===1?'🥈':'🥉'}</span>
+            <span style="flex:1;font-weight:${m.isMe?700:400};color:${m.isMe?'var(--accent)':'var(--text)'}">${m.name}${m.isMe?' (you)':''}</span>
+            <span style="font-weight:700">${(m[ch.key]||0).toLocaleString()} ${ch.unit}</span>
+          </div>`).join('')}
+      </div>`;
+  }).join('');
+}
+
+// =====================================================
+// ── NOTIFICATION REMINDER TIME SAVE
+// =====================================================
+function saveReminderTime(val) {
+  AppState.prefs = AppState.prefs || {};
+  AppState.prefs.reminderTime = val;
+  saveToStorage();
+  if (Notification.permission === 'granted') {
+    scheduleDailyReminder();
+    showToast(`⏰ Reminder set for ${val}`);
+  }
+}
+
