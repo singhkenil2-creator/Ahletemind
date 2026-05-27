@@ -160,6 +160,19 @@
     <i class="fas fa-comment-alt"></i>
   </button>
 
+  <!-- ===== PWA INSTALL BANNER ===== -->
+  <div id="installBanner" class="install-banner hidden">
+    <div class="install-banner-inner">
+      <div class="install-banner-icon">📲</div>
+      <div class="install-banner-text">
+        <strong>Install AthleteMind</strong>
+        <span>Get the full app experience — works offline, no browser needed!</span>
+      </div>
+      <button class="install-banner-btn" onclick="triggerInstall()">Install Free</button>
+      <button class="install-banner-close" onclick="dismissInstallBanner()"><i class="fas fa-times"></i></button>
+    </div>
+  </div>
+
   <!-- Page transition bar -->
   <div id="pageLoader" class="page-loader hidden"></div>
 
@@ -1929,6 +1942,9 @@
     </button>
     <button class="mbn-btn" data-page="gamify" onclick="navTo('gamify')">
       <i class="fas fa-fire"></i><span>Streak</span>
+    </button>
+    <button class="mbn-btn mbn-install hidden" id="mbnInstallBtn" onclick="triggerInstall()">
+      <i class="fas fa-download"></i><span>Install</span>
     </button>
     <button class="mbn-btn mbn-more" onclick="toggleMobileMoreMenu()">
       <i class="fas fa-grid-2"></i><span>More</span>

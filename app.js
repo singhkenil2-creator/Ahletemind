@@ -143,6 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initWhatsNew();
   initRatePrompt();
   initNotifications();
+  initInstallPrompt();
 
   // ── Feature 6: Render activity feed ──
   setTimeout(renderActivityFeed, 200);
@@ -285,9 +286,14 @@ const SPORT_EQUIPMENT = {
 };
 
 function setupAgeGateDobMax() {
-  const maxDate = new Date();
-  maxDate.setFullYear(maxDate.getFullYear() - 13);
-  document.getElementById('userDob').max = maxDate.toISOString().split('T')[0];
+  const now = new Date();
+  const maxDate = new Date(now);
+  maxDate.setFullYear(now.getFullYear() - 13);  // must be at least 13
+  const minDate = new Date(now);
+  minDate.setFullYear(now.getFullYear() - 120); // max age 120 years
+  const dobField = document.getElementById('userDob');
+  dobField.max = maxDate.toISOString().split('T')[0];
+  dobField.min = minDate.toISOString().split('T')[0];
 }
 
 function onboardNext(step) {
@@ -5146,3 +5152,79 @@ document.addEventListener('DOMContentLoaded', () => {
   if (AppState.pushEnabled) scheduleDailyReminder();
 });
 
+/* ============================================================
+   PWA INSTALL PROMPT
+   ============================================================ */
+let _installPromptEvent = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _installPromptEvent = e;
+  // Show banner after 3 seconds if not already installed / dismissed
+  if (!localStorage.getItem('installBannerDismissed')) {
+    setTimeout(showInstallBanner, 3000);
+  }
+});
+
+// Also re-show banner each visit if not dismissed (catches returning users)
+window.addEventListener('appinstalled', () => {
+  hideInstallBanner();
+  localStorage.setItem('installBannerDismissed', '1');
+});
+
+function initInstallPrompt() {
+  // On iOS Safari there's no beforeinstallprompt — show manual instructions banner
+  const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isInStandaloneMode = window.navigator.standalone === true;
+  const dismissed = localStorage.getItem('installBannerDismissed');
+  if (isIos && !isInStandaloneMode && !dismissed) {
+    setTimeout(showInstallBanner, 3000);
+  }
+  // Show install button in mobile nav if prompt available
+  // (handled by beforeinstallprompt listener above)
+}
+
+function showInstallBanner() {
+  const banner = document.getElementById('installBanner');
+  const mbnBtn = document.getElementById('mbnInstallBtn');
+  if (banner) banner.classList.remove('hidden');
+  if (mbnBtn) mbnBtn.classList.remove('hidden');
+  // Nudge again after 60s if still visible
+  setTimeout(() => {
+    const b = document.getElementById('installBanner');
+    if (b && !b.classList.contains('hidden')) {
+      b.style.animation = 'none';
+      b.style.animation = 'slideDown .4s ease';
+    }
+  }, 60000);
+}
+
+function hideInstallBanner() {
+  const banner = document.getElementById('installBanner');
+  if (banner) banner.classList.add('hidden');
+}
+
+function dismissInstallBanner() {
+  hideInstallBanner();
+  localStorage.setItem('installBannerDismissed', '1');
+}
+
+async function triggerInstall() {
+  const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if (isIos) {
+    showToast('📲 Tap the Share button (⬆) then "Add to Home Screen"!', 5000);
+    return;
+  }
+  if (_installPromptEvent) {
+    _installPromptEvent.prompt();
+    const { outcome } = await _installPromptEvent.userChoice;
+    if (outcome === 'accepted') {
+      hideInstallBanner();
+      localStorage.setItem('installBannerDismissed', '1');
+      showToast('🎉 AthleteMind installed! Open it from your home screen.');
+    }
+    _installPromptEvent = null;
+  } else {
+    showToast('📲 Open your browser menu and tap "Add to Home Screen"!', 5000);
+  }
+}
