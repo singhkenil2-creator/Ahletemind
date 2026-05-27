@@ -426,6 +426,7 @@
         <span class="notif-badge hidden" id="notifBadge"></span>
       </button>
       <button class="sport-toggle-btn" onclick="openSportSwitch()"><i class="fas fa-exchange-alt"></i> <span id="currentSportLabel">Football</span></button>
+      <button id="reinstallChip" onclick="showInstallBanner()" title="Install App" style="display:none;background:var(--accent);color:#000;border:none;border-radius:20px;padding:5px 12px;font-size:.75rem;font-weight:800;cursor:pointer;flex-shrink:0"><i class="fas fa-download"></i> Install</button>
       <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark / light mode" id="themeToggleBtn">
         <span class="theme-toggle-track">
           <span class="theme-toggle-thumb"></span>
@@ -1968,6 +1969,7 @@
   <div id="mobileMoreDrawer" class="mobile-more-drawer hidden">
     <div class="mmd-header"><span>All Sections</span><button onclick="closeMobileMoreMenu()"><i class="fas fa-times"></i></button></div>
     <div class="mmd-grid">
+      <button onclick="triggerInstall();closeMobileMoreMenu()"><i class="fas fa-download"></i><span>Install App</span></button>
       <button onclick="navTo('nutrition');closeMobileMoreMenu()"><i class="fas fa-apple-alt"></i><span>Nutrition</span></button>
       <button onclick="navTo('stats');closeMobileMoreMenu()"><i class="fas fa-chart-line"></i><span>Stats</span></button>
       <button onclick="navTo('wellness');closeMobileMoreMenu()"><i class="fas fa-heart-pulse"></i><span>Wellness</span></button>

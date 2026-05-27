@@ -5261,6 +5261,9 @@ function hideInstallBanner() {
 function dismissInstallBanner() {
   hideInstallBanner();
   localStorage.setItem('installBannerDismissed', '1');
+  // Show a small re-open chip in the header
+  const chip = document.getElementById('reinstallChip');
+  if (chip) chip.style.display = '';
 }
 
 async function triggerInstall() {
