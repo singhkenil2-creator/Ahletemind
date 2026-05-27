@@ -1,53 +1,55 @@
-/* AthleteMind — Service Worker */
-const CACHE = 'athletemind-v5';
-const ASSETS = [
-  '/Ahletemind/',
-  '/Ahletemind/index.html',
-  '/Ahletemind/styles.css',
-  '/Ahletemind/app.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css',
-  'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'
-];
+/* AthleteMind — Service Worker v6 (network-first for app files) */
+const CACHE = 'athletemind-v6';
 
-// Install — cache core assets
+// Install — skip waiting immediately
 self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS).catch(() => {}))
-  );
   self.skipWaiting();
 });
 
-// Activate — remove old caches
+// Activate — delete ALL old caches immediately
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    )
+      Promise.all(keys.map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// Fetch — cache-first for assets, network-first for API
+// Fetch — NETWORK FIRST for same-origin (HTML/CSS/JS always fresh)
+// Cache only external CDN resources (fonts, icons, chart.js)
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
-
-  // Always go to network for API calls
   if (url.pathname.startsWith('/api/')) return;
 
+  // CDN — cache first
+  if (url.origin !== self.location.origin) {
+    e.respondWith(
+      caches.match(e.request).then(cached => {
+        if (cached) return cached;
+        return fetch(e.request).then(res => {
+          if (res && res.status === 200) {
+            const clone = res.clone();
+            caches.open(CACHE).then(c => c.put(e.request, clone));
+          }
+          return res;
+        });
+      })
+    );
+    return;
+  }
+
+  // App files — NETWORK FIRST so updates always show immediately
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(res => {
-        if (!res || res.status !== 200 || res.type === 'opaque') return res;
+    fetch(e.request).then(res => {
+      if (res && res.status === 200) {
         const clone = res.clone();
         caches.open(CACHE).then(c => c.put(e.request, clone));
-        return res;
-      }).catch(() => caches.match('/index.html'));
-    })
+      }
+      return res;
+    }).catch(() => caches.match(e.request))
   );
 });
 
-// Push notifications
 self.addEventListener('push', e => {
   const data = e.data ? e.data.json() : {};
   const title = data.title || 'AthleteMind 🏆';
@@ -63,7 +65,6 @@ self.addEventListener('push', e => {
   e.waitUntil(self.registration.showNotification(title, options));
 });
 
-// Notification click — open app
 self.addEventListener('notificationclick', e => {
   e.notification.close();
   e.waitUntil(

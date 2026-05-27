@@ -4459,7 +4459,12 @@ function renderTeamLeaderboard() {
   members.sort((a, b) => (b.xp || 0) - (a.xp || 0));
 
   if (members.length <= 1) {
-    el.innerHTML = '<p style="color:var(--text-secondary);font-size:.85rem">Add friends to see your team leaderboard!</p>';
+    el.innerHTML = `
+      <div style="text-align:center;padding:20px 0">
+        <div style="font-size:2.5rem;margin-bottom:10px">👥</div>
+        <p style="color:var(--text-secondary);font-size:.88rem;margin-bottom:14px">No teammates yet! Add friends using their Athlete ID to compete on the leaderboard.</p>
+        <p style="color:var(--accent);font-size:.8rem">Your ID: <strong>${getDeviceId().toUpperCase().slice(0,12)}</strong></p>
+      </div>`;
     return;
   }
 
