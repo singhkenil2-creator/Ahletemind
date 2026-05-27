@@ -5160,9 +5160,10 @@ let _installPromptEvent = null;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   _installPromptEvent = e;
-  // Show banner after 3 seconds if not already installed / dismissed
   if (!localStorage.getItem('installBannerDismissed')) {
     setTimeout(showInstallBanner, 3000);
+    // Auto-trigger the native install popup after 4s
+    setTimeout(() => { if (_installPromptEvent) _installPromptEvent.prompt(); }, 4000);
   }
 });
 
@@ -5192,7 +5193,7 @@ function initInstallPrompt() {
 function showInstallBanner() {
   const banner = document.getElementById('installBanner');
   const mbnBtn = document.getElementById('mbnInstallBtn');
-  if (banner) banner.classList.remove('hidden');
+  if (banner) { banner.classList.remove('hidden'); document.body.classList.add('banner-visible'); }
   if (mbnBtn) mbnBtn.classList.remove('hidden');
   // Nudge again after 60s if still visible
   setTimeout(() => {
@@ -5206,7 +5207,7 @@ function showInstallBanner() {
 
 function hideInstallBanner() {
   const banner = document.getElementById('installBanner');
-  if (banner) banner.classList.add('hidden');
+  if (banner) { banner.classList.add('hidden'); document.body.classList.remove('banner-visible'); }
 }
 
 function dismissInstallBanner() {

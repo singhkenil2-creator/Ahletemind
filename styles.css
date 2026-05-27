@@ -212,6 +212,7 @@ body {
   flex: 1;
   justify-content: center;
 }
+@media (max-width: 899px) { .nav-tabs { display: none !important; } }
 
 .nav-btn {
   display: flex;
@@ -321,6 +322,8 @@ body {
   margin-right: auto;
   padding-top: 88px;
 }
+body.banner-visible .app-main { padding-top: 136px; }
+body.banner-visible .app-header { top: 52px; }
 
 .page { display: none; }
 .page.active { display: block; animation: fadeIn 0.3s ease; }
