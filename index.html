@@ -413,20 +413,20 @@
       <span class="user-greeting" id="greetingText"></span>
     </div>
     <nav class="nav-tabs">
-      <button class="nav-btn active" data-page="dashboard"><i class="fas fa-home"></i><span>Home</span></button>
-      <button class="nav-btn" data-page="plans"><i class="fas fa-dumbbell"></i><span>Plans</span></button>
-      <button class="nav-btn" data-page="fields"><i class="fas fa-map-marker-alt"></i><span>Fields</span></button>
-      <button class="nav-btn" data-page="calendar"><i class="fas fa-calendar-alt"></i><span>Calendar</span></button>
-      <button class="nav-btn" data-page="nutrition"><i class="fas fa-apple-alt"></i><span>Nutrition</span></button>
-      <button class="nav-btn" data-page="stats"><i class="fas fa-chart-line"></i><span>Stats</span></button>
-      <button class="nav-btn" data-page="gamify"><i class="fas fa-fire"></i><span>Streak Hub</span></button>
-      <button class="nav-btn" data-page="wellness"><i class="fas fa-heart-pulse"></i><span>Wellness</span></button>
-      <button class="nav-btn" data-page="drills"><i class="fas fa-play-circle"></i><span>Drills</span></button>
-      <button class="nav-btn" data-page="video"><i class="fas fa-clapperboard"></i><span>Video</span></button>
-      <button class="nav-btn" data-page="gear"><i class="fas fa-bag-shopping"></i><span>Gear</span></button>
-      <button class="nav-btn" data-page="profile"><i class="fas fa-user-circle"></i><span>Profile</span></button>
-      <button class="nav-btn" data-page="ai"><i class="fas fa-comment-dots"></i><span>Coach</span></button>
-      <button class="nav-btn" data-page="team"><i class="fas fa-users"></i><span>Team</span></button>
+      <button class="nav-btn active" data-page="dashboard"><i class="fas fa-home"></i><span data-i18n="nav_dashboard">Home</span></button>
+      <button class="nav-btn" data-page="plans"><i class="fas fa-dumbbell"></i><span data-i18n="nav_plans">Plans</span></button>
+      <button class="nav-btn" data-page="fields"><i class="fas fa-map-marker-alt"></i><span data-i18n="nav_fields">Fields</span></button>
+      <button class="nav-btn" data-page="calendar"><i class="fas fa-calendar-alt"></i><span data-i18n="nav_calendar">Calendar</span></button>
+      <button class="nav-btn" data-page="nutrition"><i class="fas fa-apple-alt"></i><span data-i18n="nav_nutrition">Nutrition</span></button>
+      <button class="nav-btn" data-page="stats"><i class="fas fa-chart-line"></i><span data-i18n="nav_stats">Stats</span></button>
+      <button class="nav-btn" data-page="gamify"><i class="fas fa-fire"></i><span data-i18n="nav_gamify">Streak Hub</span></button>
+      <button class="nav-btn" data-page="wellness"><i class="fas fa-heart-pulse"></i><span data-i18n="nav_wellness">Wellness</span></button>
+      <button class="nav-btn" data-page="drills"><i class="fas fa-play-circle"></i><span data-i18n="nav_drills">Drills</span></button>
+      <button class="nav-btn" data-page="video"><i class="fas fa-clapperboard"></i><span data-i18n="nav_video">Video</span></button>
+      <button class="nav-btn" data-page="gear"><i class="fas fa-bag-shopping"></i><span data-i18n="nav_gear">Gear</span></button>
+      <button class="nav-btn" data-page="profile"><i class="fas fa-user-circle"></i><span data-i18n="nav_profile">Profile</span></button>
+      <button class="nav-btn" data-page="ai"><i class="fas fa-comment-dots"></i><span data-i18n="nav_ai">Coach</span></button>
+      <button class="nav-btn" data-page="team"><i class="fas fa-users"></i><span data-i18n="nav_team">Team</span></button>
     </nav>
     <div class="header-right">
       <button class="notif-bell-btn" onclick="toggleNotifDropdown()" title="Notifications" id="notifBellBtn">
@@ -454,20 +454,20 @@
     <section id="page-dashboard" class="page active">
       <div class="page-hero">
         <div class="hero-content">
-          <div class="hero-badge"><i class="fas fa-bolt"></i> AI-Powered Training</div>
-          <h1 class="hero-title">Your <span class="accent">Pro Journey</span><br>Starts Here</h1>
-          <p class="hero-sub">Personalised training, nutrition &amp; field discovery &mdash; all in one place.</p>
+          <div class="hero-badge"><i class="fas fa-bolt"></i> <span data-i18n="heroBadge">AI-Powered Training</span></div>
+          <h1 class="hero-title">Your <span class="accent">Athletic Journey</span><br>Starts Here</h1>
+          <p class="hero-sub" data-i18n="heroSub">Personalised training, nutrition &amp; field discovery &mdash; all in one place.</p>
           <div class="hero-actions">
-            <button class="btn-primary" onclick="navTo('plans')"><i class="fas fa-dumbbell"></i> Get My Plan</button>
-            <button class="btn-secondary" onclick="navTo('fields')"><i class="fas fa-map"></i> Find Fields Near Me</button>
-            <button class="btn-ghost" onclick="openShareCard()"><i class="fas fa-share-alt"></i> Share My Progress</button>
+            <button class="btn-primary" onclick="navTo('plans')"><i class="fas fa-dumbbell"></i> <span data-i18n="btnGetPlan">Get My Plan</span></button>
+            <button class="btn-secondary" onclick="navTo('fields')"><i class="fas fa-map"></i> <span data-i18n="btnFindFields">Find Fields Near Me</span></button>
+            <button class="btn-ghost" onclick="openShareCard()"><i class="fas fa-share-alt"></i> <span data-i18n="btnShareProgress">Share My Progress</span></button>
           </div>
         </div>
         <div class="hero-stats">
-          <div class="stat-card"><i class="fas fa-fire"></i><span id="stat-streak">0</span><label>Day Streak</label></div>
-          <div class="stat-card"><i class="fas fa-calendar-check"></i><span id="stat-sessions">0</span><label>Sessions</label></div>
-          <div class="stat-card"><i class="fas fa-utensils"></i><span id="stat-calories">0</span><label>Calories Today</label></div>
-          <div class="stat-card"><i class="fas fa-trophy"></i><span id="stat-level">Rookie</span><label>Level</label></div>
+          <div class="stat-card"><i class="fas fa-fire"></i><span id="stat-streak">0</span><label data-i18n="lblStreak">Day Streak</label></div>
+          <div class="stat-card"><i class="fas fa-calendar-check"></i><span id="stat-sessions">0</span><label data-i18n="lblSessions">Sessions</label></div>
+          <div class="stat-card"><i class="fas fa-utensils"></i><span id="stat-calories">0</span><label data-i18n="lblCaloriesToday">Calories Today</label></div>
+          <div class="stat-card"><i class="fas fa-trophy"></i><span id="stat-level">Rookie</span><label data-i18n="lblLevel">Level</label></div>
         </div>
       </div>
 
@@ -482,7 +482,7 @@
 
       <!-- AI Daily Tip -->
       <div class="card ai-daily-tip">
-        <div class="card-header"><i class="fas fa-lightbulb"></i> Daily Tip</div>
+        <div class="card-header"><i class="fas fa-lightbulb"></i> <span data-i18n="chDailyTip">Daily Tip</span></div>
         <p id="dailyTip" class="tip-text">Loading your personalised tip...</p>
         <button class="btn-ghost" onclick="refreshDailyTip()"><i class="fas fa-sync-alt"></i> New Tip</button>
       </div>
@@ -491,68 +491,68 @@
       <div class="dashboard-grid">
         <div class="card quick-card" onclick="navTo('plans')">
           <i class="fas fa-dumbbell big-icon"></i>
-          <h3>Training Plans</h3>
-          <p>Personalised AthleteMind programmes</p>
+          <h3 data-i18n="qcPlansTitle">Training Plans</h3>
+          <p data-i18n="qcPlansDesc">Personalised AthleteMind programmes</p>
           <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
         </div>
         <div class="card quick-card" onclick="navTo('fields')">
           <i class="fas fa-map-marker-alt big-icon"></i>
-          <h3>Find Fields</h3>
-          <p>Nearby pitches + live weather</p>
+          <h3 data-i18n="qcFieldsTitle">Find Fields</h3>
+          <p data-i18n="qcFieldsDesc">Nearby pitches + live weather</p>
           <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
         </div>
         <div class="card quick-card" onclick="navTo('calendar')">
           <i class="fas fa-calendar-alt big-icon"></i>
-          <h3>My Calendar</h3>
-          <p>Schedule & track sessions</p>
+          <h3 data-i18n="qcCalTitle">My Calendar</h3>
+          <p data-i18n="qcCalDesc">Schedule & track sessions</p>
           <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
         </div>
         <div class="card quick-card" onclick="navTo('nutrition')">
           <i class="fas fa-apple-alt big-icon"></i>
-          <h3>Nutrition</h3>
-          <p>Calorie & macro tracking</p>
+          <h3 data-i18n="qcNutriTitle">Nutrition</h3>
+          <p data-i18n="qcNutriDesc">Calorie & macro tracking</p>
           <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
         </div>
       </div>
 
       <!-- Activity Feed -->
       <div class="card">
-        <div class="card-header"><i class="fas fa-history"></i> Recent Activity</div>
+        <div class="card-header"><i class="fas fa-history"></i> <span data-i18n="chRecentActivity">Recent Activity</span></div>
         <div id="activityFeed" class="activity-feed"></div>
       </div>
 
       <!-- Weekly Summary Widget -->
       <div class="card" id="weeklySummaryWidget">
-        <div class="card-header"><i class="fas fa-calendar-week"></i> This Week <button class="btn-ghost small" style="margin-left:auto" onclick="openWeeklyReport()"><i class="fas fa-expand"></i> Full Report</button></div>
+        <div class="card-header"><i class="fas fa-calendar-week"></i> <span data-i18n="chThisWeek">This Week</span> <button class="btn-ghost small" style="margin-left:auto" onclick="openWeeklyReport()"><i class="fas fa-expand"></i> <span data-i18n="chFullReport">Full Report</span></button></div>
         <div class="weekly-summary-grid" id="weeklySummaryGrid">
-          <div class="wsw-stat"><span id="wsw-sessions">0</span><label>Sessions</label></div>
-          <div class="wsw-stat"><span id="wsw-cals">0</span><label>Calories</label></div>
-          <div class="wsw-stat"><span id="wsw-streak">0</span><label>🔥 Streak</label></div>
-          <div class="wsw-stat"><span id="wsw-xp">0</span><label>⚡ XP</label></div>
+          <div class="wsw-stat"><span id="wsw-sessions">0</span><label data-i18n="lblWSessions">Sessions</label></div>
+          <div class="wsw-stat"><span id="wsw-cals">0</span><label data-i18n="lblWCals">Calories</label></div>
+          <div class="wsw-stat"><span id="wsw-streak">0</span><label data-i18n="lblWStreak">🔥 Streak</label></div>
+          <div class="wsw-stat"><span id="wsw-xp">0</span><label data-i18n="lblWXP">⚡ XP</label></div>
         </div>
       </div>
 
       <!-- Training Timer Quick Launch -->
       <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:16px">
         <div>
-          <div style="font-weight:700;margin-bottom:4px"><i class="fas fa-stopwatch" style="color:var(--accent)"></i> Training Timer</div>
-          <div style="font-size:.82rem;color:var(--text-secondary)">Start a live session stopwatch</div>
+          <div style="font-weight:700;margin-bottom:4px"><i class="fas fa-stopwatch" style="color:var(--accent)"></i> <span data-i18n="timerLabel">Training Timer</span></div>
+          <div style="font-size:.82rem;color:var(--text-secondary)" data-i18n="timerSub">Start a live session stopwatch</div>
         </div>
-        <button class="btn-primary" onclick="openSessionTimer()"><i class="fas fa-play"></i> Start</button>
+        <button class="btn-primary" onclick="openSessionTimer()"><i class="fas fa-play"></i> <span data-i18n="btnStart">Start</span></button>
       </div>
     </section>
 
     <!-- ===== PLANS PAGE ===== -->
     <section id="page-plans" class="page">
       <div class="page-header">
-        <h2><i class="fas fa-dumbbell"></i> AthleteMind — Training Plans</h2>
-        <p>AI-generated programmes tailored to your sport, age & goals</p>
+        <h2><i class="fas fa-dumbbell"></i> <span data-i18n="plansTitle">AthleteMind — Training Plans</span></h2>
+        <p data-i18n="plansSubtitle">AI-generated programmes tailored to your sport, age & goals</p>
       </div>
 
       <div class="plans-controls card">
         <div class="form-row">
           <div class="form-group">
-            <label>Sport</label>
+            <label data-i18n="lblSport">Sport</label>
             <select id="planSport">
               <option value="football">⚽ Football</option>
               <option value="basketball">🏀 Basketball</option>
@@ -571,10 +571,9 @@
             </select>
           </div>
           <div class="form-group">
-            <label>Goal</label>
+            <label data-i18n="lblGoal">Goal</label>
             <select id="planGoal">
               <option value="fitness">General Fitness</option>
-              <option value="pro">AthleteMind Pro</option>
               <option value="speed">Speed & Agility</option>
               <option value="strength">Strength & Power</option>
               <option value="endurance">Endurance</option>
@@ -582,7 +581,7 @@
             </select>
           </div>
           <div class="form-group">
-            <label>Duration</label>
+            <label data-i18n="lblDuration">Duration</label>
             <select id="planDuration">
               <option value="4">4 Weeks</option>
               <option value="8">8 Weeks</option>
@@ -591,7 +590,7 @@
             </select>
           </div>
           <div class="form-group">
-            <label>Level</label>
+            <label data-i18n="lblPlanLevel">Level</label>
             <select id="planLevel">
               <option value="beginner">Beginner</option>
               <option value="intermediate">Intermediate</option>
@@ -601,7 +600,7 @@
           </div>
         </div>
         <button class="btn-primary btn-full" onclick="generatePlan()">
-          <i class="fas fa-robot"></i> Generate My AI Plan
+          <i class="fas fa-robot"></i> <span data-i18n="btnGenerate">Generate My AI Plan</span>
         </button>
       </div>
 
@@ -609,7 +608,7 @@
 
       <!-- AthleteMind Roadmap -->
       <div class="card roadmap-card">
-        <div class="card-header"><i class="fas fa-road"></i> AthleteMind Roadmap</div>
+        <div class="card-header"><i class="fas fa-road"></i> <span data-i18n="chRoadmap">AthleteMind Roadmap</span></div>
         <div class="roadmap">
           <div class="roadmap-step completed"><div class="step-dot"><i class="fas fa-check"></i></div><div class="step-info"><h4>Phase 1 — Foundations</h4><p>Basic fitness, coordination, sport fundamentals</p></div></div>
           <div class="roadmap-step" id="road-phase2"><div class="step-dot">2</div><div class="step-info"><h4>Phase 2 — Development</h4><p>Technical skills, tactical understanding</p></div></div>
@@ -662,13 +661,13 @@
     <!-- ===== FIELDS PAGE ===== -->
     <section id="page-fields" class="page">
       <div class="page-header">
-        <h2><i class="fas fa-map-marker-alt"></i> Find Nearby Fields</h2>
-        <p>Instant sport-venue search powered by Google Maps — always accurate, always fast</p>
+        <h2><i class="fas fa-map-marker-alt"></i> <span data-i18n="fieldsTitle">Find Nearby Fields</span></h2>
+        <p data-i18n="fieldsSubtitle">Instant sport-venue search powered by Google Maps — always accurate, always fast</p>
       </div>
 
       <!-- Quick Sport Search Buttons -->
       <div class="card">
-        <div class="card-header"><i class="fas fa-bolt"></i> Quick Search — Tap & Go</div>
+        <div class="card-header"><i class="fas fa-bolt"></i> <span data-i18n="chQuickSearch">Quick Search — Tap & Go</span></div>
         <p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:14px">Opens Google Maps instantly — the fastest & most accurate way to find venues near you.</p>
         <div class="fields-quick-grid" id="fieldsQuickGrid">
           <a class="fields-quick-btn" href="https://maps.google.com/?q=football+pitches+near+me" target="_blank" rel="noopener"><span class="fq-icon">⚽</span><span>Football Pitches</span></a>
@@ -682,11 +681,11 @@
 
       <!-- Smart Search + Embed Map -->
       <div class="card">
-        <div class="card-header"><i class="fas fa-search-location"></i> Search Any Location</div>
+        <div class="card-header"><i class="fas fa-search-location"></i> <span data-i18n="chSearchAny">Search Any Location</span></div>
         <div class="fields-search-row">
           <input type="text" id="locationSearch" class="fields-search-input" placeholder="Enter city, town or postcode…" />
-          <button class="btn-primary" onclick="searchFieldsLocation()"><i class="fas fa-search"></i> Search</button>
-          <button class="btn-secondary" onclick="searchCurrentLocation()"><i class="fas fa-crosshairs"></i> Near Me</button>
+          <button class="btn-primary" onclick="searchFieldsLocation()"><i class="fas fa-search"></i> <span data-i18n="btnSearch">Search</span></button>
+          <button class="btn-secondary" onclick="searchCurrentLocation()"><i class="fas fa-crosshairs"></i> <span data-i18n="btnNearMe">Near Me</span></button>
         </div>
         <div id="fieldsMapWrap" class="fields-map-wrap">
           <div class="fields-map-placeholder" id="fieldsMapPlaceholder">
@@ -713,8 +712,8 @@
     <!-- ===== CALENDAR PAGE ===== -->
     <section id="page-calendar" class="page">
       <div class="page-header">
-        <h2><i class="fas fa-calendar-alt"></i> My Calendar</h2>
-        <p>Training, school, personal life & rest — plan everything in one place</p>
+        <h2><i class="fas fa-calendar-alt"></i> <span data-i18n="calTitle">My Calendar</span></h2>
+        <p data-i18n="calSubtitle">Training, school, personal life & rest — plan everything in one place</p>
       </div>
 
       <!-- Filter bar -->
@@ -749,11 +748,11 @@
         <div class="calendar-side">
           <!-- Add Event Card -->
           <div class="card add-event-card">
-            <div class="card-header"><i class="fas fa-plus-circle"></i> Add Event</div>
+            <div class="card-header"><i class="fas fa-plus-circle"></i> <span data-i18n="chAddEvent">Add Event</span></div>
 
             <!-- Quick Add Special Events -->
             <div class="form-group">
-              <label>⚡ Quick Add</label>
+              <label data-i18n="lblQuickAdd">⚡ Quick Add</label>
               <div class="quick-event-grid">
                 <button class="quick-ev-btn" onclick="quickAddEvent('matchday','team','Matchday','#42a5f5')" title="Matchday">⚽ Matchday</button>
                 <button class="quick-ev-btn" onclick="quickAddEvent('tournament','team','Tournament Day','#ffd600')" title="Tournament">🏆 Tournament</button>
@@ -768,7 +767,7 @@
 
             <!-- Event Type Quick Selector -->
             <div class="form-group">
-              <label>Event Type</label>
+              <label data-i18n="lblEventType">Event Type</label>
               <div class="event-type-grid" id="eventTypeGrid">
                 <button class="event-type-btn active" data-type="training" onclick="selectEventType('training', this)">
                   <i class="fas fa-dumbbell"></i><span>Training</span>
@@ -795,7 +794,7 @@
             </div>
 
             <div class="form-group">
-              <label>Event Name</label>
+              <label data-i18n="lblEventName">Event Name</label>
               <input type="text" id="eventTitle" placeholder="e.g. Sprint Training, Maths Exam..." />
             </div>
 
@@ -836,18 +835,18 @@
 
             <div class="form-row">
               <div class="form-group">
-                <label>Date</label>
+                <label data-i18n="lblEventDate">Date</label>
                 <input type="date" id="eventDate" />
               </div>
               <div class="form-group">
-                <label>Time</label>
+                <label data-i18n="lblEventTime">Time</label>
                 <input type="time" id="eventTime" />
               </div>
             </div>
 
             <div class="form-row">
               <div class="form-group">
-                <label>Duration (mins)</label>
+                <label data-i18n="lblDuration2">Duration (mins)</label>
                 <input type="number" id="eventDuration" placeholder="60" min="5" max="600" />
               </div>
               <div class="form-group">
@@ -857,7 +856,7 @@
             </div>
 
             <div class="form-group">
-              <label>Notes / Details</label>
+              <label data-i18n="lblNotes">Notes / Details</label>
               <textarea id="eventNotes" placeholder="Location, what to bring, reminders..."></textarea>
             </div>
 
@@ -879,7 +878,7 @@
             </button>
 
             <button class="btn-primary btn-full" onclick="addCalendarEvent()">
-              <i class="fas fa-calendar-plus"></i> Add to Calendar
+              <i class="fas fa-calendar-plus"></i> <span data-i18n="btnAddToCalendar">Add to Calendar</span>
             </button>
           </div>
 
@@ -891,7 +890,7 @@
 
           <!-- Upcoming Events -->
           <div class="card upcoming-card">
-            <div class="card-header"><i class="fas fa-clock"></i> Upcoming</div>
+            <div class="card-header"><i class="fas fa-clock"></i> <span data-i18n="chUpcoming">Upcoming</span></div>
             <div id="upcomingEvents"></div>
           </div>
         </div>
@@ -901,8 +900,8 @@
     <!-- ===== NUTRITION PAGE ===== -->
     <section id="page-nutrition" class="page">
       <div class="page-header">
-        <h2><i class="fas fa-apple-alt"></i> Nutrition & Calorie Tracker</h2>
-        <p>Fuel your pro journey with smart eating</p>
+        <h2><i class="fas fa-apple-alt"></i> <span data-i18n="nutTitle">Nutrition & Calorie Tracker</span></h2>
+        <p data-i18n="nutSubtitle">Fuel your pro journey with smart eating</p>
       </div>
 
       <!-- Calorie Summary -->
@@ -920,19 +919,19 @@
         </div>
         <div class="macro-bars">
           <div class="macro-item">
-            <div class="macro-label"><span>Protein</span><span id="proteinVal">0g</span></div>
+            <div class="macro-label"><span data-i18n="lblProtein">Protein</span><span id="proteinVal">0g</span></div>
             <div class="macro-bar-bg"><div class="macro-bar protein-bar" id="proteinBar"></div></div>
           </div>
           <div class="macro-item">
-            <div class="macro-label"><span>Carbs</span><span id="carbsVal">0g</span></div>
+            <div class="macro-label"><span data-i18n="lblCarbs">Carbs</span><span id="carbsVal">0g</span></div>
             <div class="macro-bar-bg"><div class="macro-bar carbs-bar" id="carbsBar"></div></div>
           </div>
           <div class="macro-item">
-            <div class="macro-label"><span>Fat</span><span id="fatVal">0g</span></div>
+            <div class="macro-label"><span data-i18n="lblFat">Fat</span><span id="fatVal">0g</span></div>
             <div class="macro-bar-bg"><div class="macro-bar fat-bar" id="fatBar"></div></div>
           </div>
           <div class="macro-item">
-            <div class="macro-label"><span>Fibre</span><span id="fibreVal">0g</span></div>
+            <div class="macro-label"><span data-i18n="lblFibre">Fibre</span><span id="fibreVal">0g</span></div>
             <div class="macro-bar-bg"><div class="macro-bar fibre-bar" id="fibreBar"></div></div>
           </div>
         </div>
@@ -1801,19 +1800,6 @@
             <button class="btn-secondary btn-full" onclick="openWeeklyReport()"><i class="fas fa-eye"></i> View This Week</button>
           </div>
 
-          <!-- Go Premium -->
-          <div class="card premium-card">
-            <div class="card-header" style="color:var(--accent)"><i class="fas fa-crown"></i> AthleteMind Pro</div>
-            <p style="font-size:.82rem;color:var(--text-secondary);margin-bottom:12px">Unlock real AI coaching, advanced plans, video analysis and more.</p>
-            <div class="premium-features">
-              <div class="pf-item"><i class="fas fa-check"></i> Real AI Coach (GPT-4)</div>
-              <div class="pf-item"><i class="fas fa-check"></i> Unlimited Plans</div>
-              <div class="pf-item"><i class="fas fa-check"></i> Video Analysis</div>
-              <div class="pf-item"><i class="fas fa-check"></i> Priority Support</div>
-            </div>
-            <button class="btn-primary btn-full premium-btn" onclick="openPaywall()"><i class="fas fa-crown"></i> Upgrade to Pro — £4.99/mo</button>
-          </div>
-
           <!-- Photo Progress Wall -->
           <div class="card">
             <div class="card-header"><i class="fas fa-camera"></i> Progress Wall</div>
@@ -1938,28 +1924,6 @@
     </div>
   </div>
 
-  <!-- ========== PAYWALL MODAL ========== -->
-  <div id="paywallModal" class="modal-overlay hidden">
-    <div class="modal-box" style="max-width:420px;text-align:center">
-      <div class="modal-header">
-        <h3><i class="fas fa-crown" style="color:var(--accent)"></i> AthleteMind Pro</h3>
-        <button class="close-btn" onclick="closeModal('paywallModal')"><i class="fas fa-times"></i></button>
-      </div>
-      <div style="padding:24px">
-        <div class="paywall-price">£4.99<span>/month</span></div>
-        <p style="color:var(--text-secondary);margin-bottom:20px;font-size:.9rem">Everything you need to reach the top.</p>
-        <div class="premium-features" style="text-align:left;margin-bottom:20px">
-          <div class="pf-item"><i class="fas fa-check"></i> Real AI Coach powered by GPT-4</div>
-          <div class="pf-item"><i class="fas fa-check"></i> Unlimited personalised plans</div>
-          <div class="pf-item"><i class="fas fa-check"></i> Advanced video analysis</div>
-          <div class="pf-item"><i class="fas fa-check"></i> Priority support</div>
-          <div class="pf-item"><i class="fas fa-check"></i> No ads, ever</div>
-        </div>
-        <button class="btn-primary btn-full premium-btn" onclick="handleUpgrade()"><i class="fas fa-crown"></i> Start Free 7-Day Trial</button>
-        <p style="font-size:.72rem;color:var(--text-secondary);margin-top:10px">Cancel anytime. No commitment.</p>
-      </div>
-    </div>
-  </div>
   <div id="drillTimerModal" class="modal-overlay hidden">
     <div class="modal-box dt-modal">
       <div class="modal-header">
@@ -2128,39 +2092,39 @@
   <!-- ========== MOBILE BOTTOM NAV ========== -->
   <nav class="mobile-bottom-nav" id="mobileBottomNav">
     <button class="mbn-btn active" data-page="dashboard" onclick="navTo('dashboard')">
-      <i class="fas fa-home"></i><span>Home</span>
+      <i class="fas fa-home"></i><span data-i18n="nav_dashboard">Home</span>
     </button>
     <button class="mbn-btn" data-page="plans" onclick="navTo('plans')">
-      <i class="fas fa-dumbbell"></i><span>Plans</span>
+      <i class="fas fa-dumbbell"></i><span data-i18n="nav_plans">Plans</span>
     </button>
     <button class="mbn-btn" data-page="calendar" onclick="navTo('calendar')">
-      <i class="fas fa-calendar-alt"></i><span>Calendar</span>
+      <i class="fas fa-calendar-alt"></i><span data-i18n="nav_calendar">Calendar</span>
     </button>
     <button class="mbn-btn" data-page="gamify" onclick="navTo('gamify')">
-      <i class="fas fa-fire"></i><span>Streak</span>
+      <i class="fas fa-fire"></i><span data-i18n="nav_gamify">Streak</span>
     </button>
     <button class="mbn-btn mbn-more" onclick="toggleMobileMoreMenu()">
-      <i class="fas fa-grid-2"></i><span>More</span>
+      <i class="fas fa-grid-2"></i><span data-i18n="nav_more">More</span>
     </button>
   </nav>
 
   <!-- Mobile "More" drawer -->
   <div id="mobileMoreOverlay" class="mobile-more-overlay hidden" onclick="closeMobileMoreMenu()"></div>
   <div id="mobileMoreDrawer" class="mobile-more-drawer hidden">
-    <div class="mmd-header"><span>All Sections</span><button onclick="closeMobileMoreMenu()"><i class="fas fa-times"></i></button></div>
+    <div class="mmd-header"><span data-i18n="allSections">All Sections</span><button onclick="closeMobileMoreMenu()"><i class="fas fa-times"></i></button></div>
     <div class="mmd-grid">
       <button onclick="triggerInstall();closeMobileMoreMenu()"><i class="fas fa-download"></i><span>Install App</span></button>
       <button onclick="openModal('langModal');closeMobileMoreMenu()"><i class="fas fa-language"></i><span>Language</span></button>
       <button onclick="openModal('bizCardModal');closeMobileMoreMenu()"><i class="fas fa-id-card"></i><span>Share App</span></button>
-      <button onclick="navTo('nutrition');closeMobileMoreMenu()"><i class="fas fa-apple-alt"></i><span>Nutrition</span></button>
-      <button onclick="navTo('stats');closeMobileMoreMenu()"><i class="fas fa-chart-line"></i><span>Stats</span></button>
-      <button onclick="navTo('wellness');closeMobileMoreMenu()"><i class="fas fa-heart-pulse"></i><span>Wellness</span></button>
-      <button onclick="navTo('drills');closeMobileMoreMenu()"><i class="fas fa-play-circle"></i><span>Drills</span></button>
-      <button onclick="navTo('video');closeMobileMoreMenu()"><i class="fas fa-clapperboard"></i><span>Video</span></button>
-      <button onclick="navTo('gear');closeMobileMoreMenu()"><i class="fas fa-bag-shopping"></i><span>Gear</span></button>
-      <button onclick="navTo('fields');closeMobileMoreMenu()"><i class="fas fa-map-marker-alt"></i><span>Fields</span></button>
-      <button onclick="navTo('ai');closeMobileMoreMenu()"><i class="fas fa-comment-dots"></i><span>Coach</span></button>
-      <button onclick="navTo('profile');closeMobileMoreMenu()"><i class="fas fa-user-circle"></i><span>Profile</span></button>
+      <button onclick="navTo('nutrition');closeMobileMoreMenu()"><i class="fas fa-apple-alt"></i><span data-i18n="nav_nutrition">Nutrition</span></button>
+      <button onclick="navTo('stats');closeMobileMoreMenu()"><i class="fas fa-chart-line"></i><span data-i18n="nav_stats">Stats</span></button>
+      <button onclick="navTo('wellness');closeMobileMoreMenu()"><i class="fas fa-heart-pulse"></i><span data-i18n="nav_wellness">Wellness</span></button>
+      <button onclick="navTo('drills');closeMobileMoreMenu()"><i class="fas fa-play-circle"></i><span data-i18n="nav_drills">Drills</span></button>
+      <button onclick="navTo('video');closeMobileMoreMenu()"><i class="fas fa-clapperboard"></i><span data-i18n="nav_video">Video</span></button>
+      <button onclick="navTo('gear');closeMobileMoreMenu()"><i class="fas fa-bag-shopping"></i><span data-i18n="nav_gear">Gear</span></button>
+      <button onclick="navTo('fields');closeMobileMoreMenu()"><i class="fas fa-map-marker-alt"></i><span data-i18n="nav_fields">Fields</span></button>
+      <button onclick="navTo('ai');closeMobileMoreMenu()"><i class="fas fa-comment-dots"></i><span data-i18n="nav_ai">Coach</span></button>
+      <button onclick="navTo('profile');closeMobileMoreMenu()"><i class="fas fa-user-circle"></i><span data-i18n="nav_profile">Profile</span></button>
     </div>
   </div>
 

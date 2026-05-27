@@ -2021,59 +2021,251 @@ function closeModal(id) {
 // =====================================================
 const TRANSLATIONS = {
   en: {
-    langLabel:'EN', home:'Home', plans:'Plans', calendar:'Calendar', streak:'Streak', more:'More',
-    nutrition:'Nutrition', stats:'Stats', wellness:'Wellness', drills:'Drills', video:'Video',
-    gear:'Gear', fields:'Fields', ai:'Coach', profile:'Profile', team:'Team',
-    logSession:'Log Session', today:'Today',
+    langLabel:'EN',
+    nav_dashboard:'Home', nav_plans:'Plans', nav_fields:'Fields', nav_calendar:'Calendar',
+    nav_nutrition:'Nutrition', nav_stats:'Stats', nav_gamify:'Streak Hub', nav_wellness:'Wellness',
+    nav_drills:'Drills', nav_video:'Video', nav_gear:'Gear', nav_profile:'Profile',
+    nav_ai:'Coach', nav_team:'Team', nav_more:'More', allSections:'All Sections',
+    heroBadge:'AI-Powered Training',
+    heroSub:'Personalised training, nutrition & field discovery — all in one place.',
+    btnGetPlan:'Get My Plan', btnFindFields:'Find Fields Near Me', btnShareProgress:'Share My Progress',
+    lblStreak:'Day Streak', lblSessions:'Sessions', lblCaloriesToday:'Calories Today', lblLevel:'Level',
+    qcPlansTitle:'Training Plans', qcPlansDesc:'Personalised programmes',
+    qcFieldsTitle:'Find Fields', qcFieldsDesc:'Nearby pitches + live weather',
+    qcCalTitle:'My Calendar', qcCalDesc:'Schedule & track sessions',
+    qcNutriTitle:'Nutrition', qcNutriDesc:'Calorie & macro tracking',
+    chDailyTip:'Daily Tip', chRecentActivity:'Recent Activity', chThisWeek:'This Week',
+    chFullReport:'Full Report', timerLabel:'Training Timer', timerSub:'Start a live session stopwatch', btnStart:'Start',
+    lblWSessions:'Sessions', lblWCals:'Calories', lblWStreak:'🔥 Streak', lblWXP:'⚡ XP',
+    plansTitle:'Training Plans', plansSubtitle:'AI-generated programmes tailored to your sport, age & goals',
+    lblSport:'Sport', lblGoal:'Goal', lblDuration:'Duration', lblPlanLevel:'Level',
+    btnGenerate:'Generate My AI Plan', chRoadmap:'AthleteMind Roadmap',
+    fieldsTitle:'Find Nearby Fields', fieldsSubtitle:'Instant sport-venue search powered by Google Maps',
+    chQuickSearch:'Quick Search — Tap & Go', chSearchAny:'Search Any Location',
+    btnSearch:'Search', btnNearMe:'Near Me',
+    calTitle:'My Calendar', calSubtitle:'Training, school, personal life & rest — plan everything in one place',
+    chAddEvent:'Add Event', lblQuickAdd:'⚡ Quick Add', lblEventType:'Event Type',
+    lblEventName:'Event Name', lblEventDate:'Date', lblEventTime:'Time',
+    lblDuration2:'Duration (mins)', lblNotes:'Notes / Details', btnAddToCalendar:'Add to Calendar', chUpcoming:'Upcoming',
+    nutTitle:'Nutrition & Calorie Tracker', nutSubtitle:'Fuel your journey with smart eating',
+    lblProtein:'Protein', lblCarbs:'Carbs', lblFat:'Fat', lblFibre:'Fibre',
     toastLang:'🌐 Language set to English'
   },
   es: {
-    langLabel:'ES', home:'Inicio', plans:'Planes', calendar:'Calendario', streak:'Racha', more:'Más',
-    nutrition:'Nutrición', stats:'Estadísticas', wellness:'Bienestar', drills:'Ejercicios', video:'Vídeo',
-    gear:'Equipo', fields:'Campos', ai:'Entrenador', profile:'Perfil', team:'Equipo',
-    logSession:'Registrar sesión', today:'Hoy',
+    langLabel:'ES',
+    nav_dashboard:'Inicio', nav_plans:'Planes', nav_fields:'Campos', nav_calendar:'Calendario',
+    nav_nutrition:'Nutrición', nav_stats:'Estadísticas', nav_gamify:'Racha', nav_wellness:'Bienestar',
+    nav_drills:'Ejercicios', nav_video:'Vídeo', nav_gear:'Equipo', nav_profile:'Perfil',
+    nav_ai:'Entrenador', nav_team:'Equipo', nav_more:'Más', allSections:'Todas las secciones',
+    heroBadge:'Entrenamiento con IA',
+    heroSub:'Entrenamiento personalizado, nutrición y búsqueda de campos — todo en un lugar.',
+    btnGetPlan:'Mi Plan', btnFindFields:'Buscar Campos', btnShareProgress:'Compartir Progreso',
+    lblStreak:'Días Seguidos', lblSessions:'Sesiones', lblCaloriesToday:'Calorías Hoy', lblLevel:'Nivel',
+    qcPlansTitle:'Planes de Entrenamiento', qcPlansDesc:'Programas personalizados',
+    qcFieldsTitle:'Buscar Campos', qcFieldsDesc:'Pistas cercanas + clima en vivo',
+    qcCalTitle:'Mi Calendario', qcCalDesc:'Planifica y sigue tus sesiones',
+    qcNutriTitle:'Nutrición', qcNutriDesc:'Control de calorías y macros',
+    chDailyTip:'Consejo del Día', chRecentActivity:'Actividad Reciente', chThisWeek:'Esta Semana',
+    chFullReport:'Informe Completo', timerLabel:'Temporizador de Entrenamiento', timerSub:'Inicia un cronómetro de sesión en vivo', btnStart:'Iniciar',
+    lblWSessions:'Sesiones', lblWCals:'Calorías', lblWStreak:'🔥 Racha', lblWXP:'⚡ XP',
+    plansTitle:'Planes de Entrenamiento', plansSubtitle:'Programas generados por IA adaptados a tu deporte, edad y objetivos',
+    lblSport:'Deporte', lblGoal:'Objetivo', lblDuration:'Duración', lblPlanLevel:'Nivel',
+    btnGenerate:'Generar Mi Plan IA', chRoadmap:'Hoja de Ruta',
+    fieldsTitle:'Buscar Campos Cercanos', fieldsSubtitle:'Búsqueda instantánea de instalaciones deportivas',
+    chQuickSearch:'Búsqueda Rápida', chSearchAny:'Buscar Cualquier Lugar',
+    btnSearch:'Buscar', btnNearMe:'Cerca de Mí',
+    calTitle:'Mi Calendario', calSubtitle:'Entrenamiento, escuela y descanso — planifica todo',
+    chAddEvent:'Agregar Evento', lblQuickAdd:'⚡ Agregar Rápido', lblEventType:'Tipo de Evento',
+    lblEventName:'Nombre del Evento', lblEventDate:'Fecha', lblEventTime:'Hora',
+    lblDuration2:'Duración (min)', lblNotes:'Notas / Detalles', btnAddToCalendar:'Agregar al Calendario', chUpcoming:'Próximos',
+    nutTitle:'Rastreador de Nutrición y Calorías', nutSubtitle:'Alimenta tu viaje con comida inteligente',
+    lblProtein:'Proteína', lblCarbs:'Carbohidratos', lblFat:'Grasa', lblFibre:'Fibra',
     toastLang:'🌐 Idioma configurado a Español'
   },
   fr: {
-    langLabel:'FR', home:'Accueil', plans:'Plans', calendar:'Calendrier', streak:'Série', more:'Plus',
-    nutrition:'Nutrition', stats:'Statistiques', wellness:'Bien-être', drills:'Exercices', video:'Vidéo',
-    gear:'Équipement', fields:'Terrains', ai:'Coach', profile:'Profil', team:'Équipe',
-    logSession:'Enregistrer', today:"Aujourd'hui",
+    langLabel:'FR',
+    nav_dashboard:'Accueil', nav_plans:'Plans', nav_fields:'Terrains', nav_calendar:'Calendrier',
+    nav_nutrition:'Nutrition', nav_stats:'Statistiques', nav_gamify:'Série', nav_wellness:'Bien-être',
+    nav_drills:'Exercices', nav_video:'Vidéo', nav_gear:'Équipement', nav_profile:'Profil',
+    nav_ai:'Coach', nav_team:'Équipe', nav_more:'Plus', allSections:'Toutes les sections',
+    heroBadge:'Entraînement par IA',
+    heroSub:"Entraînement personnalisé, nutrition et découverte de terrains — tout en un.",
+    btnGetPlan:'Mon Plan', btnFindFields:'Trouver des Terrains', btnShareProgress:'Partager mes Progrès',
+    lblStreak:'Jours de Suite', lblSessions:'Séances', lblCaloriesToday:"Calories Aujourd'hui", lblLevel:'Niveau',
+    qcPlansTitle:"Plans d'Entraînement", qcPlansDesc:'Programmes personnalisés',
+    qcFieldsTitle:'Trouver des Terrains', qcFieldsDesc:'Terrains proches + météo en direct',
+    qcCalTitle:'Mon Calendrier', qcCalDesc:'Planifiez et suivez vos séances',
+    qcNutriTitle:'Nutrition', qcNutriDesc:'Suivi des calories et macros',
+    chDailyTip:'Conseil du Jour', chRecentActivity:'Activité Récente', chThisWeek:'Cette Semaine',
+    chFullReport:'Rapport Complet', timerLabel:"Minuteur d'Entraînement", timerSub:'Démarrez un chronomètre de séance en direct', btnStart:'Démarrer',
+    lblWSessions:'Séances', lblWCals:'Calories', lblWStreak:'🔥 Série', lblWXP:'⚡ XP',
+    plansTitle:"Plans d'Entraînement", plansSubtitle:'Programmes générés par IA adaptés à votre sport, âge et objectifs',
+    lblSport:'Sport', lblGoal:'Objectif', lblDuration:'Durée', lblPlanLevel:'Niveau',
+    btnGenerate:'Générer Mon Plan IA', chRoadmap:'Feuille de Route',
+    fieldsTitle:'Trouver des Terrains Proches', fieldsSubtitle:'Recherche instantanée de lieux sportifs',
+    chQuickSearch:'Recherche Rapide', chSearchAny:"Rechercher n'importe où",
+    btnSearch:'Rechercher', btnNearMe:'Près de Moi',
+    calTitle:'Mon Calendrier', calSubtitle:"Entraînement, école, vie personnelle — planifiez tout",
+    chAddEvent:'Ajouter un Événement', lblQuickAdd:'⚡ Ajout Rapide', lblEventType:"Type d'Événement",
+    lblEventName:"Nom de l'Événement", lblEventDate:'Date', lblEventTime:'Heure',
+    lblDuration2:'Durée (min)', lblNotes:'Notes / Détails', btnAddToCalendar:'Ajouter au Calendrier', chUpcoming:'À venir',
+    nutTitle:'Suivi Nutrition & Calories', nutSubtitle:'Alimentez votre voyage avec une alimentation intelligente',
+    lblProtein:'Protéines', lblCarbs:'Glucides', lblFat:'Lipides', lblFibre:'Fibres',
     toastLang:'🌐 Langue définie sur le Français'
   },
   de: {
-    langLabel:'DE', home:'Start', plans:'Pläne', calendar:'Kalender', streak:'Serie', more:'Mehr',
-    nutrition:'Ernährung', stats:'Statistiken', wellness:'Wohlbefinden', drills:'Übungen', video:'Video',
-    gear:'Ausrüstung', fields:'Felder', ai:'Coach', profile:'Profil', team:'Team',
-    logSession:'Einheit speichern', today:'Heute',
+    langLabel:'DE',
+    nav_dashboard:'Start', nav_plans:'Pläne', nav_fields:'Felder', nav_calendar:'Kalender',
+    nav_nutrition:'Ernährung', nav_stats:'Statistiken', nav_gamify:'Serie', nav_wellness:'Wohlbefinden',
+    nav_drills:'Übungen', nav_video:'Video', nav_gear:'Ausrüstung', nav_profile:'Profil',
+    nav_ai:'Coach', nav_team:'Team', nav_more:'Mehr', allSections:'Alle Bereiche',
+    heroBadge:'KI-gesteuertes Training',
+    heroSub:'Personalisiertes Training, Ernährung & Feldsuche — alles an einem Ort.',
+    btnGetPlan:'Mein Plan', btnFindFields:'Felder finden', btnShareProgress:'Fortschritt teilen',
+    lblStreak:'Tage in Folge', lblSessions:'Einheiten', lblCaloriesToday:'Kalorien heute', lblLevel:'Level',
+    qcPlansTitle:'Trainingspläne', qcPlansDesc:'Personalisierte Programme',
+    qcFieldsTitle:'Felder finden', qcFieldsDesc:'Nahegelegene Plätze + Live-Wetter',
+    qcCalTitle:'Mein Kalender', qcCalDesc:'Sitzungen planen & verfolgen',
+    qcNutriTitle:'Ernährung', qcNutriDesc:'Kalorien- & Makro-Tracking',
+    chDailyTip:'Tipp des Tages', chRecentActivity:'Letzte Aktivität', chThisWeek:'Diese Woche',
+    chFullReport:'Vollbericht', timerLabel:'Trainings-Timer', timerSub:'Stoppuhr für Live-Sitzung starten', btnStart:'Start',
+    lblWSessions:'Einheiten', lblWCals:'Kalorien', lblWStreak:'🔥 Serie', lblWXP:'⚡ XP',
+    plansTitle:'Trainingspläne', plansSubtitle:'KI-generierte Programme angepasst an Sport, Alter & Ziele',
+    lblSport:'Sportart', lblGoal:'Ziel', lblDuration:'Dauer', lblPlanLevel:'Level',
+    btnGenerate:'Meinen KI-Plan erstellen', chRoadmap:'Trainings-Roadmap',
+    fieldsTitle:'Nahegelegene Felder finden', fieldsSubtitle:'Sofortige Sportplatzsuche über Google Maps',
+    chQuickSearch:'Schnellsuche', chSearchAny:'Beliebigen Ort suchen',
+    btnSearch:'Suchen', btnNearMe:'In meiner Nähe',
+    calTitle:'Mein Kalender', calSubtitle:'Training, Schule, Privates & Erholung — alles planen',
+    chAddEvent:'Ereignis hinzufügen', lblQuickAdd:'⚡ Schnell hinzufügen', lblEventType:'Ereignistyp',
+    lblEventName:'Ereignisname', lblEventDate:'Datum', lblEventTime:'Uhrzeit',
+    lblDuration2:'Dauer (Min)', lblNotes:'Notizen / Details', btnAddToCalendar:'Zum Kalender hinzufügen', chUpcoming:'Demnächst',
+    nutTitle:'Ernährungs- & Kalorien-Tracker', nutSubtitle:'Versorge deine Reise mit kluger Ernährung',
+    lblProtein:'Protein', lblCarbs:'Kohlenhydrate', lblFat:'Fett', lblFibre:'Ballaststoffe',
     toastLang:'🌐 Sprache auf Deutsch eingestellt'
   },
   pt: {
-    langLabel:'PT', home:'Início', plans:'Planos', calendar:'Calendário', streak:'Sequência', more:'Mais',
-    nutrition:'Nutrição', stats:'Estatísticas', wellness:'Bem-estar', drills:'Treinos', video:'Vídeo',
-    gear:'Equipamento', fields:'Campos', ai:'Treinador', profile:'Perfil', team:'Time',
-    logSession:'Registar sessão', today:'Hoje',
+    langLabel:'PT',
+    nav_dashboard:'Início', nav_plans:'Planos', nav_fields:'Campos', nav_calendar:'Calendário',
+    nav_nutrition:'Nutrição', nav_stats:'Estatísticas', nav_gamify:'Sequência', nav_wellness:'Bem-estar',
+    nav_drills:'Treinos', nav_video:'Vídeo', nav_gear:'Equipamento', nav_profile:'Perfil',
+    nav_ai:'Treinador', nav_team:'Time', nav_more:'Mais', allSections:'Todas as Seções',
+    heroBadge:'Treino com IA',
+    heroSub:'Treino personalizado, nutrição e descoberta de campos — tudo num só lugar.',
+    btnGetPlan:'Meu Plano', btnFindFields:'Encontrar Campos', btnShareProgress:'Compartilhar Progresso',
+    lblStreak:'Dias Seguidos', lblSessions:'Sessões', lblCaloriesToday:'Calorias Hoje', lblLevel:'Nível',
+    qcPlansTitle:'Planos de Treino', qcPlansDesc:'Programas personalizados',
+    qcFieldsTitle:'Encontrar Campos', qcFieldsDesc:'Campos próximos + clima em tempo real',
+    qcCalTitle:'Meu Calendário', qcCalDesc:'Agende e acompanhe as sessões',
+    qcNutriTitle:'Nutrição', qcNutriDesc:'Rastreio de calorias e macros',
+    chDailyTip:'Dica do Dia', chRecentActivity:'Atividade Recente', chThisWeek:'Esta Semana',
+    chFullReport:'Relatório Completo', timerLabel:'Temporizador de Treino', timerSub:'Iniciar cronómetro de sessão ao vivo', btnStart:'Iniciar',
+    lblWSessions:'Sessões', lblWCals:'Calorias', lblWStreak:'🔥 Sequência', lblWXP:'⚡ XP',
+    plansTitle:'Planos de Treino', plansSubtitle:'Programas gerados por IA adaptados ao seu desporto, idade e objetivos',
+    lblSport:'Desporto', lblGoal:'Objetivo', lblDuration:'Duração', lblPlanLevel:'Nível',
+    btnGenerate:'Gerar Meu Plano IA', chRoadmap:'Roteiro AthleteMind',
+    fieldsTitle:'Encontrar Campos Próximos', fieldsSubtitle:'Pesquisa instantânea de locais desportivos',
+    chQuickSearch:'Pesquisa Rápida', chSearchAny:'Pesquisar Qualquer Local',
+    btnSearch:'Pesquisar', btnNearMe:'Perto de Mim',
+    calTitle:'Meu Calendário', calSubtitle:'Treino, escola, vida pessoal — planeje tudo',
+    chAddEvent:'Adicionar Evento', lblQuickAdd:'⚡ Adicionar Rápido', lblEventType:'Tipo de Evento',
+    lblEventName:'Nome do Evento', lblEventDate:'Data', lblEventTime:'Hora',
+    lblDuration2:'Duração (min)', lblNotes:'Notas / Detalhes', btnAddToCalendar:'Adicionar ao Calendário', chUpcoming:'Próximos',
+    nutTitle:'Rastreador de Nutrição e Calorias', nutSubtitle:'Alimente sua jornada com alimentação inteligente',
+    lblProtein:'Proteína', lblCarbs:'Carboidratos', lblFat:'Gordura', lblFibre:'Fibra',
     toastLang:'🌐 Idioma definido para Português'
   },
   ar: {
-    langLabel:'AR', home:'الرئيسية', plans:'الخطط', calendar:'التقويم', streak:'السلسلة', more:'المزيد',
-    nutrition:'التغذية', stats:'الإحصاء', wellness:'الصحة', drills:'التدريبات', video:'فيديو',
-    gear:'المعدات', fields:'الملاعب', ai:'المدرب', profile:'الملف', team:'الفريق',
-    logSession:'تسجيل جلسة', today:'اليوم',
+    langLabel:'AR',
+    nav_dashboard:'الرئيسية', nav_plans:'الخطط', nav_fields:'الملاعب', nav_calendar:'التقويم',
+    nav_nutrition:'التغذية', nav_stats:'الإحصاء', nav_gamify:'السلسلة', nav_wellness:'الصحة',
+    nav_drills:'التدريبات', nav_video:'فيديو', nav_gear:'المعدات', nav_profile:'الملف',
+    nav_ai:'المدرب', nav_team:'الفريق', nav_more:'المزيد', allSections:'جميع الأقسام',
+    heroBadge:'تدريب بالذكاء الاصطناعي',
+    heroSub:'تدريب مخصص وتغذية واكتشاف ملاعب — كل شيء في مكان واحد.',
+    btnGetPlan:'خطتي', btnFindFields:'البحث عن ملاعب', btnShareProgress:'مشاركة التقدم',
+    lblStreak:'أيام متتالية', lblSessions:'جلسات', lblCaloriesToday:'السعرات اليوم', lblLevel:'المستوى',
+    qcPlansTitle:'خطط التدريب', qcPlansDesc:'برامج مخصصة',
+    qcFieldsTitle:'البحث عن ملاعب', qcFieldsDesc:'ملاعب قريبة + الطقس المباشر',
+    qcCalTitle:'تقويمي', qcCalDesc:'جدولة وتتبع الجلسات',
+    qcNutriTitle:'التغذية', qcNutriDesc:'تتبع السعرات والمغذيات',
+    chDailyTip:'نصيحة اليوم', chRecentActivity:'النشاط الأخير', chThisWeek:'هذا الأسبوع',
+    chFullReport:'التقرير الكامل', timerLabel:'مؤقت التدريب', timerSub:'ابدأ ساعة توقيت للجلسة المباشرة', btnStart:'ابدأ',
+    lblWSessions:'الجلسات', lblWCals:'السعرات', lblWStreak:'🔥 السلسلة', lblWXP:'⚡ XP',
+    plansTitle:'خطط التدريب', plansSubtitle:'برامج بالذكاء الاصطناعي مخصصة لرياضتك وعمرك وأهدافك',
+    lblSport:'الرياضة', lblGoal:'الهدف', lblDuration:'المدة', lblPlanLevel:'المستوى',
+    btnGenerate:'إنشاء خطتي بالذكاء الاصطناعي', chRoadmap:'خارطة الطريق',
+    fieldsTitle:'البحث عن ملاعب قريبة', fieldsSubtitle:'بحث فوري عن الملاعب الرياضية',
+    chQuickSearch:'بحث سريع', chSearchAny:'البحث في أي مكان',
+    btnSearch:'بحث', btnNearMe:'بالقرب مني',
+    calTitle:'تقويمي', calSubtitle:'التدريب والمدرسة والراحة — خطط لكل شيء',
+    chAddEvent:'إضافة حدث', lblQuickAdd:'⚡ إضافة سريعة', lblEventType:'نوع الحدث',
+    lblEventName:'اسم الحدث', lblEventDate:'التاريخ', lblEventTime:'الوقت',
+    lblDuration2:'المدة (دقيقة)', lblNotes:'ملاحظات / تفاصيل', btnAddToCalendar:'إضافة إلى التقويم', chUpcoming:'القادمة',
+    nutTitle:'متتبع التغذية والسعرات', nutSubtitle:'أطعم رحلتك بأكل ذكي',
+    lblProtein:'بروتين', lblCarbs:'كربوهيدرات', lblFat:'دهون', lblFibre:'ألياف',
     toastLang:'🌐 تم تعيين اللغة إلى العربية'
   },
   hi: {
-    langLabel:'HI', home:'होम', plans:'योजनाएं', calendar:'कैलेंडर', streak:'स्ट्रीक', more:'अधिक',
-    nutrition:'पोषण', stats:'आँकड़े', wellness:'स्वास्थ्य', drills:'अभ्यास', video:'वीडियो',
-    gear:'उपकरण', fields:'मैदान', ai:'कोच', profile:'प्रोफाइल', team:'टीम',
-    logSession:'सत्र लॉग करें', today:'आज',
+    langLabel:'HI',
+    nav_dashboard:'होम', nav_plans:'योजनाएं', nav_fields:'मैदान', nav_calendar:'कैलेंडर',
+    nav_nutrition:'पोषण', nav_stats:'आँकड़े', nav_gamify:'स्ट्रीक', nav_wellness:'स्वास्थ्य',
+    nav_drills:'अभ्यास', nav_video:'वीडियो', nav_gear:'उपकरण', nav_profile:'प्रोफाइल',
+    nav_ai:'कोच', nav_team:'टीम', nav_more:'अधिक', allSections:'सभी अनुभाग',
+    heroBadge:'AI-संचालित प्रशिक्षण',
+    heroSub:'व्यक्तिगत प्रशिक्षण, पोषण और मैदान खोज — सब एक जगह।',
+    btnGetPlan:'मेरी योजना', btnFindFields:'मैदान खोजें', btnShareProgress:'प्रगति साझा करें',
+    lblStreak:'दिन की लकीर', lblSessions:'सत्र', lblCaloriesToday:'आज की कैलोरी', lblLevel:'स्तर',
+    qcPlansTitle:'प्रशिक्षण योजनाएं', qcPlansDesc:'व्यक्तिगत कार्यक्रम',
+    qcFieldsTitle:'मैदान खोजें', qcFieldsDesc:'पास के मैदान + लाइव मौसम',
+    qcCalTitle:'मेरा कैलेंडर', qcCalDesc:'सत्र शेड्यूल करें और ट्रैक करें',
+    qcNutriTitle:'पोषण', qcNutriDesc:'कैलोरी और मैक्रो ट्रैकिंग',
+    chDailyTip:'दैनिक टिप', chRecentActivity:'हालिया गतिविधि', chThisWeek:'इस सप्ताह',
+    chFullReport:'पूरी रिपोर्ट', timerLabel:'प्रशिक्षण टाइमर', timerSub:'लाइव सत्र स्टॉपवॉच शुरू करें', btnStart:'शुरू',
+    lblWSessions:'सत्र', lblWCals:'कैलोरी', lblWStreak:'🔥 स्ट्रीक', lblWXP:'⚡ XP',
+    plansTitle:'प्रशिक्षण योजनाएं', plansSubtitle:'AI द्वारा तैयार कार्यक्रम आपके खेल, उम्र और लक्ष्यों के अनुसार',
+    lblSport:'खेल', lblGoal:'लक्ष्य', lblDuration:'अवधि', lblPlanLevel:'स्तर',
+    btnGenerate:'मेरी AI योजना बनाएं', chRoadmap:'प्रशिक्षण रोडमैप',
+    fieldsTitle:'पास के मैदान खोजें', fieldsSubtitle:'Google Maps द्वारा त्वरित खेल स्थल खोज',
+    chQuickSearch:'त्वरित खोज', chSearchAny:'कोई भी स्थान खोजें',
+    btnSearch:'खोजें', btnNearMe:'मेरे पास',
+    calTitle:'मेरा कैलेंडर', calSubtitle:'प्रशिक्षण, स्कूल, व्यक्तिगत जीवन — सब कुछ योजना बनाएं',
+    chAddEvent:'इवेंट जोड़ें', lblQuickAdd:'⚡ जल्दी जोड़ें', lblEventType:'इवेंट प्रकार',
+    lblEventName:'इवेंट का नाम', lblEventDate:'तारीख', lblEventTime:'समय',
+    lblDuration2:'अवधि (मिनट)', lblNotes:'नोट्स / विवरण', btnAddToCalendar:'कैलेंडर में जोड़ें', chUpcoming:'आगामी',
+    nutTitle:'पोषण और कैलोरी ट्रैकर', nutSubtitle:'स्मार्ट खाने से अपनी यात्रा को ईंधन दें',
+    lblProtein:'प्रोटीन', lblCarbs:'कार्ब्स', lblFat:'वसा', lblFibre:'फाइबर',
     toastLang:'🌐 भाषा हिन्दी में सेट की गई'
   },
   zh: {
-    langLabel:'ZH', home:'主页', plans:'计划', calendar:'日历', streak:'连续', more:'更多',
-    nutrition:'营养', stats:'统计', wellness:'健康', drills:'训练', video:'视频',
-    gear:'装备', fields:'场地', ai:'教练', profile:'个人', team:'团队',
-    logSession:'记录训练', today:'今天',
+    langLabel:'ZH',
+    nav_dashboard:'主页', nav_plans:'计划', nav_fields:'场地', nav_calendar:'日历',
+    nav_nutrition:'营养', nav_stats:'统计', nav_gamify:'连续', nav_wellness:'健康',
+    nav_drills:'训练', nav_video:'视频', nav_gear:'装备', nav_profile:'个人',
+    nav_ai:'教练', nav_team:'团队', nav_more:'更多', allSections:'所有版块',
+    heroBadge:'AI驱动训练',
+    heroSub:'个性化训练、营养和场地发现 — 一站式服务。',
+    btnGetPlan:'我的计划', btnFindFields:'查找场地', btnShareProgress:'分享进度',
+    lblStreak:'连续天数', lblSessions:'课程', lblCaloriesToday:'今日卡路里', lblLevel:'等级',
+    qcPlansTitle:'训练计划', qcPlansDesc:'个性化方案',
+    qcFieldsTitle:'查找场地', qcFieldsDesc:'附近场地 + 实时天气',
+    qcCalTitle:'我的日历', qcCalDesc:'安排和跟踪课程',
+    qcNutriTitle:'营养', qcNutriDesc:'卡路里和营养素追踪',
+    chDailyTip:'每日提示', chRecentActivity:'最近活动', chThisWeek:'本周',
+    chFullReport:'完整报告', timerLabel:'训练计时器', timerSub:'开始实时课程秒表', btnStart:'开始',
+    lblWSessions:'课程', lblWCals:'卡路里', lblWStreak:'🔥 连续', lblWXP:'⚡ XP',
+    plansTitle:'训练计划', plansSubtitle:'AI生成的个性化训练方案',
+    lblSport:'运动', lblGoal:'目标', lblDuration:'时长', lblPlanLevel:'级别',
+    btnGenerate:'生成我的AI计划', chRoadmap:'训练路线图',
+    fieldsTitle:'查找附近场地', fieldsSubtitle:'Google Maps驱动的即时场地搜索',
+    chQuickSearch:'快速搜索', chSearchAny:'搜索任意位置',
+    btnSearch:'搜索', btnNearMe:'我附近',
+    calTitle:'我的日历', calSubtitle:'训练、学校、个人生活 — 规划一切',
+    chAddEvent:'添加活动', lblQuickAdd:'⚡ 快速添加', lblEventType:'活动类型',
+    lblEventName:'活动名称', lblEventDate:'日期', lblEventTime:'时间',
+    lblDuration2:'时长（分钟）', lblNotes:'备注 / 详情', btnAddToCalendar:'添加到日历', chUpcoming:'即将到来',
+    nutTitle:'营养和卡路里追踪器', nutSubtitle:'用智慧饮食为旅程提供动力',
+    lblProtein:'蛋白质', lblCarbs:'碳水化合物', lblFat:'脂肪', lblFibre:'膳食纤维',
     toastLang:'🌐 语言已设置为中文'
   }
 };
@@ -2088,33 +2280,15 @@ function setLanguage(lang) {
   const chip = document.getElementById('langLabel');
   if (chip) chip.textContent = t.langLabel;
 
-  // Update bottom nav labels
-  const navMap = { 'nav-home':'home','nav-plans':'plans','nav-calendar':'calendar','nav-streak':'streak','nav-more':'more' };
-  Object.entries(navMap).forEach(([id, key]) => {
-    const el = document.querySelector(`[data-nav="${id}"] .nav-label, #${id} .nav-label`);
-    if (el && t[key]) el.textContent = t[key];
-  });
-
-  // Update nav tab labels using data-section attributes
-  document.querySelectorAll('.nav-tab[data-section]').forEach(tab => {
-    const sec = tab.dataset.section;
-    if (t[sec]) {
-      const span = tab.querySelector('span');
-      if (span) span.textContent = t[sec];
-    }
-  });
-
-  // Update mobile bottom nav buttons
-  document.querySelectorAll('.mobile-bottom-nav button[data-page]').forEach(btn => {
-    const page = btn.dataset.page;
-    if (t[page]) {
-      const span = btn.querySelector('span');
-      if (span) span.textContent = t[page];
-    }
+  // Translate ALL elements with data-i18n attributes (covers the whole website)
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (t[key] !== undefined) el.textContent = t[key];
   });
 
   // Update document direction for Arabic
   document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+  document.documentElement.lang = lang;
 
   // Highlight active lang button
   document.querySelectorAll('.lang-btn').forEach(b => {
@@ -5276,29 +5450,6 @@ function checkReferralOnLoad() {
     }).catch(() => {});
     showToast(`Welcome! Referred by ${ref} 🎉`);
   }
-}
-
-// =====================================================
-// ── PAYWALL / PREMIUM
-// =====================================================
-function openPaywall() {
-  document.getElementById('paywallModal').classList.remove('hidden');
-}
-
-function handleUpgrade() {
-  // Stripe integration point — for now show a coming soon message
-  showToast('Payment coming soon! Email us at hello@athletemind.app to get early access 🚀', 5000);
-  closeModal('paywallModal');
-}
-
-function isPremium() {
-  return AppState.isPremium === true;
-}
-
-// Lock premium features — show paywall instead
-function requirePremium(fn) {
-  if (isPremium()) { fn(); return; }
-  openPaywall();
 }
 
 // =====================================================
