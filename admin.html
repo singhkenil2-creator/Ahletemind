@@ -414,7 +414,33 @@ async function viewUser(id) {
   const u = await api(`/api/admin/user/${id}`);
   document.getElementById('modalTitle').textContent = `${u.name} · ${u.sport}`;
   const d = u.data;
+  const usr = d.user || {};
+  const weightKg = usr.weightKg ? usr.weightKg.toFixed(1) : null;
+  const weightLbs = weightKg ? (usr.weightKg * 2.20462).toFixed(1) : null;
+  const heightCm = usr.heightCm ? usr.heightCm.toFixed(0) : null;
+  const heightFt = heightCm ? `${Math.floor(usr.heightCm / 30.48)}'${Math.round((usr.heightCm % 30.48) / 2.54)}"` : null;
+  const bmi = (weightKg && heightCm) ? (usr.weightKg / Math.pow(usr.heightCm / 100, 2)).toFixed(1) : null;
+  const bmiLabel = bmi ? (bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Healthy' : bmi < 30 ? 'Overweight' : 'Obese') : null;
+  const bmiColor = bmi ? (bmi < 18.5 ? '#00b0ff' : bmi < 25 ? '#00e676' : bmi < 30 ? '#ffd600' : '#ff4d4d') : null;
+  const equipment = (usr.equipment || []).join(', ') || '—';
+  const dob = usr.dob ? (() => { const d2 = new Date(usr.dob); const age = Math.floor((Date.now() - d2) / 31557600000); return `${d2.toLocaleDateString()} (${age} yrs)`; })() : '—';
+
   document.getElementById('modalBody').innerHTML = `
+    <p style="font-size:.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📋 Physical Profile</p>
+    <div class="detail-grid" style="margin-bottom:14px">
+      <div class="detail-item"><div class="d-label">Weight</div><div class="d-val">${weightKg ? `${weightKg} kg` : '—'}<span style="font-size:.72rem;color:var(--text2);margin-left:6px">${weightLbs ? `(${weightLbs} lbs)` : ''}</span></div></div>
+      <div class="detail-item"><div class="d-label">Height</div><div class="d-val">${heightCm ? `${heightCm} cm` : '—'}<span style="font-size:.72rem;color:var(--text2);margin-left:6px">${heightFt ? `(${heightFt})` : ''}</span></div></div>
+      <div class="detail-item"><div class="d-label">BMI</div><div class="d-val" style="color:${bmiColor || 'inherit'}">${bmi || '—'}<span style="font-size:.72rem;margin-left:6px">${bmiLabel || ''}</span></div></div>
+      <div class="detail-item"><div class="d-label">Date of Birth</div><div class="d-val" style="font-size:.85rem">${dob}</div></div>
+      <div class="detail-item"><div class="d-label">Fitness Level</div><div class="d-val" style="text-transform:capitalize">${usr.fitness || '—'}</div></div>
+      <div class="detail-item"><div class="d-label">Training Days / Week</div><div class="d-val">${usr.trainingDays || '—'}</div></div>
+      <div class="detail-item"><div class="d-label">Position</div><div class="d-val">${usr.position || '—'}</div></div>
+      <div class="detail-item"><div class="d-label">Goal</div><div class="d-val" style="font-size:.85rem;text-transform:capitalize">${(usr.goal || '—').replace(/_/g,' ')}</div></div>
+      <div class="detail-item"><div class="d-label">City</div><div class="d-val">${usr.city || '—'}</div></div>
+      <div class="detail-item"><div class="d-label">Email</div><div class="d-val" style="font-size:.82rem">${usr.email || '—'}</div></div>
+      <div class="detail-item" style="grid-column:1/-1"><div class="d-label">Equipment</div><div class="d-val" style="font-size:.82rem;font-weight:400">${esc(equipment)}</div></div>
+    </div>
+    <p style="font-size:.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📊 Activity</p>
     <div class="detail-grid">
       <div class="detail-item"><div class="d-label">Streak</div><div class="d-val">🔥 ${u.streak}</div></div>
       <div class="detail-item"><div class="d-label">XP</div><div class="d-val">⚡ ${u.xp}</div></div>
@@ -425,7 +451,7 @@ async function viewUser(id) {
       <div class="detail-item"><div class="d-label">Longest Streak</div><div class="d-val">🏆 ${d.longestStreak || 0}</div></div>
       <div class="detail-item"><div class="d-label">Badges Earned</div><div class="d-val">🏅 ${(d.earnedBadges||[]).length}</div></div>
     </div>
-    <div class="json-section">
+    <div class="json-section" style="margin-top:20px">
       <h3>Full Data (JSON)</h3>
       <div class="json-box">${esc(JSON.stringify(d, null, 2))}</div>
     </div>
