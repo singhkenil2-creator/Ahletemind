@@ -2952,7 +2952,7 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
    ==================================================== */
 /* ====== PWA INSTALL BANNER ====== */
 .install-banner {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 99998;
+  position: fixed; top: 64px; left: 0; right: 0; z-index: 99;
   background: linear-gradient(135deg, #00e676, #00bcd4);
   color: #000;
   padding: 0;

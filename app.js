@@ -5180,8 +5180,13 @@ function initInstallPrompt() {
   if (isIos && !isInStandaloneMode && !dismissed) {
     setTimeout(showInstallBanner, 3000);
   }
-  // Show install button in mobile nav if prompt available
-  // (handled by beforeinstallprompt listener above)
+  // For Android/desktop: beforeinstallprompt fires automatically
+  // But also show a manual install hint if not standalone and not dismissed
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+  if (!isStandalone && !dismissed && !isIos) {
+    // Show after 5s regardless — user can always dismiss
+    setTimeout(showInstallBanner, 5000);
+  }
 }
 
 function showInstallBanner() {
