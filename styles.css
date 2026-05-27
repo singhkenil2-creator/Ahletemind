@@ -322,8 +322,6 @@ body {
   margin-right: auto;
   padding-top: 88px;
 }
-body.banner-visible .app-main { padding-top: 136px; }
-body.banner-visible .app-header { top: 52px; }
 
 .page { display: none; }
 .page.active { display: block; animation: fadeIn 0.3s ease; }
@@ -2955,13 +2953,13 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
    ==================================================== */
 /* ====== PWA INSTALL BANNER ====== */
 .install-banner {
-  position: fixed; top: 64px; left: 0; right: 0; z-index: 99;
+  position: fixed; bottom: 64px; left: 0; right: 0; z-index: 199;
   background: linear-gradient(135deg, #00e676, #00bcd4);
   color: #000;
   padding: 0;
-  animation: slideDown .4s ease;
-  box-shadow: 0 4px 20px rgba(0,230,118,.5);
+  box-shadow: 0 -4px 20px rgba(0,230,118,.4);
 }
+@media (min-width: 900px) { .install-banner { bottom: 0; } }
 .install-banner-inner {
   display: flex; align-items: center; gap: 12px;
   max-width: 700px; margin: 0 auto; padding: 12px 16px;
