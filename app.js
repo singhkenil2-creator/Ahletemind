@@ -579,6 +579,12 @@ function applySport(sport) {
   }
   updatePWAThemeColor();
   saveToStorage();
+  // Sync Game Day emoji spans
+  const emoji = getSportEmoji(sport);
+  const gdBtn = document.getElementById('gameDaySportEmoji');
+  if (gdBtn) gdBtn.textContent = emoji;
+  const gdModal = document.getElementById('gameDayModalEmoji');
+  if (gdModal) gdModal.textContent = emoji;
 }
 
 function openSportSwitch() {
@@ -1291,12 +1297,20 @@ function buildWeatherFallback() {
 
 // Sport → friendly Google Maps search query
 const SPORT_MAPS_QUERY = {
-  football:   'football pitches near me',
-  basketball: 'basketball courts near me',
-  running:    'running tracks near me',
-  tennis:     'tennis courts near me',
-  swimming:   'swimming pools near me',
-  cycling:    'cycling routes near me',
+  football:    'football pitches near me',
+  basketball:  'basketball courts near me',
+  running:     'running tracks near me',
+  tennis:      'tennis courts near me',
+  swimming:    'swimming pools near me',
+  cycling:     'cycling routes near me',
+  rugby:       'rugby pitches near me',
+  cricket:     'cricket grounds near me',
+  boxing:      'boxing gyms near me',
+  gym:         'gyms near me',
+  martial_arts:'martial arts gyms near me',
+  athletics:   'athletics tracks near me',
+  volleyball:  'volleyball courts near me',
+  hockey:      'hockey pitches near me',
 };
 
 function initMap() {
@@ -1308,10 +1322,23 @@ function updateFieldsQuickGrid() {
   const grid = document.getElementById('fieldsQuickGrid');
   if (!grid) return;
   const sport = AppState.sport;
-  grid.querySelectorAll('.fields-quick-btn').forEach(btn => {
-    btn.classList.toggle('active-sport', btn.textContent.toLowerCase().includes(sport));
+  grid.querySelectorAll('.fields-quick-btn[data-sport]').forEach(btn => {
+    btn.classList.toggle('active-sport', btn.dataset.sport === sport);
   });
 }
+
+function quickSearchSport(sport, query) {
+  // Scroll to the map section
+  const mapWrap = document.getElementById('fieldsMapWrap');
+  if (mapWrap) mapWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Highlight active button
+  document.querySelectorAll('.fields-quick-btn[data-sport]').forEach(btn => {
+    btn.classList.toggle('active-sport', btn.dataset.sport === sport);
+  });
+  loadFieldsIframe(query);
+  showToast(`${getSportEmoji(sport)} Showing ${getSportLabel(sport)} venues on map`);
+}
+window.quickSearchSport = quickSearchSport;
 
 function loadFieldsIframe(query) {
   const frame = document.getElementById('fieldsMapFrame');

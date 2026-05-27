@@ -436,6 +436,7 @@
       <button class="sport-toggle-btn" onclick="openSportSwitch()"><i class="fas fa-exchange-alt"></i> <span id="currentSportLabel">Football</span></button>
       <button id="reinstallChip" onclick="showInstallBanner()" title="Install App" style="display:none;background:var(--accent);color:#000;border:none;border-radius:20px;padding:5px 12px;font-size:.75rem;font-weight:800;cursor:pointer;flex-shrink:0"><i class="fas fa-download"></i> Install</button>
       <button class="sport-toggle-btn" onclick="openModal('langModal')" title="Change Language" style="gap:4px"><i class="fas fa-language"></i> <span id="langLabel">EN</span></button>
+      <button class="sport-toggle-btn" onclick="openModal('bizCardModal')" title="Share App" style="gap:4px"><i class="fas fa-share-alt"></i></button>
       <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark / light mode" id="themeToggleBtn">
         <span class="theme-toggle-track">
           <span class="theme-toggle-thumb"></span>
@@ -477,7 +478,7 @@
           <span class="mascot-emoji">😴</span>
           <span class="mascot-msg">Ready to start your streak? Log a session!</span>
         </div>
-        <button class="btn-gameday" onclick="openGameDay()"><i class="fas fa-gamepad"></i> 🎮 Game Day Mode</button>
+        <button class="btn-gameday" id="gameDayBtn" onclick="openGameDay()"><span id="gameDaySportEmoji">⚽</span> Game Day Mode</button>
       </div>
 
       <!-- AI Daily Tip -->
@@ -668,14 +669,22 @@
       <!-- Quick Sport Search Buttons -->
       <div class="card">
         <div class="card-header"><i class="fas fa-bolt"></i> <span data-i18n="chQuickSearch">Quick Search — Tap & Go</span></div>
-        <p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:14px">Opens Google Maps instantly — the fastest & most accurate way to find venues near you.</p>
+        <p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:14px">Tap any sport to instantly show venues on the map below.</p>
         <div class="fields-quick-grid" id="fieldsQuickGrid">
-          <a class="fields-quick-btn" href="https://maps.google.com/?q=football+pitches+near+me" target="_blank" rel="noopener"><span class="fq-icon">⚽</span><span>Football Pitches</span></a>
-          <a class="fields-quick-btn" href="https://maps.google.com/?q=basketball+courts+near+me" target="_blank" rel="noopener"><span class="fq-icon">🏀</span><span>Basketball Courts</span></a>
-          <a class="fields-quick-btn" href="https://maps.google.com/?q=running+tracks+near+me" target="_blank" rel="noopener"><span class="fq-icon">🏃</span><span>Running Tracks</span></a>
-          <a class="fields-quick-btn" href="https://maps.google.com/?q=tennis+courts+near+me" target="_blank" rel="noopener"><span class="fq-icon">🎾</span><span>Tennis Courts</span></a>
-          <a class="fields-quick-btn" href="https://maps.google.com/?q=swimming+pools+near+me" target="_blank" rel="noopener"><span class="fq-icon">🏊</span><span>Swimming Pools</span></a>
-          <a class="fields-quick-btn" href="https://maps.google.com/?q=cycling+routes+near+me" target="_blank" rel="noopener"><span class="fq-icon">🚴</span><span>Cycling Routes</span></a>
+          <button class="fields-quick-btn" data-sport="football" onclick="quickSearchSport('football','football pitches near me')"><span class="fq-icon">⚽</span><span>Football</span></button>
+          <button class="fields-quick-btn" data-sport="basketball" onclick="quickSearchSport('basketball','basketball courts near me')"><span class="fq-icon">🏀</span><span>Basketball</span></button>
+          <button class="fields-quick-btn" data-sport="running" onclick="quickSearchSport('running','running tracks near me')"><span class="fq-icon">🏃</span><span>Running</span></button>
+          <button class="fields-quick-btn" data-sport="tennis" onclick="quickSearchSport('tennis','tennis courts near me')"><span class="fq-icon">🎾</span><span>Tennis</span></button>
+          <button class="fields-quick-btn" data-sport="swimming" onclick="quickSearchSport('swimming','swimming pools near me')"><span class="fq-icon">🏊</span><span>Swimming</span></button>
+          <button class="fields-quick-btn" data-sport="cycling" onclick="quickSearchSport('cycling','cycling routes near me')"><span class="fq-icon">🚴</span><span>Cycling</span></button>
+          <button class="fields-quick-btn" data-sport="rugby" onclick="quickSearchSport('rugby','rugby pitches near me')"><span class="fq-icon">🏉</span><span>Rugby</span></button>
+          <button class="fields-quick-btn" data-sport="cricket" onclick="quickSearchSport('cricket','cricket grounds near me')"><span class="fq-icon">🏏</span><span>Cricket</span></button>
+          <button class="fields-quick-btn" data-sport="boxing" onclick="quickSearchSport('boxing','boxing gyms near me')"><span class="fq-icon">🥊</span><span>Boxing</span></button>
+          <button class="fields-quick-btn" data-sport="gym" onclick="quickSearchSport('gym','gyms near me')"><span class="fq-icon">🏋️</span><span>Gym</span></button>
+          <button class="fields-quick-btn" data-sport="martial_arts" onclick="quickSearchSport('martial_arts','martial arts gyms near me')"><span class="fq-icon">🥋</span><span>Martial Arts</span></button>
+          <button class="fields-quick-btn" data-sport="athletics" onclick="quickSearchSport('athletics','athletics tracks near me')"><span class="fq-icon">🏅</span><span>Athletics</span></button>
+          <button class="fields-quick-btn" data-sport="volleyball" onclick="quickSearchSport('volleyball','volleyball courts near me')"><span class="fq-icon">🏐</span><span>Volleyball</span></button>
+          <button class="fields-quick-btn" data-sport="hockey" onclick="quickSearchSport('hockey','hockey pitches near me')"><span class="fq-icon">🏑</span><span>Hockey</span></button>
         </div>
       </div>
 
@@ -1953,7 +1962,7 @@
   <div id="gameDayModal" class="modal-overlay hidden">
     <div class="modal-box gd-modal">
       <div class="modal-header">
-        <h3><i class="fas fa-gamepad"></i> 🎮 Game Day Mode</h3>
+        <h3><span id="gameDayModalEmoji">⚽</span> Game Day Mode</h3>
         <button class="close-btn" onclick="closeGameDay()"><i class="fas fa-times"></i></button>
       </div>
       <div class="gd-section">
