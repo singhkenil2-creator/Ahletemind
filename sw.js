@@ -1,10 +1,10 @@
 /* AthleteMind — Service Worker */
-const CACHE = 'athletemind-v3';
+const CACHE = 'athletemind-v4';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/app.js',
+  '/Ahletemind/',
+  '/Ahletemind/index.html',
+  '/Ahletemind/styles.css',
+  '/Ahletemind/app.js',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css',
   'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'
 ];
