@@ -2959,6 +2959,7 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
   display: flex; align-items: center; justify-content: center;
 }
 .feedback-fab:hover { transform: scale(1.1); box-shadow: 0 6px 24px rgba(0,230,118,.5); }
+@media (max-width: 899px) { .feedback-fab { right: auto; left: 18px; bottom: 76px; } }
 
 /* ====================================================
    PRIVACY POLICY MODAL
