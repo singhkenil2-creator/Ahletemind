@@ -1736,6 +1736,46 @@
       </div>
     </section>
 
+    <!-- ===== TEAM PAGE ===== -->
+    <section id="page-team" class="page">
+      <div class="page-header">
+        <h2><i class="fas fa-users"></i> Team Mode</h2>
+        <p>Add friends, compare streaks &amp; compete on your private leaderboard</p>
+      </div>
+
+      <!-- My Team Code -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-id-badge"></i> My Athlete ID</div>
+        <p style="color:var(--text-secondary);font-size:.85rem;margin-bottom:12px">Share your Athlete ID with friends so they can add you to their team.</p>
+        <div class="referral-box">
+          <span class="referral-code" id="myAthleteId">Loading...</span>
+          <button class="btn-ghost small" onclick="copyAthleteId()"><i class="fas fa-copy"></i> Copy</button>
+        </div>
+      </div>
+
+      <!-- Add Friend -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-user-plus"></i> Add a Friend</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <input type="text" id="friendIdInput" placeholder="Enter their Athlete ID" style="flex:1;padding:10px 14px;background:var(--input-bg);border:1px solid var(--border);border-radius:9px;color:var(--text-primary);outline:none" />
+          <button class="btn-primary" onclick="addTeamFriend()"><i class="fas fa-plus"></i> Add</button>
+        </div>
+        <p style="font-size:.78rem;color:var(--text-secondary)" id="addFriendMsg"></p>
+      </div>
+
+      <!-- Team Leaderboard -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-trophy"></i> Team Leaderboard</div>
+        <div id="teamLeaderboard" style="margin-top:8px"></div>
+      </div>
+
+      <!-- Team Activity -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-bell"></i> Team Activity</div>
+        <div id="teamActivity" style="margin-top:8px"></div>
+      </div>
+    </section>
+
   </main>
 
   <!-- ========== SHARE CARD MODAL ========== -->
@@ -1983,45 +2023,6 @@
   </div>
 
   <!-- ========== ADMIN OVERLAY (secret access) ========== -->
-    <!-- ===== TEAM PAGE ===== -->
-    <section id="page-team" class="page">
-      <div class="page-header">
-        <h2><i class="fas fa-users"></i> Team Mode</h2>
-        <p>Add friends, compare streaks & compete on your private leaderboard</p>
-      </div>
-
-      <!-- My Team Code -->
-      <div class="card">
-        <div class="card-header"><i class="fas fa-id-badge"></i> My Athlete ID</div>
-        <p style="color:var(--text-secondary);font-size:.85rem;margin-bottom:12px">Share your Athlete ID with friends so they can add you to their team.</p>
-        <div class="referral-box">
-          <span class="referral-code" id="myAthleteId">Loading...</span>
-          <button class="btn-ghost small" onclick="copyAthleteId()"><i class="fas fa-copy"></i> Copy</button>
-        </div>
-      </div>
-
-      <!-- Add Friend -->
-      <div class="card">
-        <div class="card-header"><i class="fas fa-user-plus"></i> Add a Friend</div>
-        <div style="display:flex;gap:8px;margin-bottom:10px">
-          <input type="text" id="friendIdInput" placeholder="Enter their Athlete ID" style="flex:1;padding:10px 14px;background:var(--input-bg);border:1px solid var(--border);border-radius:9px;color:var(--text-primary);outline:none" />
-          <button class="btn-primary" onclick="addTeamFriend()"><i class="fas fa-plus"></i> Add</button>
-        </div>
-        <p style="font-size:.78rem;color:var(--text-secondary)" id="addFriendMsg"></p>
-      </div>
-
-      <!-- Team Leaderboard -->
-      <div class="card">
-        <div class="card-header"><i class="fas fa-trophy"></i> Team Leaderboard</div>
-        <div id="teamLeaderboard" style="margin-top:8px"></div>
-      </div>
-
-      <!-- Team Activity -->
-      <div class="card">
-        <div class="card-header"><i class="fas fa-bell"></i> Team Activity</div>
-        <div id="teamActivity" style="margin-top:8px"></div>
-      </div>
-    </section>
 
   <!-- ===== TERMS & CONDITIONS MODAL ===== -->
   <div id="termsModal" class="modal-overlay hidden">
