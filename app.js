@@ -5267,7 +5267,6 @@ function dismissInstallBanner() {
 }
 
 async function triggerInstall() {
-  // Best case: native install prompt available (Android/Chrome/Edge)
   if (_installPromptEvent) {
     _installPromptEvent.prompt();
     const { outcome } = await _installPromptEvent.userChoice;
@@ -5277,48 +5276,7 @@ async function triggerInstall() {
       showToast('🎉 AthleteMind installed! Open it from your home screen.');
     }
     _installPromptEvent = null;
-    return;
-  }
-  // Fallback: show a visual instructions modal
-  const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  let steps = '';
-  if (isIos || isSafari) {
-    steps = `
-      <div style="text-align:center;padding:8px 0">
-        <div style="font-size:2.2rem">📱</div>
-        <p style="margin:10px 0 6px;font-weight:700">Install on iPhone / iPad</p>
-        <ol style="text-align:left;line-height:2;padding-left:20px;color:var(--text-secondary);font-size:.9rem">
-          <li>Tap the <strong style="color:var(--text)">⬆ Share</strong> button at the bottom of Safari</li>
-          <li>Scroll down and tap <strong style="color:var(--text)">Add to Home Screen</strong></li>
-          <li>Tap <strong style="color:var(--text)">Add</strong> — done! 🎉</li>
-        </ol>
-      </div>`;
   } else {
-    steps = `
-      <div style="text-align:center;padding:8px 0">
-        <div style="font-size:2.2rem">💻</div>
-        <p style="margin:10px 0 6px;font-weight:700">Install on your device</p>
-        <ol style="text-align:left;line-height:2;padding-left:20px;color:var(--text-secondary);font-size:.9rem">
-          <li>Open this page in <strong style="color:var(--text)">Chrome or Edge</strong></li>
-          <li>Click the <strong style="color:var(--text)">⋮ menu</strong> (top right)</li>
-          <li>Tap <strong style="color:var(--text)">Install App</strong> or <strong style="color:var(--text)">Add to Home Screen</strong></li>
-        </ol>
-      </div>`;
+    showToast('📲 Open this page in Chrome and tap "Add to Home Screen" from the menu.');
   }
-  // Inject and show a one-time modal
-  let modal = document.getElementById('installInstructModal');
-  if (!modal) {
-    modal = document.createElement('div');
-    modal.id = 'installInstructModal';
-    modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:20px';
-    modal.innerHTML = `<div style="background:var(--card-bg);border-radius:18px;padding:24px;max-width:360px;width:100%;position:relative">
-      <button onclick="document.getElementById('installInstructModal').remove()" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:1.2rem;color:var(--text-secondary);cursor:pointer">✕</button>
-      <div id="installInstructBody"></div>
-      <button onclick="document.getElementById('installInstructModal').remove()" style="margin-top:16px;width:100%;padding:12px;background:var(--accent);color:#000;border:none;border-radius:30px;font-weight:800;font-size:.95rem;cursor:pointer">Got it!</button>
-    </div>`;
-    document.body.appendChild(modal);
-  }
-  document.getElementById('installInstructBody').innerHTML = steps;
-  modal.style.display = 'flex';
 }
