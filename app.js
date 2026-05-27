@@ -4700,13 +4700,20 @@ async function overlayLogin() {
     const r = await fetch('/api/admin/stats', { headers: { 'x-admin-password': pw } });
     if (r.ok) {
       stats = await r.json();
-    } else {
-      // Server returned error — wrong password
+    } else if (r.status === 401 || r.status === 403) {
+      // Server explicitly rejected the password
       document.getElementById('overlayLoginErr').style.display = 'block';
       return;
+    } else {
+      // 404 or any other — server not available (GitHub Pages), fall back to local check
+      if (pw !== '213') {
+        document.getElementById('overlayLoginErr').style.display = 'block';
+        return;
+      }
+      stats = { totalUsers: 0, totalSyncs: 0, activeLast7: 0, topSports: [], topStreaks: [], syncsPerDay: [] };
     }
   } catch {
-    // Server unreachable — allow access with hardcoded password for offline use
+    // Network error — server unreachable, use local password
     if (pw !== '213') {
       document.getElementById('overlayLoginErr').style.display = 'block';
       return;
