@@ -1,7 +1,20 @@
-const express = require('express');
-const cors    = require('cors');
-const fs      = require('fs');
-const path    = require('path');
+const express    = require('express');
+const cors       = require('cors');
+const fs         = require('fs');
+const path       = require('path');
+const nodemailer = require('nodemailer');
+
+// ─── EMAIL TRANSPORTER ───────────────────────────────────────────────────────
+// Set these environment variables on your server (never hard-code credentials):
+//   GMAIL_USER  = your Gmail address  e.g. you@gmail.com
+//   GMAIL_PASS  = Gmail App Password  (Google Account → Security → App Passwords)
+const emailTransporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASS,
+  }
+});
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -218,6 +231,43 @@ app.post('/api/chat', async (req, res) => {
 
 // Admin panel
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
+
+// POST /api/send-welcome
+app.post('/api/send-welcome', async (req, res) => {
+  try {
+    const { name, email, sport } = req.body;
+    if (!name || !email) return res.status(400).json({ error: 'Missing name or email' });
+    if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
+      return res.status(503).json({ error: 'Email not configured on server' });
+    }
+    await emailTransporter.sendMail({
+      from: `"AthleteMind" <${process.env.GMAIL_USER}>`,
+      to: email,
+      subject: `Welcome to AthleteMind, ${name}! 🏆`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;background:#0d0d0d;color:#f0f0f0;border-radius:16px;overflow:hidden">
+          <div style="background:#00e676;padding:28px 32px;text-align:center">
+            <h1 style="color:#000;margin:0;font-size:1.6rem">🏆 AthleteMind</h1>
+            <p style="color:#000;margin:6px 0 0;font-size:.95rem">Your Personal Sports Journey</p>
+          </div>
+          <div style="padding:32px">
+            <h2 style="margin:0 0 12px">Hey ${name}, welcome aboard! 👋</h2>
+            <p style="color:#aaa;line-height:1.6">You've joined AthleteMind as a <strong style="color:#00e676">${sport}</strong> athlete. We're pumped to have you!</p>
+            <p style="color:#aaa;line-height:1.6">Track your training, hit your goals, and crush your streak every single day.</p>
+            <div style="text-align:center;margin:28px 0">
+              <a href="https://singhkenil2-creator.github.io/Ahletemind" style="background:#00e676;color:#000;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:700;font-size:1rem">Open AthleteMind 🚀</a>
+            </div>
+            <p style="color:#555;font-size:.8rem;text-align:center;margin-top:24px">Built with ❤️ by Kenil Singh · AthleteMind</p>
+          </div>
+        </div>
+      `
+    });
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('Welcome email error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
 
 // 404 page
 app.use((req, res) => res.status(404).sendFile(path.join(__dirname, '404.html')));

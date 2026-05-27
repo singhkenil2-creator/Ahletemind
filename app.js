@@ -317,38 +317,20 @@ function setupAgeGateDobMax() {
 }
 
 // =====================================================
-// EMAILJS — WELCOME EMAIL
+// WELCOME EMAIL — sent via our own server (no 3rd party)
 // =====================================================
-// To activate: sign up at https://www.emailjs.com (free)
-// 1. Create a Gmail service  → copy Service ID  → replace EMAILJS_SERVICE_ID
-// 2. Create an email template → copy Template ID → replace EMAILJS_TEMPLATE_ID
-//    Template variables available: {{to_name}}, {{to_email}}, {{sport}}, {{app_url}}
-// 3. Copy your Public Key (Account → API Keys) → replace EMAILJS_PUBLIC_KEY
-
-const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';   // e.g. 'service_abc123'
-const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';  // e.g. 'template_xyz789'
-const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';   // e.g. 'abcDEFghiJKL'
-
-function initEmailJS() {
-  if (typeof emailjs !== 'undefined' && EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
-    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-  }
-}
+function initEmailJS() { /* no-op — email is handled server-side */ }
 
 function sendWelcomeEmail(name, email, sport) {
   if (!email) return;
-  if (typeof emailjs === 'undefined') return;
-  if (EMAILJS_PUBLIC_KEY === 'YOUR_PUBLIC_KEY') return; // not configured yet
-  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-    to_name:  name,
-    to_email: email,
-    sport:    getSportLabel(sport),
-    app_url:  'https://singhkenil2-creator.github.io/Ahletemind'
-  }).then(() => {
-    console.log('Welcome email sent to', email);
-  }).catch(err => {
-    console.warn('EmailJS error:', err);
-  });
+  fetch('/api/send-welcome', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, email, sport: getSportLabel(sport) })
+  }).then(r => r.json()).then(r => {
+    if (r.ok) console.log('Welcome email sent to', email);
+    else console.warn('Welcome email failed:', r.error);
+  }).catch(err => console.warn('Welcome email error:', err));
 }
 
 function onboardNext(step) {
