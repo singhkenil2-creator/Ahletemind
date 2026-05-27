@@ -1,5 +1,5 @@
 /* AthleteMind — Service Worker */
-const CACHE = 'athletemind-v1';
+const CACHE = 'athletemind-v3';
 const ASSETS = [
   '/',
   '/index.html',
