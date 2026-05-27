@@ -15,7 +15,7 @@
   <link rel="apple-touch-icon" href="https://via.placeholder.com/180x180/00e676/000000?text=AM" />
 
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=5" />
   <!-- Font Awesome icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <!-- Google Fonts — preconnect for performance -->
@@ -161,15 +161,15 @@
   </button>
 
   <!-- ===== PWA INSTALL BANNER ===== -->
-  <div id="installBanner" class="install-banner hidden">
-    <div class="install-banner-inner">
-      <div class="install-banner-icon">📲</div>
-      <div class="install-banner-text">
-        <strong>Install AthleteMind</strong>
-        <span>Get the full app experience — works offline, no browser needed!</span>
+  <div id="installBanner" class="install-banner hidden" style="position:fixed;top:64px;left:0;right:0;z-index:99;background:linear-gradient(135deg,#00e676,#00bcd4);color:#000;box-shadow:0 4px 20px rgba(0,230,118,.5);display:none">
+    <div class="install-banner-inner" style="display:flex;align-items:center;gap:12px;max-width:700px;margin:0 auto;padding:12px 16px">
+      <div style="font-size:1.6rem;flex-shrink:0">📲</div>
+      <div style="flex:1">
+        <strong style="display:block;font-size:.95rem;font-weight:800">Install AthleteMind as an App</strong>
+        <span style="font-size:.78rem;opacity:.85" id="installBannerSubtext">Get the full app — works offline, no browser needed!</span>
       </div>
-      <button class="install-banner-btn" onclick="triggerInstall()">Install Free</button>
-      <button class="install-banner-close" onclick="dismissInstallBanner()"><i class="fas fa-times"></i></button>
+      <button onclick="triggerInstall()" style="background:#000;color:#00e676;border:none;font-weight:800;font-size:.85rem;padding:9px 18px;border-radius:30px;cursor:pointer;white-space:nowrap;flex-shrink:0">Install Free</button>
+      <button onclick="dismissInstallBanner()" style="background:none;border:none;color:#000;opacity:.6;font-size:1rem;cursor:pointer;flex-shrink:0;padding:4px"><i class="fas fa-times"></i></button>
     </div>
   </div>
 
@@ -2164,7 +2164,7 @@
     </div>
   </div>
 
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=5"></script>
   <script>
     document.getElementById('footerYear').textContent = new Date().getFullYear();
     // Register service worker

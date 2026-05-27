@@ -5193,7 +5193,15 @@ function initInstallPrompt() {
 function showInstallBanner() {
   const banner = document.getElementById('installBanner');
   const mbnBtn = document.getElementById('mbnInstallBtn');
-  if (banner) { banner.classList.remove('hidden'); document.body.classList.add('banner-visible'); }
+  if (!banner) return;
+  const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if (isIos) {
+    const sub = document.getElementById('installBannerSubtext');
+    if (sub) sub.textContent = 'Tap the Share button \u2B06 then \'Add to Home Screen\'';
+  }
+  banner.style.display = 'block';
+  banner.classList.remove('hidden');
+  document.body.classList.add('banner-visible');
   if (mbnBtn) mbnBtn.classList.remove('hidden');
   // Nudge again after 60s if still visible
   setTimeout(() => {
@@ -5207,7 +5215,7 @@ function showInstallBanner() {
 
 function hideInstallBanner() {
   const banner = document.getElementById('installBanner');
-  if (banner) { banner.classList.add('hidden'); document.body.classList.remove('banner-visible'); }
+  if (banner) { banner.style.display = 'none'; banner.classList.add('hidden'); document.body.classList.remove('banner-visible'); }
 }
 
 function dismissInstallBanner() {
@@ -5218,7 +5226,8 @@ function dismissInstallBanner() {
 async function triggerInstall() {
   const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
   if (isIos) {
-    showToast('📲 Tap the Share button (⬆) then "Add to Home Screen"!', 5000);
+    const sub = document.getElementById('installBannerSubtext');
+    if (sub) sub.innerHTML = '<strong>Tap ⬆ Share below → then \'Add to Home Screen\'</strong>';
     return;
   }
   if (_installPromptEvent) {
@@ -5227,10 +5236,10 @@ async function triggerInstall() {
     if (outcome === 'accepted') {
       hideInstallBanner();
       localStorage.setItem('installBannerDismissed', '1');
-      showToast('🎉 AthleteMind installed! Open it from your home screen.');
+      showToast('\uD83C\uDF89 AthleteMind installed! Open it from your home screen.');
     }
     _installPromptEvent = null;
   } else {
-    showToast('📲 Open your browser menu and tap "Add to Home Screen"!', 5000);
+    showToast('\uD83D\uDCF2 Open your browser menu (⋮) and tap \'Add to Home Screen\'!', 5000);
   }
 }
