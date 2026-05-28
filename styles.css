@@ -3070,6 +3070,23 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
+  max-height: 52vh;
+  overflow: auto;
+  padding-right: 2px;
+}
+.lang-search-input {
+  width: 100%;
+  margin-bottom: 12px;
+  background: var(--card-bg);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  color: var(--text-primary);
+  font-size: .92rem;
+  outline: none;
+}
+.lang-search-input:focus {
+  border-color: var(--accent);
 }
 .lang-btn {
   background: var(--card-bg);

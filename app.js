@@ -89,6 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Auto-apply saved theme & sport
   applyTheme(AppState.theme);
   applySport(AppState.sport);
+  renderLanguageOptions();
   applyStoredLanguage();
 
   // If user already set up, skip age gate
@@ -2063,22 +2064,50 @@ function closeModal(id) {
   if (el) { el.classList.add('hidden'); el.classList.remove('active'); }
 }
 
-function printBusinessCard() {
-  const modal = document.getElementById('bizCardModal');
-  if (!modal) return;
+function downloadBusinessCardPDF() {
+  const jsPDF = window.jspdf?.jsPDF;
+  if (!jsPDF) {
+    showToast('PDF library not loaded yet. Try again in a second.');
+    return;
+  }
 
-  const wasHidden = modal.classList.contains('hidden');
-  if (wasHidden) openModal('bizCardModal');
+  // Business-card style PDF (landscape)
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [55, 90] });
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#4CAF50';
+  const name = AppState.user?.name || 'Athlete';
+  const sport = getSportLabel(AppState.sport || 'football');
+  const url = 'https://singhkenil2-creator.github.io/Ahletemind';
 
-  document.body.classList.add('printing-biz-card');
+  doc.setFillColor(16, 16, 20);
+  doc.rect(0, 0, 90, 55, 'F');
+  doc.setDrawColor(240, 240, 240);
+  doc.setLineWidth(0.5);
+  doc.rect(1, 1, 88, 53);
 
-  const cleanup = () => {
-    document.body.classList.remove('printing-biz-card');
-    if (wasHidden) closeModal('bizCardModal');
-  };
+  doc.setFillColor(accent);
+  doc.rect(0, 0, 7, 55, 'F');
 
-  window.addEventListener('afterprint', cleanup, { once: true });
-  setTimeout(() => window.print(), 100);
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(15);
+  doc.text('AthleteMind', 10, 12);
+
+  doc.setFontSize(10);
+  doc.setTextColor(190, 190, 190);
+  doc.text('Your AI-Powered Sports Coach', 10, 18);
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(12);
+  doc.text(`Name: ${name}`, 10, 28);
+  doc.text(`Sport: ${sport}`, 10, 35);
+
+  doc.setTextColor(190, 190, 190);
+  doc.setFontSize(9);
+  doc.text('Built by Kenil Singh', 10, 44);
+  doc.text(url, 10, 50);
+
+  doc.save('AthleteMind-Business-Card.pdf');
+  showToast('📄 PDF card downloaded');
 }
 
 // =====================================================
@@ -2831,6 +2860,96 @@ const TRANSLATIONS = {
   }
 };
 
+let LANGUAGE_OPTIONS = [];
+
+const LANGUAGE_FLAGS = {
+  en:'🇬🇧', es:'🇪🇸', fr:'🇫🇷', de:'🇩🇪', it:'🇮🇹', pt:'🇧🇷', nl:'🇳🇱', pl:'🇵🇱',
+  ru:'🇷🇺', uk:'🇺🇦', el:'🇬🇷', tr:'🇹🇷', ar:'🇸🇦', ur:'🇵🇰', hi:'🇮🇳', bn:'🇧🇩',
+  zh:'🇨🇳', ja:'🇯🇵', ko:'🇰🇷', th:'🇹🇭', vi:'🇻🇳', id:'🇮🇩', fil:'🇵🇭', sw:'🇰🇪'
+};
+
+const CORE_LANGUAGE_ORDER = ['en','es','fr','de','it','pt','nl','pl','ru','uk','el','tr','ar','ur','hi','bn','zh','ja','ko','th','vi','id','fil','sw'];
+
+function buildLanguageCatalog() {
+  const map = new Map();
+  const enNames = new Intl.DisplayNames(['en'], { type: 'language' });
+
+  const add = code => {
+    if (!code) return;
+    const clean = String(code).toLowerCase();
+    if (map.has(clean)) return;
+    const label = enNames.of(clean) || clean.toUpperCase();
+    map.set(clean, { code: clean, label });
+  };
+
+  // Always include all core in-app languages first
+  CORE_LANGUAGE_ORDER.forEach(add);
+  Object.keys(TRANSLATIONS).forEach(add);
+
+  // Add broad locale support from browser (covers many world languages)
+  const candidates = [];
+  for (let i = 97; i <= 122; i++) {
+    for (let j = 97; j <= 122; j++) {
+      candidates.push(String.fromCharCode(i, j));
+    }
+  }
+  const supported = Intl.DateTimeFormat.supportedLocalesOf(candidates, { localeMatcher: 'lookup' });
+  supported.forEach(add);
+
+  const prioritySet = new Set(CORE_LANGUAGE_ORDER);
+  const all = Array.from(map.values()).sort((a, b) => a.label.localeCompare(b.label));
+  const pinned = CORE_LANGUAGE_ORDER.map(code => map.get(code)).filter(Boolean);
+  const others = all.filter(item => !prioritySet.has(item.code));
+  return [...pinned, ...others];
+}
+
+function renderLanguageOptions() {
+  const grid = document.getElementById('langGrid');
+  if (!grid) return;
+  LANGUAGE_OPTIONS = buildLanguageCatalog();
+  const selected = AppState.prefs?.language || 'en';
+  grid.innerHTML = LANGUAGE_OPTIONS.map(item => {
+    const flag = LANGUAGE_FLAGS[item.code] || '🌐';
+    const active = item.code === selected ? ' active' : '';
+    return `<button class="lang-btn${active}" data-lang="${item.code}" onclick="handleLanguageChoice('${item.code}')">${flag} ${item.label}</button>`;
+  }).join('');
+}
+
+function filterLanguageOptions() {
+  const q = (document.getElementById('langSearchInput')?.value || '').trim().toLowerCase();
+  document.querySelectorAll('#langGrid .lang-btn').forEach(btn => {
+    const txt = btn.textContent.toLowerCase();
+    btn.style.display = txt.includes(q) ? '' : 'none';
+  });
+}
+
+function handleLanguageChoice(lang) {
+  if (TRANSLATIONS[lang]) {
+    setLanguage(lang);
+    return;
+  }
+
+  AppState.prefs = AppState.prefs || {};
+  AppState.prefs.language = lang;
+  saveToStorage();
+
+  const chip = document.getElementById('langLabel');
+  if (chip) chip.textContent = lang.toUpperCase();
+
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === lang);
+  });
+
+  closeModal('langModal');
+  showToast(`🌐 Opening translated view (${lang.toUpperCase()})...`);
+
+  const url = window.location.href.split('#')[0];
+  const translated = `https://translate.google.com/translate?sl=auto&tl=${encodeURIComponent(lang)}&u=${encodeURIComponent(url)}`;
+  window.open(translated, '_blank', 'noopener');
+}
+window.filterLanguageOptions = filterLanguageOptions;
+window.handleLanguageChoice = handleLanguageChoice;
+
 function setLanguage(lang) {
   const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
   AppState.prefs = AppState.prefs || {};
@@ -2863,10 +2982,11 @@ window.setLanguage = setLanguage;
 
 function applyStoredLanguage() {
   const lang = AppState.prefs?.language || 'en';
-  if (lang !== 'en') setLanguage(lang);
+  if (lang !== 'en' && TRANSLATIONS[lang]) setLanguage(lang);
   else {
     const chip = document.getElementById('langLabel');
-    if (chip) chip.textContent = 'EN';
+    if (chip) chip.textContent = lang.toUpperCase();
+    document.documentElement.lang = lang;
   }
 }
 
