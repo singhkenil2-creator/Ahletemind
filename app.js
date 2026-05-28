@@ -2064,52 +2064,6 @@ function closeModal(id) {
   if (el) { el.classList.add('hidden'); el.classList.remove('active'); }
 }
 
-function downloadBusinessCardPDF() {
-  const jsPDF = window.jspdf?.jsPDF;
-  if (!jsPDF) {
-    showToast('PDF library not loaded yet. Try again in a second.');
-    return;
-  }
-
-  // Business-card style PDF (landscape)
-  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [55, 90] });
-  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#4CAF50';
-  const name = AppState.user?.name || 'Athlete';
-  const sport = getSportLabel(AppState.sport || 'football');
-  const url = 'https://singhkenil2-creator.github.io/Ahletemind';
-
-  doc.setFillColor(16, 16, 20);
-  doc.rect(0, 0, 90, 55, 'F');
-  doc.setDrawColor(240, 240, 240);
-  doc.setLineWidth(0.5);
-  doc.rect(1, 1, 88, 53);
-
-  doc.setFillColor(accent);
-  doc.rect(0, 0, 7, 55, 'F');
-
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(15);
-  doc.text('AthleteMind', 10, 12);
-
-  doc.setFontSize(10);
-  doc.setTextColor(190, 190, 190);
-  doc.text('Your AI-Powered Sports Coach', 10, 18);
-
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(12);
-  doc.text(`Name: ${name}`, 10, 28);
-  doc.text(`Sport: ${sport}`, 10, 35);
-
-  doc.setTextColor(190, 190, 190);
-  doc.setFontSize(9);
-  doc.text('Built by Kenil Singh', 10, 44);
-  doc.text(url, 10, 50);
-
-  doc.save('AthleteMind-Business-Card.pdf');
-  showToast('📄 PDF card downloaded');
-}
-
 // =====================================================
 // LANGUAGE / i18n SYSTEM
 // =====================================================
