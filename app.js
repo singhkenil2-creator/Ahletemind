@@ -2868,6 +2868,46 @@ const LANGUAGE_FLAGS = {
   zh:'🇨🇳', ja:'🇯🇵', ko:'🇰🇷', th:'🇹🇭', vi:'🇻🇳', id:'🇮🇩', fil:'🇵🇭', sw:'🇰🇪'
 };
 
+const LANGUAGE_TO_REGION = {
+  af:'ZA', am:'ET', az:'AZ', be:'BY', bg:'BG', ca:'ES', cs:'CZ', da:'DK',
+  et:'EE', fa:'IR', fi:'FI', ga:'IE', he:'IL', hr:'HR', hu:'HU', hy:'AM',
+  is:'IS', ka:'GE', kk:'KZ', km:'KH', kn:'IN', ky:'KG', lo:'LA', lt:'LT',
+  lv:'LV', mk:'MK', ml:'IN', mn:'MN', mr:'IN', ms:'MY', my:'MM', ne:'NP',
+  no:'NO', pa:'IN', ro:'RO', si:'LK', sk:'SK', sl:'SI', sq:'AL', sr:'RS',
+  sv:'SE', ta:'IN', te:'IN', tg:'TJ', tk:'TM', tl:'PH', tr:'TR', uz:'UZ',
+  yi:'IL', yo:'NG', zu:'ZA', cy:'GB', mt:'MT', eu:'ES', gl:'ES', gu:'IN',
+  ps:'AF', rw:'RW', so:'SO', st:'LS', su:'ID', xh:'ZA', ig:'NG', ha:'NG'
+};
+
+function regionToFlag(region) {
+  if (!region || region.length !== 2) return null;
+  const code = region.toUpperCase();
+  const A = 0x1F1E6;
+  const base = 'A'.charCodeAt(0);
+  return String.fromCodePoint(A + code.charCodeAt(0) - base, A + code.charCodeAt(1) - base);
+}
+
+function getLanguageFlag(langCode) {
+  if (LANGUAGE_FLAGS[langCode]) return LANGUAGE_FLAGS[langCode];
+
+  // Best effort 1: map common language -> representative country
+  const mappedRegion = LANGUAGE_TO_REGION[langCode];
+  const mappedFlag = regionToFlag(mappedRegion);
+  if (mappedFlag) return mappedFlag;
+
+  // Best effort 2: derive likely region from Intl locale maximization
+  try {
+    if (typeof Intl !== 'undefined' && Intl.Locale) {
+      const loc = new Intl.Locale(langCode).maximize();
+      const autoFlag = regionToFlag(loc?.region);
+      if (autoFlag) return autoFlag;
+    }
+  } catch {}
+
+  // Final fallback
+  return '🏳️';
+}
+
 const CORE_LANGUAGE_ORDER = ['en','es','fr','de','it','pt','nl','pl','ru','uk','el','tr','ar','ur','hi','bn','zh','ja','ko','th','vi','id','fil','sw'];
 
 function buildLanguageCatalog() {
@@ -2909,7 +2949,7 @@ function renderLanguageOptions() {
   LANGUAGE_OPTIONS = buildLanguageCatalog();
   const selected = AppState.prefs?.language || 'en';
   grid.innerHTML = LANGUAGE_OPTIONS.map(item => {
-    const flag = LANGUAGE_FLAGS[item.code] || '🌐';
+    const flag = getLanguageFlag(item.code);
     const active = item.code === selected ? ' active' : '';
     return `<button class="lang-btn${active}" data-lang="${item.code}" onclick="handleLanguageChoice('${item.code}')">${flag} ${item.label}</button>`;
   }).join('');
