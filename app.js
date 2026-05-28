@@ -2063,6 +2063,24 @@ function closeModal(id) {
   if (el) { el.classList.add('hidden'); el.classList.remove('active'); }
 }
 
+function printBusinessCard() {
+  const modal = document.getElementById('bizCardModal');
+  if (!modal) return;
+
+  const wasHidden = modal.classList.contains('hidden');
+  if (wasHidden) openModal('bizCardModal');
+
+  document.body.classList.add('printing-biz-card');
+
+  const cleanup = () => {
+    document.body.classList.remove('printing-biz-card');
+    if (wasHidden) closeModal('bizCardModal');
+  };
+
+  window.addEventListener('afterprint', cleanup, { once: true });
+  setTimeout(() => window.print(), 100);
+}
+
 // =====================================================
 // LANGUAGE / i18n SYSTEM
 // =====================================================

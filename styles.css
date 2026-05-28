@@ -3132,4 +3132,42 @@ input:checked + .toggle-slider:before { transform: translateX(20px); }
 .biz-detail a { color: var(--accent); text-decoration: none; font-weight: 600; word-break: break-all; }
 .biz-detail a:hover { text-decoration: underline; }
 
+@media print {
+  body.printing-biz-card * {
+    visibility: hidden !important;
+  }
+
+  body.printing-biz-card #bizCardModal,
+  body.printing-biz-card #bizCardModal * {
+    visibility: visible !important;
+  }
+
+  body.printing-biz-card #bizCardModal {
+    position: fixed !important;
+    inset: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #fff !important;
+    padding: 0 !important;
+  }
+
+  body.printing-biz-card #bizCardModal .close-btn,
+  body.printing-biz-card #bizCardModal button {
+    display: none !important;
+  }
+
+  body.printing-biz-card #bizCardModal .modal-box {
+    max-width: 420px !important;
+    width: 92vw !important;
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+  }
+
+  body.printing-biz-card #bizCardModal .biz-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+
 
