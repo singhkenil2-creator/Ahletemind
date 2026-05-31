@@ -193,6 +193,15 @@ body {
   filter: drop-shadow(0 0 8px var(--accent));
 }
 
+.header-brand-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  object-fit: contain;
+  display: block;
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
 .app-title {
   font-family: var(--font-display);
   font-size: 1.3rem;
